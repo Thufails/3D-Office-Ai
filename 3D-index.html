@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#edf0e8">
+    <meta name="description" content="Kantor kecil, dua kucing, dan ide-ide besar.">
+    <title>Pawffice — a little room for big ideas</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="Three.js"></script>
+    <script defer src="main.js"></script>
+  </head>
+  <body>
+    <!-- Ikon antarmuka berupa SVG lokal, tanpa font atau aset dari internet. -->
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="i-paw" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="16" rx="5.5" ry="4.5" fill="currentColor" stroke="none"/>
+        <ellipse cx="5" cy="10" rx="2.4" ry="3" fill="currentColor" stroke="none"/>
+        <ellipse cx="10" cy="5.8" rx="2.3" ry="3" fill="currentColor" stroke="none"/>
+        <ellipse cx="16" cy="6.5" rx="2.3" ry="3" fill="currentColor" stroke="none"/>
+        <ellipse cx="20" cy="11" rx="2.2" ry="2.8" fill="currentColor" stroke="none"/>
+      </symbol>
+      <symbol id="i-coffee" viewBox="0 0 24 24">
+        <path d="M4 9h12v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zm12 1h2a3 3 0 0 1 0 6h-2M7 3v3m5-3v3"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24">
+        <path d="M20.8 14A9 9 0 0 1 10 3.2 9 9 0 1 0 20.8 14Z"/>
+      </symbol>
+      <symbol id="i-home" viewBox="0 0 24 24">
+        <path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7"/>
+      </symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24">
+        <path d="M8 5v14M16 5v14"/>
+      </symbol>
+      <symbol id="i-play" viewBox="0 0 24 24">
+        <path d="m8 4 12 8-12 8Z"/>
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M5 12h14m-6-6 6 6-6 6"/>
+      </symbol>
+      <symbol id="i-focus" viewBox="0 0 24 24">
+        <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>
+        <circle cx="12" cy="12" r="3"/>
+      </symbol>
+      <symbol id="i-meet" viewBox="0 0 24 24">
+        <circle cx="9" cy="8" r="3"/>
+        <path d="M3 21v-3a6 6 0 0 1 12 0v3m2-16a3 3 0 0 1 0 6m2 10v-3a6 6 0 0 0-2-4"/>
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6"/>
+      </symbol>
+    </svg>
+
+    <header class="topbar">
+      <a class="brand" href="./3D-index.html" aria-label="Pawffice beranda">
+        <span class="brand-mark"><svg><use href="#i-paw"/></svg></span>
+        <span>pawffice<span class="brand-period">.</span></span>
+        <span class="preview-tag">SANDBOX</span>
+      </a>
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        Kantor kecilmu sedang hidup
+      </div>
+      <div class="header-right">
+        <span class="day-label" id="day-label">SENIN · HARI 01</span>
+        <span class="clock" id="clock">09:00</span>
+        <button class="icon-button" id="theme-button"
+          title="Ganti suasana siang / malam" aria-label="Ganti suasana malam">
+          <svg><use href="#i-moon"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <aside class="left-panel">
+        <div class="intro">
+          <p class="eyebrow">YOUR LITTLE VIRTUAL WORKSPACE</p>
+          <h1>Ruang ide,<br>versi <em>meng.</em></h1>
+          <p class="intro-copy">Dua rekan berbulu.<br>Sejuta kemungkinan kecil.</p>
+        </div>
+
+        <section class="team-section" aria-labelledby="team-title">
+          <div class="section-heading">
+            <h2 id="team-title">Penghuni kantor</h2>
+            <span class="count-tag">02</span>
+          </div>
+          <button class="crew-card selected" id="crew-miko"
+            data-cat="miko" aria-pressed="true">
+            <img class="crew-avatar" id="portrait-miko" alt="Miko, kucing oren berkemeja">
+            <span class="crew-info">
+              <strong>Miko</strong>
+              <span>Project Coordinator</span>
+              <span class="crew-state" id="state-miko">● Menyusun rencana</span>
+            </span>
+            <svg class="crew-arrow"><use href="#i-arrow"/></svg>
+          </button>
+          <button class="crew-card" id="crew-luna"
+            data-cat="luna" aria-pressed="false">
+            <img class="crew-avatar" id="portrait-luna" alt="Luna, kucing abu-abu memakai cardigan">
+            <span class="crew-info">
+              <strong>Luna</strong>
+              <span>Visual Designer</span>
+              <span class="crew-state" id="state-luna">● Menggambar ide</span>
+            </span>
+            <svg class="crew-arrow"><use href="#i-arrow"/></svg>
+          </button>
+        </section>
+
+        <section class="activity-section" aria-labelledby="activity-title">
+          <div class="section-heading">
+            <h2 id="activity-title">Cerita hari ini</h2>
+            <span class="tiny-dot"></span>
+          </div>
+          <ol class="activity-list" id="activity-list" aria-live="polite"></ol>
+        </section>
+        <p class="left-footnote">A cozy experiment. Made for curiosity.</p>
+      </aside>
+
+      <section class="world" id="world" aria-label="Kantor kucing 3D interaktif">
+        <div class="world-label">
+          <span class="live-dot"></span>
+          <span id="world-label">THE STUDIO · MORNING LIGHT</span>
+        </div>
+        <div id="scene" tabindex="0"
+          aria-label="Seret untuk memutar kantor, gulir untuk zoom, klik kucing"></div>
+        <div class="loading" id="loading">
+          <span class="loading-paw">🐾</span>
+          <span>Merapikan meja para meng…</span>
+        </div>
+        <div class="scene-caption">
+          <span class="caption-line"></span>
+          a little room for big ideas
+          <span class="caption-line"></span>
+        </div>
+      </section>
+
+      <aside class="right-panel">
+        <section class="inspector panel" aria-labelledby="selected-name">
+          <div class="section-heading">
+            <span class="eyebrow">MEET YOUR TEAMMATE</span>
+            <span class="availability"><span class="live-dot"></span> Di kantor</span>
+          </div>
+          <div class="profile-heading">
+            <img id="selected-portrait" class="profile-avatar" alt="Avatar kucing terpilih">
+            <div>
+              <span class="role-label" id="selected-role">THE PLANNER</span>
+              <h2 id="selected-name">Miko<span>♂</span></h2>
+              <p id="selected-job">Project Coordinator</p>
+            </div>
+          </div>
+          <p class="profile-bio" id="selected-bio">
+            Penggemar to-do list, kopi hangat, dan memastikan semua ide punya tempat.
+          </p>
+          <div class="current-task">
+            <span class="task-icon">✦</span>
+            <div>
+              <span>LAGI SIBUK APA?</span>
+              <strong id="selected-task">Menyusun rencana</strong>
+            </div>
+          </div>
+          <div class="needs">
+            <div class="need-row">
+              <span>Energi</span>
+              <span class="need-track"><i id="energy-bar"></i></span>
+              <b id="energy-value">90</b>
+            </div>
+            <div class="need-row">
+              <span>Semangat</span>
+              <span class="need-track mood"><i id="mood-bar"></i></span>
+              <b id="mood-value">95</b>
+            </div>
+          </div>
+          <button class="text-button" id="focus-button">
+            Lihat lebih dekat
+            <svg><use href="#i-focus"/></svg>
+          </button>
+        </section>
+
+        <section class="mission-panel panel" aria-labelledby="mission-title">
+          <div class="section-heading">
+            <h2 id="mission-title">Misi kecil hari ini</h2>
+            <span class="mission-total" id="mission-total">0 / 3</span>
+          </div>
+          <p class="mission-copy">Pelan-pelan juga sampai.</p>
+          <div id="mission-list"></div>
+          <div class="reward-line">
+            <span>✧ Office happiness</span>
+            <strong id="happiness">+0</strong>
+          </div>
+        </section>
+        <div class="local-note">
+          <span class="local-dot"></span> LOCAL SIMULATION
+          <span>Just cats. Just vibes.</span>
+        </div>
+      </aside>
+
+      <footer class="bottom-bar">
+        <div class="camera-hint">
+          <span>↔</span> Seret untuk putar
+          <i>·</i> Scroll untuk zoom
+          <i>·</i> Klik kucing
+        </div>
+        <div class="toolbar" aria-label="Kontrol simulasi">
+          <button class="tool-button" id="home-button" title="Kamera awal (R)">
+            <svg><use href="#i-home"/></svg><span>Overview</span>
+          </button>
+          <span class="tool-divider"></span>
+          <button class="tool-button" id="coffee-button">
+            <svg><use href="#i-coffee"/></svg><span>Coffee break</span>
+          </button>
+          <button class="tool-button" id="meeting-button">
+            <svg><use href="#i-meet"/></svg><span>Team huddle</span>
+          </button>
+          <span class="tool-divider"></span>
+          <button class="tool-button pause-button" id="pause-button"
+            title="Jeda / lanjut (Spasi)" aria-label="Jeda simulasi" aria-pressed="false">
+            <svg><use href="#i-pause"/></svg>
+          </button>
+          <button class="speed-button" id="speed-button" title="Kecepatan simulasi">1×</button>
+        </div>
+        <span class="version">EXPERIMENT 001</span>
+      </footer>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+    <noscript>Aktifkan JavaScript di browser untuk membuka kantor 3D ini.</noscript>
+  </body>
+</html>
