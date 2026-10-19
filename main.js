@@ -71,15 +71,48 @@
     paused: false,
     speed: 1,
     night: false,
-    minutes: 9 * 60,
+    themeOverride: null,
     elapsed: 0,
     focusSeconds: 0,
-    day: 1,
+    selectedId: "miko",
     seen: new Set(["miko"]),
     coffee: false,
     missions: [false, false, false],
     events: [],
   };
+
+  const PROGRESS_KEY = "pawffice.progress.v1";
+  const JAKARTA_TIME_ZONE = "Asia/Jakarta";
+
+  const MEETING_TABLE = {
+    x: 1.7,
+    z: 2.15,
+    radius: 0.93,
+  };
+
+  const MEETING_SEATS = [
+    { ownerId: "miko", x: 0.2, z: 2.85 },
+    { ownerId: "luna", x: 3.2, z: 2.85 },
+  ];
+
+  const jakartaPartsFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: JAKARTA_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+
+  const jakartaDateFormatter = new Intl.DateTimeFormat("id-ID", {
+    timeZone: JAKARTA_TIME_ZONE,
+    weekday: "long",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 
   const materials = new Map();
   const geometries = new Map();
@@ -105,6 +138,10 @@
   let toastTimeout;
   let lastUIUpdate = 0;
   let lastMissionSignature = "";
+  let lastSavedProgress = "";
+  let lastProgressSaveAt = 0;
+  let storageErrorShown = false;
+  let appliedTheme = null;
 
   const orbit = {
     theta: 0.62,
@@ -117,6 +154,151 @@
     goalTarget: new THREE.Vector3(0, 0.8, 0),
     follow: false,
   };
+
+  // ---------- Progres quest: simpan di browser, pulihkan saat refresh ----------
+
+  function progressSnapshot() {
+    return {
+      version: 1,
+      selectedId: simulation.selectedId,
+      seen: [...simulation.seen].sort(),
+      focusSeconds: Math.min(30, simulation.focusSeconds),
+      coffee: simulation.coffee,
+    };
+  }
+
+  function setSaveStatus(message) {
+    const status = $("save-status");
+
+    if (status) {
+      status.textContent = message;
+    }
+  }
+
+  function reportStorageError(error) {
+    setSaveStatus("Penyimpanan browser tidak tersedia. Progres masih sementara.");
+
+    if (!storageErrorShown) {
+      storageErrorShown = true;
+      console.warn("Pawffice tidak dapat menyimpan progres:", error);
+
+      if (selected) {
+        toast("Browser memblokir penyimpanan. Progres belum bisa disimpan.");
+      }
+    }
+  }
+
+  function loadProgress() {
+    let raw;
+
+    try {
+      raw = window.localStorage.getItem(PROGRESS_KEY);
+    } catch (error) {
+      reportStorageError(error);
+      return;
+    }
+
+    if (!raw) {
+      return;
+    }
+
+    try {
+      const saved = JSON.parse(raw);
+
+      if (!saved || saved.version !== 1) {
+        return;
+      }
+
+      const validIds = new Set(TEAM.map((member) => member.id));
+
+      if (Array.isArray(saved.seen)) {
+        simulation.seen = new Set(
+          saved.seen.filter((id) => validIds.has(id))
+        );
+      }
+
+      if (Number.isFinite(saved.focusSeconds)) {
+        simulation.focusSeconds = Math.max(0, Math.min(30, saved.focusSeconds));
+      }
+
+      simulation.coffee = saved.coffee === true;
+
+      if (validIds.has(saved.selectedId)) {
+        simulation.selectedId = saved.selectedId;
+      }
+
+      // Pulihkan status langsung, agar refresh tidak mengulang hadiah / toast misi.
+      simulation.missions = [
+        simulation.seen.size >= 2,
+        simulation.focusSeconds >= 30,
+        simulation.coffee,
+      ];
+      lastSavedProgress = JSON.stringify(progressSnapshot());
+      setSaveStatus("Progres tersimpan di browser ini.");
+    } catch (error) {
+      // Data lama yang rusak tidak boleh menghentikan kantor 3D.
+      console.warn("Data progres Pawffice tidak terbaca:", error);
+    }
+  }
+
+  function saveProgress(force = false) {
+    const now = performance.now();
+
+    // Progres fokus disimpan paling sering sekali per detik.
+    // Pemilihan karakter, misi selesai, dan penutupan tab disimpan langsung.
+    if (!force && now - lastProgressSaveAt < 1000) {
+      return;
+    }
+
+    lastProgressSaveAt = now;
+    const payload = JSON.stringify(progressSnapshot());
+
+    if (payload === lastSavedProgress) {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(PROGRESS_KEY, payload);
+      lastSavedProgress = payload;
+      setSaveStatus("Progres tersimpan di browser ini.");
+    } catch (error) {
+      reportStorageError(error);
+    }
+  }
+
+  // ---------- Jam nyata WIB, terpisah dari waktu animasi ----------
+
+  function readJakartaTime(now = new Date()) {
+    const parts = Object.fromEntries(
+      jakartaPartsFormatter.formatToParts(now)
+        .filter((part) => part.type !== "literal")
+        .map((part) => [part.type, part.value])
+    );
+
+    return {
+      hour: Number(parts.hour),
+      minute: Number(parts.minute),
+      second: Number(parts.second),
+      shortTime: `${parts.hour}:${parts.minute}`,
+      clockText: `${parts.hour}:${parts.minute}:${parts.second} WIB`,
+      dateKey: `${parts.year}-${parts.month}-${parts.day}`,
+      dateLabel: jakartaDateFormatter.format(now).toLocaleUpperCase("id-ID"),
+    };
+  }
+
+  function updateLiveClock() {
+    const time = readJakartaTime();
+    $("clock").textContent = time.clockText;
+    $("day-label").textContent = time.dateLabel;
+
+    // Jarum menit/jam juga mengikuti waktu nyata, termasuk detiknya.
+    clockMinute.rotation.z = -(time.minute + time.second / 60) * Math.PI / 30;
+    clockHour.rotation.z = -(time.hour % 12 + time.minute / 60) * Math.PI / 6;
+
+    if (simulation.themeOverride === null) {
+      applyTheme(time.hour >= 18 || time.hour < 6);
+    }
+  }
 
   // ---------- Bentuk dasar yang dipakai berulang kali ----------
 
@@ -249,8 +431,12 @@
     return mesh;
   }
 
-  function obstacle(x, z, width, depth) {
-    obstacles.push({ x, z, width, depth });
+  function obstacle(x, z, width, depth, ownerId = null) {
+    obstacles.push({ type: "box", x, z, width, depth, ownerId });
+  }
+
+  function circleObstacle(x, z, radius, ownerId = null) {
+    obstacles.push({ type: "circle", x, z, radius, ownerId });
   }
 
   // ---------- Ruangan: lantai kayu, dinding, dan jendela ----------
@@ -506,10 +692,10 @@
 
     const plate = label(data.name.toUpperCase(), 0.55, 0.17, "#e4ccaa", "#5e6c56");
     plate.position.set(x + 0.55, 0.98, z + 0.637);
-    createChair(x, data.desk.z, index ? 0x9eaa8d : 0xb69672);
+    createChair(x, data.desk.z, index ? 0x9eaa8d : 0xb69672, data.id);
   }
 
-  function createChair(x, z, color) {
+  function createChair(x, z, color, ownerId) {
     cylinder(0.08, 0.08, 0.42, 0x5c655b, x, 0.32, z);
     box(0.72, 0.13, 0.68, color, x, 0.56, z);
     box(0.70, 0.67, 0.12, color, x, 0.95, z - 0.31);
@@ -528,6 +714,9 @@
         z + Math.cos(angle) * 0.32
       );
     }
+
+    // Pemilik boleh keluar / masuk kursinya; kucing lain perlu memutarinya.
+    obstacle(x, z - 0.02, 0.76, 0.80, ownerId);
   }
 
   function createMug(x, y, z, color, parent = scene) {
@@ -602,17 +791,27 @@
     cylinder(0.55, 0.55, 0.10, 0xd5b98f, -3.20, 0.64, 2.2);
     cylinder(0.13, 0.20, 0.5, 0x748568, -3.20, 0.35, 2.2);
     box(0.34, 0.035, 0.42, 0x748568, -3.18, 0.72, 2.2);
-    obstacle(-3.20, 2.2, 1.1, 1.1);
+    circleObstacle(-3.20, 2.2, 0.55);
 
     // Karpet lingkaran, meja rapat, dan dua bangku bundar.
     cylinder(1.85, 1.85, 0.018, 0xd4bba0, 1.7, 0.12, 2.25);
-    cylinder(0.93, 0.93, 0.13, 0xe7d2af, 1.7, 0.95, 2.15);
-    cylinder(0.14, 0.30, 0.77, 0x819070, 1.7, 0.52, 2.15);
-    obstacle(1.7, 2.15, 1.82, 1.82);
+    cylinder(
+      MEETING_TABLE.radius,
+      MEETING_TABLE.radius,
+      0.13,
+      0xe7d2af,
+      MEETING_TABLE.x,
+      0.95,
+      MEETING_TABLE.z
+    );
+    cylinder(0.14, 0.30, 0.77, 0x819070,
+      MEETING_TABLE.x, 0.52, MEETING_TABLE.z);
+    circleObstacle(MEETING_TABLE.x, MEETING_TABLE.z, 0.97);
 
-    for (const x of [0.2, 3.2]) {
-      cylinder(0.34, 0.34, 0.13, 0x93a185, x, 0.54, 2.85);
-      cylinder(0.08, 0.15, 0.39, 0x687a5e, x, 0.29, 2.85);
+    for (const seat of MEETING_SEATS) {
+      cylinder(0.34, 0.34, 0.13, 0x93a185, seat.x, 0.54, seat.z);
+      cylinder(0.08, 0.15, 0.39, 0x687a5e, seat.x, 0.29, seat.z);
+      circleObstacle(seat.x, seat.z, 0.34, seat.ownerId);
     }
 
     createMug(1.4, 1.025, 2.10, 0xbd8868);
@@ -816,6 +1015,10 @@
       activity: "work",
       task: data.tasks[0],
       route: [],
+      navTarget: null,
+      navCooldown: 0,
+      navStall: 0,
+      motion: 0,
       energy: data.id === "miko" ? 92 : 88,
       mood: data.id === "miko" ? 94 : 97,
       timer: data.id === "miko" ? 32 : 43,
@@ -894,36 +1097,128 @@
   const navigation = {
     minX: -5.72,
     minZ: -4.12,
-    step: 0.34,
-    columns: 34,
-    rows: 25,
-    radius: 0.29,
+    step: 0.28,
+    columns: 42,
+    rows: 30,
+    radius: 0.40,
+    agentSeparation: 0.92,
+    arrivalRadius: 0.10,
   };
 
-  function blocked(x, z) {
+  function blocked(x, z, mover = null, avoidCats = false) {
     if (x < -5.85 || x > 5.85 || z < -4.25 || z > 4.25) {
       return true;
     }
 
-    return obstacles.some((item) => {
+    const hitsFurniture = obstacles.some((item) => {
+      if (mover && item.ownerId === mover.data.id) {
+        return false;
+      }
+
+      if (item.type === "circle") {
+        return Math.hypot(x - item.x, z - item.z)
+          < item.radius + navigation.radius;
+      }
+
       const paddedWidth = item.width / 2 + navigation.radius;
       const paddedDepth = item.depth / 2 + navigation.radius;
       return Math.abs(x - item.x) < paddedWidth
         && Math.abs(z - item.z) < paddedDepth;
     });
+
+    if (hitsFurniture) {
+      return true;
+    }
+
+    return avoidCats && mover !== null && cats.some((other) => {
+      if (other === mover) {
+        return false;
+      }
+
+      return Math.hypot(x - other.root.position.x, z - other.root.position.z)
+        < navigation.agentSeparation;
+    });
   }
 
-  function segmentClear(start, end) {
-    const distance = Math.hypot(end.x - start.x, end.z - start.z);
-    const samples = Math.max(1, Math.ceil(distance / 0.09));
+  function segmentHitsCircle(start, end, x, z, radius) {
+    const dx = end.x - start.x;
+    const dz = end.z - start.z;
+    const lengthSquared = dx * dx + dz * dz;
+    const projection = lengthSquared > 0
+      ? ((x - start.x) * dx + (z - start.z) * dz) / lengthSquared
+      : 0;
+    const t = Math.max(0, Math.min(1, projection));
+    const closestX = start.x + dx * t;
+    const closestZ = start.z + dz * t;
+    return Math.hypot(closestX - x, closestZ - z) < radius - 0.000001;
+  }
 
-    for (let i = 1; i <= samples; i += 1) {
-      const t = i / samples;
-      const x = start.x + (end.x - start.x) * t;
-      const z = start.z + (end.z - start.z) * t;
+  function segmentHitsBox(start, end, item) {
+    let enter = 0;
+    let leave = 1;
 
-      if (blocked(x, z)) {
+    for (const axis of ["x", "z"]) {
+      const size = axis === "x" ? item.width : item.depth;
+      const halfSize = size / 2 + navigation.radius;
+      const minimum = item[axis] - halfSize;
+      const maximum = item[axis] + halfSize;
+      const delta = end[axis] - start[axis];
+
+      if (Math.abs(delta) < 0.0000001) {
+        if (start[axis] <= minimum || start[axis] >= maximum) {
+          return false;
+        }
+
+        continue;
+      }
+
+      const a = (minimum - start[axis]) / delta;
+      const b = (maximum - start[axis]) / delta;
+      enter = Math.max(enter, Math.min(a, b));
+      leave = Math.min(leave, Math.max(a, b));
+
+      if (enter >= leave - 0.0000001) {
         return false;
+      }
+    }
+
+    return leave > 0.0000001 && enter < 1 - 0.0000001;
+  }
+
+  function segmentClear(start, end, mover = null, avoidCats = false) {
+    if (blocked(end.x, end.z, mover, avoidCats)) {
+      return false;
+    }
+
+    // Uji seluruh ruas secara geometris. Sampling jarang bisa melewatkan
+    // sudut meja, lalu karakter tersangkut ketika langkah kecil menyentuhnya.
+    for (const item of obstacles) {
+      if (mover && item.ownerId === mover.data.id) {
+        continue;
+      }
+
+      const hit = item.type === "circle"
+        ? segmentHitsCircle(
+          start, end, item.x, item.z, item.radius + navigation.radius
+        )
+        : segmentHitsBox(start, end, item);
+
+      if (hit) {
+        return false;
+      }
+    }
+
+    if (avoidCats && mover) {
+      for (const other of cats) {
+        if (other !== mover && segmentHitsCircle(
+          start,
+          end,
+          other.root.position.x,
+          other.root.position.z,
+          navigation.agentSeparation
+        )) {
+          return false;
+        }
       }
     }
 
@@ -986,12 +1281,12 @@
     }
   }
 
-  function findPath(start, end) {
-    if (blocked(end.x, end.z)) {
+  function findPath(start, end, mover = null, avoidCats = false) {
+    if (blocked(end.x, end.z, mover, avoidCats)) {
       return [];
     }
 
-    if (segmentClear(start, end)) {
+    if (segmentClear(start, end, mover, avoidCats)) {
       return [end.clone()];
     }
 
@@ -1006,7 +1301,7 @@
 
     for (let i = 0; i < count; i += 1) {
       const position = point(i);
-      walkable[i] = blocked(position.x, position.z) ? 0 : 1;
+      walkable[i] = blocked(position.x, position.z, mover, avoidCats) ? 0 : 1;
     }
 
     function nearest(position) {
@@ -1024,7 +1319,8 @@
           candidate.z - position.z
         );
 
-        if (distance < bestDistance && segmentClear(position, candidate)) {
+        if (distance < bestDistance
+          && segmentClear(position, candidate, mover, avoidCats)) {
           bestIndex = i;
           bestDistance = distance;
         }
@@ -1076,7 +1372,8 @@
         for (let i = 1; i < route.length; i += 1) {
           const previous = simplified[simplified.length - 1];
 
-          if (i === route.length - 1 || !segmentClear(previous, route[i + 1])) {
+          if (i === route.length - 1
+            || !segmentClear(previous, route[i + 1], mover, avoidCats)) {
             simplified.push(route[i]);
           }
         }
@@ -1113,7 +1410,7 @@
 
         const nextPoint = point(next);
 
-        if (!segmentClear(point(current), nextPoint)) {
+        if (!segmentClear(point(current), nextPoint, mover, avoidCats)) {
           continue;
         }
 
@@ -1138,20 +1435,38 @@
 
   function navigate(cat, activity) {
     const index = cats.indexOf(cat);
+    const seat = MEETING_SEATS.find((item) => item.ownerId === cat.data.id);
     const targets = {
       work: cat.data.desk,
       coffee: new THREE.Vector3(3.85 + index * 0.95, 0, -2.45),
       lounge: new THREE.Vector3(-3.70, 0, 0.95 + index * 0.18),
-      meeting: new THREE.Vector3(index === 0 ? 0.05 : 3.35, 0, 2.65),
+      meeting: new THREE.Vector3(seat.x, 0, seat.z),
     };
-    const route = findPath(cat.root.position, targets[activity]);
+    const target = targets[activity];
 
-    if (!route.length) {
-      toast(`${cat.data.name} belum menemukan jalan. Coba aktivitas lain.`);
+    if (!target) {
       return false;
     }
 
+    let route = findPath(cat.root.position, target, cat, true);
+
+    if (!route.length) {
+      // Bedakan tujuan yang tidak terjangkau dari jalur yang hanya sedang dipakai.
+      const staticRoute = findPath(cat.root.position, target, cat, false);
+
+      if (!staticRoute.length) {
+        toast(`${cat.data.name} belum menemukan jalan. Coba aktivitas lain.`);
+        return false;
+      }
+
+      route = [];
+    }
+
     cat.route = route;
+    cat.navTarget = target.clone();
+    cat.navCooldown = 0;
+    cat.navStall = 0;
+    cat.motion = 0;
     cat.mode = "walk";
     cat.activity = activity;
     cat.task = {
@@ -1164,6 +1479,10 @@
   }
 
   function arrive(cat) {
+    cat.route = [];
+    cat.motion = 0;
+    cat.navTarget = null;
+    cat.navStall = 0;
     cat.mode = cat.activity;
     cat.timer = cat.mode === "work" ? 28 + Math.random() * 22 : 8 + Math.random() * 5;
     cat.task = {
@@ -1180,21 +1499,69 @@
       simulation.coffee = true;
       addEvent(cat.data.name, "menemukan kebahagiaan dalam secangkir kopi.");
     } else if (cat.mode === "meeting") {
-      cat.facing = cats.indexOf(cat) === 0 ? Math.PI / 2 : -Math.PI / 2;
-      addEvent(cat.data.name, "siap bertukar ide di meja diskusi.");
+      cat.facing = Math.atan2(
+        MEETING_TABLE.x - cat.root.position.x,
+        MEETING_TABLE.z - cat.root.position.z
+      );
+      addEvent(cat.data.name, "sudah duduk dan siap bertukar ide.");
     } else {
       cat.facing = -Math.PI / 2;
       addEvent(cat.data.name, "istirahat sebentar. Ide juga perlu ruang.");
     }
   }
 
+  function replanRoute(cat) {
+    const route = findPath(cat.root.position, cat.navTarget, cat, true);
+    cat.route = route;
+    cat.navCooldown = 0.45;
+    return route.length > 0;
+  }
+
   function moveCat(cat, dt) {
-    if (cat.route.length === 0) {
+    const position = cat.root.position;
+    const destination = cat.navTarget;
+    cat.motion = 0;
+    cat.navCooldown = Math.max(0, cat.navCooldown - dt);
+
+    if (!destination) {
+      return;
+    }
+
+    const remaining = Math.hypot(
+      destination.x - position.x,
+      destination.z - position.z
+    );
+
+    // Kedatangan ditentukan dari tujuan asli, bukan dari habisnya waypoint.
+    if (remaining <= navigation.arrivalRadius
+      && segmentClear(position, destination, cat, true)) {
+      position.x = destination.x;
+      position.z = destination.z;
       arrive(cat);
       return;
     }
 
-    const position = cat.root.position;
+    while (cat.route.length > 0) {
+      const waypoint = cat.route[0];
+      const gap = Math.hypot(waypoint.x - position.x, waypoint.z - position.z);
+
+      if (gap > 0.0001) {
+        break;
+      }
+
+      cat.route.shift();
+    }
+
+    if (cat.route.length === 0) {
+      cat.navStall += dt;
+
+      if (cat.navCooldown <= 0) {
+        replanRoute(cat);
+      }
+
+      return;
+    }
+
     const target = cat.route[0];
     const dx = target.x - position.x;
     const dz = target.z - position.z;
@@ -1202,33 +1569,25 @@
     const speed = cat.data.id === "miko" ? 1.12 : 1.27;
     const step = Math.min(distance, speed * dt);
 
-    if (distance < 0.08) {
-      cat.route.shift();
+    const next = {
+      x: position.x + dx / distance * step,
+      z: position.z + dz / distance * step,
+    };
+
+    if (!segmentClear(position, next, cat, true)) {
+      cat.navStall += dt;
+
+      if (cat.navCooldown <= 0) {
+        replanRoute(cat);
+      }
+
       return;
     }
 
-    let nextX = position.x + dx / distance * step;
-    let nextZ = position.z + dz / distance * step;
-
-    // Sedikit mengalah ketika dua kucing berpapasan.
-    for (const other of cats) {
-      if (other === cat) {
-        continue;
-      }
-
-      const gap = Math.hypot(nextX - other.root.position.x, nextZ - other.root.position.z);
-
-      if (gap < 0.62) {
-        nextX = position.x - dz / distance * step;
-        nextZ = position.z + dx / distance * step;
-      }
-    }
-
-    if (segmentClear(position, { x: nextX, z: nextZ })) {
-      position.x = nextX;
-      position.z = nextZ;
-    }
-
+    position.x = next.x;
+    position.z = next.z;
+    cat.motion = step / Math.max(dt, 0.0001);
+    cat.navStall = 0;
     cat.facing = Math.atan2(dx, dz);
   }
 
@@ -1240,16 +1599,9 @@
     }
 
     simulation.elapsed += dt;
-    simulation.minutes += dt * 0.8;
-
-    if (simulation.minutes >= 17 * 60) {
-      simulation.minutes = 9 * 60;
-      simulation.day += 1;
-      addEvent("Kantor", "memulai hari baru. Semoga banyak ide bagus!");
-    }
 
     if (cats.some((cat) => cat.mode === "work")) {
-      simulation.focusSeconds += dt;
+      simulation.focusSeconds = Math.min(30, simulation.focusSeconds + dt);
     }
 
     for (const cat of cats) {
@@ -1257,7 +1609,22 @@
         moveCat(cat, dt);
         cat.energy = Math.max(20, cat.energy - dt * 0.12);
       } else {
-        cat.timer -= dt;
+        // Peserta yang datang lebih dulu duduk menunggu peserta lainnya.
+        const waitingForTeam = cat.mode === "meeting" && cats.some((other) => {
+          return other !== cat
+            && other.activity === "meeting"
+            && other.mode === "walk";
+        });
+
+        if (waitingForTeam) {
+          cat.task = "Duduk menunggu teman";
+        } else {
+          cat.timer -= dt;
+
+          if (cat.mode === "meeting") {
+            cat.task = "Tukar ide bareng tim";
+          }
+        }
 
         if (cat.mode === "work") {
           cat.energy = Math.max(20, cat.energy - dt * 0.17);
@@ -1288,8 +1655,9 @@
 
   function animateCat(cat, dt) {
     const t = simulation.elapsed + cat.phase;
-    const walking = cat.mode === "walk";
+    const walking = cat.mode === "walk" && cat.motion > 0.02;
     const working = cat.mode === "work";
+    const seated = working || cat.mode === "meeting";
     const targetY = walking ? 0.105 + Math.sin(t * 12) * 0.035 : 0.10;
     const blend = 1 - Math.exp(-12 * dt);
     cat.root.position.y = THREE.MathUtils.lerp(cat.root.position.y, targetY, blend);
@@ -1330,7 +1698,7 @@
 
       if (walking) {
         target = Math.sin(t * 9 + index * Math.PI) * 0.55;
-      } else if (working) {
+      } else if (seated) {
         target = -1.15;
       }
 
@@ -1353,9 +1721,7 @@
   // ---------- Panel karakter, misi, notifikasi, dan log ----------
 
   function formatTime() {
-    const hour = Math.floor(simulation.minutes / 60);
-    const minute = Math.floor(simulation.minutes % 60);
-    return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+    return readJakartaTime().shortTime;
   }
 
   function toast(message) {
@@ -1386,6 +1752,7 @@
 
   function selectCat(cat) {
     selected = cat;
+    simulation.selectedId = cat.data.id;
     simulation.seen.add(cat.data.id);
     $("selected-portrait").src = cat.portrait;
     $("selected-portrait").alt = `Avatar ${cat.data.name}`;
@@ -1405,10 +1772,12 @@
     }
 
     checkMissions();
+    saveProgress(true);
     updateUI();
   }
 
   function checkMissions() {
+    let completedMission = false;
     const next = [
       simulation.seen.size >= 2,
       simulation.focusSeconds >= 30,
@@ -1418,6 +1787,7 @@
     next.forEach((done, index) => {
       if (done && !simulation.missions[index]) {
         simulation.missions[index] = true;
+        completedMission = true;
         const names = ["Kenalan dengan tim", "Satu putaran fokus", "Coffee break dulu"];
         toast(`Misi selesai: ${names[index]} ✧`);
         addEvent("Misi", `“${names[index]}” selesai. Kantor makin happy.`);
@@ -1425,6 +1795,7 @@
     });
 
     renderMissions();
+    saveProgress(completedMission);
   }
 
   function renderMissions() {
@@ -1466,11 +1837,6 @@
   }
 
   function updateUI() {
-    $("clock").textContent = formatTime();
-    const days = ["SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU", "MINGGU"];
-    const day = String(simulation.day).padStart(2, "0");
-    $("day-label").textContent = `${days[(simulation.day - 1) % 7]} · HARI ${day}`;
-
     for (const cat of cats) {
       $(`state-${cat.data.id}`).textContent = `● ${cat.task}`;
     }
@@ -1482,9 +1848,6 @@
       $("energy-value").textContent = Math.round(selected.energy);
       $("mood-value").textContent = Math.round(selected.mood);
     }
-
-    clockMinute.rotation.z = -simulation.minutes % 60 * Math.PI / 30;
-    clockHour.rotation.z = -(simulation.minutes / 60) * Math.PI / 6;
   }
 
   // ---------- Kamera orbit: seret, zoom, fokus, dan kembali ----------
@@ -1652,11 +2015,19 @@
     button.setAttribute("aria-label", simulation.paused ? "Lanjutkan simulasi" : "Jeda simulasi");
     button.classList.toggle("active", simulation.paused);
     button.querySelector("use").setAttribute("href", simulation.paused ? "#i-play" : "#i-pause");
-    toast(simulation.paused ? "Waktu dijeda. Kameranya tetap bisa diputar." : "Para meng kembali beraktivitas.");
+    toast(simulation.paused
+      ? "Aktivitas dijeda. Jam WIB tetap berjalan."
+      : "Para meng kembali beraktivitas."
+    );
   }
 
-  function toggleTheme() {
-    simulation.night = !simulation.night;
+  function applyTheme(night) {
+    if (appliedTheme === night) {
+      return;
+    }
+
+    appliedTheme = night;
+    simulation.night = night;
     document.body.classList.toggle("night", simulation.night);
     sunlight.intensity = simulation.night ? 0.9 : 3.0;
     sunlight.color.setHex(simulation.night ? 0x9bbbd2 : 0xffedd1);
@@ -1678,8 +2049,14 @@
       "aria-label", simulation.night ? "Ganti suasana siang" : "Ganti suasana malam"
     );
     $("world-label").textContent = simulation.night
-      ? "THE STUDIO · AFTER HOURS"
-      : "THE STUDIO · MORNING LIGHT";
+      ? "THE STUDIO · NIGHT LIGHT · WIB"
+      : "THE STUDIO · DAYLIGHT · WIB";
+  }
+
+  function toggleTheme() {
+    // Pilihan manual berlaku sampai halaman dimuat ulang.
+    simulation.themeOverride = !simulation.night;
+    applyTheme(simulation.themeOverride);
     toast(simulation.night ? "Lampu hangat, suasana malam." : "Selamat datang kembali, matahari.");
   }
 
@@ -1704,7 +2081,7 @@
       const speeds = [1, 2, 4];
       simulation.speed = speeds[(speeds.indexOf(simulation.speed) + 1) % speeds.length];
       $("speed-button").textContent = `${simulation.speed}×`;
-      toast(`Kecepatan simulasi ${simulation.speed}×`);
+      toast(`Kecepatan aktivitas ${simulation.speed}×. Jam WIB tetap waktu nyata.`);
     });
 
     $("coffee-button").addEventListener("click", () => {
@@ -1794,6 +2171,8 @@
   }
 
   function boot() {
+    loadProgress();
+
     renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -1852,7 +2231,8 @@
     selectionRing.rotation.x = -Math.PI / 2;
     scene.add(selectionRing);
 
-    selectCat(cats[0]);
+    updateLiveClock();
+    selectCat(cats.find((cat) => cat.data.id === simulation.selectedId) || cats[0]);
     addEvent("Miko", "menyiapkan rencana untuk hari yang menyenangkan.");
     addEvent("Luna", "membuka kanvas baru. Banyak ide menunggu.");
     installCameraControls();
@@ -1861,8 +2241,19 @@
     updateCamera(1);
     new ResizeObserver(resize).observe($("scene"));
 
-    // Saat tab tersembunyi, jam simulasi tidak mengejar waktu yang terlewat.
-    document.addEventListener("visibilitychange", () => clock.getDelta());
+    // Jam nyata berjalan sendiri, termasuk saat aktivitas karakter dijeda.
+    window.setInterval(updateLiveClock, 1000);
+    window.addEventListener("pagehide", () => saveProgress(true));
+
+    document.addEventListener("visibilitychange", () => {
+      clock.getDelta();
+
+      if (document.hidden) {
+        saveProgress(true);
+      } else {
+        updateLiveClock();
+      }
+    });
     renderer.domElement.addEventListener("webglcontextlost", (event) => {
       event.preventDefault();
       simulation.paused = true;

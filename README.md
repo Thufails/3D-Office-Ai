@@ -24,10 +24,27 @@ backend, akun AI, atau koneksi internet untuk menjalankan simulasi.
 - Overview atau tombol R/Escape: kembali ke kamera awal.
 - Coffee break: ajak kedua karakter ke area kopi.
 - Team huddle: ajak keduanya berdiskusi di meja bundar.
-- Tombol bulan/matahari: ganti suasana siang dan malam.
-- Tombol jeda atau Spasi: hentikan/lanjutkan waktu.
-- Tombol 1×: ganti kecepatan 1×, 2×, dan 4×.
+- Tombol bulan/matahari: ganti suasana siang dan malam secara manual.
+  Pilihan manual berlaku sampai halaman dimuat ulang.
+- Tombol jeda atau Spasi: hentikan/lanjutkan aktivitas karakter.
+  Jam Jakarta tetap berjalan.
+- Tombol 1×: ganti kecepatan aktivitas 1×, 2×, dan 4×.
+  Kecepatan ini tidak mengubah jam Jakarta.
 - Tombol angka 1 dan 2: pilih Miko atau Luna.
+
+## Gerakan dan rapat
+
+Karakter menghitung jalur yang menghindari furnitur, kursi milik karakter
+lain, dan posisi karakter lain. Jika jalurnya terhalang saat berjalan,
+karakter mencari rute baru. Saat benar-benar perlu menunggu, animasi kaki
+ikut berhenti.
+
+Pada Team huddle, setiap karakter menuju bangku rapatnya sendiri,
+duduk menghadap meja, lalu menunggu temannya sebelum waktu diskusi dihitung.
+
+Panel kiri bisa digulir ketika tinggi jendela tidak cukup. Cerita hari ini
+tetap berada di dalam panel dan tidak menimpa toolbar bawah. Pada layar
+tablet/ponsel, cerita juga ditampilkan dan dapat dibaca lewat gulir halaman.
 
 ## Misi
 
@@ -35,8 +52,31 @@ backend, akun AI, atau koneksi internet untuk menjalankan simulasi.
 2. Biarkan tim bekerja selama 30 detik waktu simulasi.
 3. Tunggu karakter sampai ke coffee corner.
 
-Setiap misi memberikan 25 office happiness. Progres diulang ketika
-halaman dimuat ulang agar mudah mencoba kembali.
+Setiap misi memberikan 25 office happiness. Progres pengenalan karakter,
+durasi fokus, kunjungan kopi, serta karakter terpilih disimpan otomatis
+di localStorage browser. Saat refresh, progres dimuat kembali dan hadiah
+tidak diberikan ulang. Misi tidak otomatis direset ketika tanggal berganti.
+
+Progres fokus disimpan setiap detik, dan langsung disimpan ketika misi
+selesai atau halaman ditinggalkan. Aktivitas yang tidak berjalan selama
+tab ditutup tidak dihitung sebagai progres tambahan.
+
+Penyimpanan berlaku di browser/profil dan alamat halaman yang sama.
+Menghapus data situs, memakai mode privat, atau memindahkan file lokal
+dapat menghasilkan penyimpanan yang berbeda. Perilaku localStorage untuk
+file HTML yang dibuka langsung bergantung pada browser. Jika penyimpanan
+ditolak, panel misi menampilkan status bahwa progres masih sementara.
+
+## Jam Jakarta live
+
+Jam digital, tanggal, cap waktu aktivitas, dan jarum jam dinding mengikuti
+zona waktu Asia/Jakarta (WIB, UTC+7). Jam menggunakan waktu komputer dan
+tidak memerlukan koneksi internet. Pastikan jam komputer sudah benar.
+
+Pause dan tombol kecepatan hanya memengaruhi aktivitas karakter.
+Saat membuka halaman, suasana otomatis mengikuti WIB: malam pukul
+18.00–05.59, dan siang pukul 06.00–17.59. Tombol bulan/matahari tetap
+bisa digunakan untuk mencoba suasana lain.
 
 ## Struktur file
 

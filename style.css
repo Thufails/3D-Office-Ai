@@ -57,6 +57,12 @@ a:focus-visible,
   outline-offset: 4px;
 }
 
+.left-panel:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 svg {
   width: 20px;
   height: 20px;
@@ -175,7 +181,7 @@ svg {
 }
 
 .clock {
-  font-size: 21px;
+  font-size: 19px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   letter-spacing: -0.8px;
@@ -203,6 +209,13 @@ svg {
   bottom: 106px;
   width: 234px;
   z-index: 2;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  padding-right: 6px;
+  padding-bottom: 8px;
 }
 
 .eyebrow {
@@ -342,6 +355,11 @@ h1 em {
   border-bottom: 1px solid var(--line);
 }
 
+.activity-list li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .activity-list time {
   font-size: 9px;
   font-variant-numeric: tabular-nums;
@@ -449,6 +467,7 @@ h1 em {
   z-index: 2;
   overflow-y: auto;
   scrollbar-width: thin;
+  overscroll-behavior: contain;
 }
 
 .panel {
@@ -694,6 +713,13 @@ h1 em {
   color: var(--green);
 }
 
+.save-status {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.6;
+  margin: 12px 0 0;
+}
+
 .local-note {
   font-size: 7px;
   color: var(--muted);
@@ -727,6 +753,7 @@ h1 em {
   gap: 15px;
   border-top: 1px solid var(--line);
   z-index: 3;
+  background: var(--background);
 }
 
 .camera-hint {
@@ -835,11 +862,30 @@ h1 em {
   }
 
   .team-section {
-    margin-top: 23px;
+    margin-top: 18px;
+  }
+
+  .intro h1 {
+    font-size: 32px;
+    margin: 10px 0;
+  }
+
+  .intro-copy {
+    line-height: 1.55;
+  }
+
+  .crew-card {
+    padding-top: 9px;
+    padding-bottom: 9px;
   }
 
   .activity-section {
-    margin-top: 20px;
+    margin-top: 17px;
+  }
+
+  .activity-list li {
+    padding-top: 7px;
+    padding-bottom: 7px;
   }
 
   .left-footnote,
@@ -901,6 +947,7 @@ h1 em {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    overflow: visible;
   }
 
   h1 {
@@ -926,9 +973,13 @@ h1 em {
     height: 42px;
   }
 
-  .activity-section,
   .left-footnote {
     display: none;
+  }
+
+  .activity-section {
+    grid-column: 1 / -1;
+    margin-top: 12px;
   }
 
   .world {
@@ -936,7 +987,7 @@ h1 em {
     inset: auto;
     width: 100%;
     height: clamp(380px, 65vw, 620px);
-    margin-top: -15px;
+    margin-top: 8px;
   }
 
   .world-label {
