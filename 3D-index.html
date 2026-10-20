@@ -137,7 +137,7 @@
 
       <div class="live-indicator">
         <span class="live-dot"></span>
-        Kantor kecilmu sedang hidup
+        Tim Pawffice sedang beraktivitas
       </div>
 
       <div class="header-right">
@@ -166,7 +166,7 @@
       <aside
         class="left-panel"
         tabindex="0"
-        aria-label="Panel tim dan cerita hari ini"
+        aria-label="Panel lokasi, tim, dan cerita hari ini"
       >
         <div class="intro">
           <p class="eyebrow">YOUR LITTLE VIRTUAL WORKSPACE</p>
@@ -175,10 +175,24 @@
             versi <em>meng.</em>
           </h1>
           <p class="intro-copy">
-            Enam rekan berbulu.<br>
+            Delapan rekan berbulu.<br>
             Sejuta kemungkinan kecil.
           </p>
         </div>
+
+        <details class="location-menu" id="location-menu">
+          <summary>
+            <strong>Lokasi kantor</strong>
+            <span id="room-current-name">Semua ruangan</span>
+          </summary>
+          <nav class="room-navigation" aria-label="Fokus ruangan kantor">
+            <button id="room-overview" class="active" aria-pressed="true">Semua ruangan</button>
+            <button id="room-work" aria-pressed="false">Ruang kerja</button>
+            <button id="room-meeting" aria-pressed="false">Meeting</button>
+            <button id="room-owner" aria-pressed="false">Owner + PA</button>
+            <button id="room-pantry" aria-pressed="false">Pantry & istirahat</button>
+          </nav>
+        </details>
 
         <section
           class="team-section"
@@ -186,8 +200,17 @@
         >
           <div class="section-heading">
             <h2 id="team-title">Penghuni kantor</h2>
-            <span class="count-tag" id="team-count">06</span>
+            <span class="count-tag" id="team-count">08</span>
           </div>
+          <button
+            class="jobdesk-button"
+            id="jobdesk-button"
+            aria-haspopup="dialog"
+            aria-controls="jobdesk-dialog"
+            title="Lihat jobdesk seluruh tim (J)"
+          >
+            Lihat jobdesk tim <span>8 role ↗</span>
+          </button>
           <div class="team-list" id="team-list"></div>
         </section>
 
@@ -223,7 +246,14 @@
           id="scene"
           tabindex="0"
           aria-label="Seret untuk memutar kantor, gulir untuk zoom, klik kucing"
-        ></div>
+        >
+          <div
+            id="workspace-labels"
+            class="workspace-labels"
+            role="list"
+            aria-label="Nama dan role di setiap bilik"
+          ></div>
+        </div>
 
         <div class="loading" id="loading">
           <span class="loading-paw">🐾</span>
@@ -383,7 +413,7 @@
             class="tool-button"
             id="coffee-button"
             aria-label="Coffee break"
-            title="Ajak rekan terpilih istirahat di coffee corner"
+            title="Ajak rekan terpilih ngopi di pantry"
           >
             <svg>
               <use href="#i-coffee" />
@@ -429,6 +459,20 @@
         <span class="version">EXPERIMENT 001</span>
       </footer>
     </main>
+
+    <dialog class="jobdesk-dialog" id="jobdesk-dialog" aria-labelledby="jobdesk-title">
+      <div class="jobdesk-header">
+        <div>
+          <p class="eyebrow">THE PAWFFICE TEAM</p>
+          <h2 id="jobdesk-title">Siapa mengerjakan apa?</h2>
+          <p>Delapan role, satu software house. Ini tanggung jawab tiap aktor.</p>
+        </div>
+        <button class="jobdesk-close" id="jobdesk-close" aria-label="Tutup daftar jobdesk">
+          ×
+        </button>
+      </div>
+      <div class="jobdesk-list" id="jobdesk-list"></div>
+    </dialog>
 
     <div class="toast" id="toast" role="status"></div>
     <noscript>Aktifkan JavaScript di browser untuk membuka kantor 3D ini.</noscript>

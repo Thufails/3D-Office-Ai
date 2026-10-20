@@ -4,10 +4,11 @@
    ============================================================ */
 
 :root {
+  --font-ui: "Aptos", "Segoe UI", system-ui, sans-serif;
   --background: #edf0e8;
   --paper: #f9faf5;
   --ink: #293e33;
-  --muted: #7c887d;
+  --muted: #69796c;
   --line: #d9dfd3;
   --green: #45654c;
   --orange: #d68d58;
@@ -25,8 +26,9 @@ body {
   overflow: hidden;
   background: var(--background);
   color: var(--ink);
-  font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
-  font-size: 13px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   transition: background 0.6s, color 0.6s;
 }
@@ -82,7 +84,7 @@ svg {
 }
 
 .topbar {
-  height: 80px;
+  height: 88px;
   margin: 0 34px;
   border-bottom: 1px solid var(--line);
   display: flex;
@@ -97,7 +99,7 @@ svg {
   gap: 10px;
   color: var(--ink);
   text-decoration: none;
-  font-size: 25px;
+  font-size: 30px;
   font-weight: 750;
   letter-spacing: -1.3px;
 }
@@ -128,7 +130,7 @@ svg {
 .local-note,
 .world-label,
 .version {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.5px;
 }
@@ -139,7 +141,7 @@ svg {
   border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1px;
 }
 
@@ -153,7 +155,7 @@ svg {
 
 .live-indicator {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .live-dot,
@@ -181,7 +183,7 @@ svg {
 }
 
 .clock {
-  font-size: 19px;
+  font-size: 22px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   letter-spacing: -0.8px;
@@ -205,9 +207,9 @@ svg {
 .left-panel {
   position: absolute;
   left: 34px;
-  top: 122px;
-  bottom: 106px;
-  width: 234px;
+  top: 116px;
+  bottom: 112px;
+  width: 286px;
   z-index: 2;
   overflow-x: hidden;
   overflow-y: auto;
@@ -220,16 +222,16 @@ svg {
 
 .eyebrow {
   margin: 0;
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1.4px;
 }
 
 h1 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(37px, 3vw, 48px);
-  font-weight: 400;
+  font-family: var(--font-ui);
+  font-size: clamp(36px, 3vw, 42px);
+  font-weight: 650;
   line-height: 1.12;
-  letter-spacing: -2px;
+  letter-spacing: -1.2px;
   margin: 17px 0 14px;
 }
 
@@ -239,13 +241,13 @@ h1 em {
 
 .intro-copy {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1.8;
   margin: 0;
 }
 
 .team-section {
-  margin-top: 35px;
+  margin-top: 24px;
 }
 
 .section-heading {
@@ -258,20 +260,40 @@ h1 em {
 
 .section-heading h2 {
   margin: 0;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 650;
   letter-spacing: -0.15px;
 }
 
 .count-tag {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
 .team-list {
   display: grid;
-  gap: 7px;
+  gap: 10px;
+}
+
+.jobdesk-button {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  text-align: left;
+}
+
+.jobdesk-button span {
+  color: var(--muted);
+  white-space: nowrap;
 }
 
 .crew-card {
@@ -301,8 +323,8 @@ h1 em {
 }
 
 .crew-avatar {
-  width: 38px;
-  height: 43px;
+  width: 48px;
+  height: 54px;
   object-fit: cover;
   border-radius: 10px;
   background: #e8d3b3;
@@ -316,12 +338,12 @@ h1 em {
 }
 
 .crew-info strong {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 650;
 }
 
 .crew-info > span {
-  font-size: 8px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -356,7 +378,7 @@ h1 em {
   gap: 11px;
   padding: 9px 0;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.6;
   border-bottom: 1px solid var(--line);
 }
@@ -367,7 +389,7 @@ h1 em {
 }
 
 .activity-list time {
-  font-size: 9px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   opacity: 0.8;
 }
@@ -379,14 +401,14 @@ h1 em {
 
 .left-footnote {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   margin-top: 25px;
   opacity: 0.7;
 }
 
 .world {
   position: absolute;
-  inset: 90px 307px 93px 273px;
+  inset: 96px 366px 110px 342px;
 }
 
 #scene {
@@ -406,6 +428,193 @@ h1 em {
   height: 100%;
 }
 
+.workspace-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.workspace-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  gap: 2px;
+  width: 128px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgba(37, 57, 45, 0.08);
+  text-align: center;
+  line-height: 1.25;
+  transform-origin: center bottom;
+}
+
+.workspace-label[hidden] {
+  display: none;
+}
+
+.workspace-label span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.workspace-label strong {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.location-menu {
+  margin-top: 22px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.location-menu summary {
+  display: grid;
+  gap: 4px;
+  position: relative;
+  padding: 13px 34px 13px 13px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.location-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.location-menu summary::after {
+  content: "⌄";
+  position: absolute;
+  right: 14px;
+  top: 17px;
+  color: var(--muted);
+}
+
+.location-menu[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.location-menu summary strong {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.location-menu summary span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.room-navigation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 10px 10px;
+}
+
+.room-navigation button {
+  min-height: 42px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  white-space: normal;
+  text-align: left;
+}
+
+.room-navigation button.active {
+  background: var(--line);
+  color: var(--ink);
+}
+
+.jobdesk-dialog {
+  width: min(800px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  padding: 24px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--background);
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgba(18, 35, 27, 0.24);
+}
+
+.jobdesk-dialog::backdrop {
+  background: rgba(29, 44, 37, 0.48);
+  backdrop-filter: blur(4px);
+}
+
+.jobdesk-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.jobdesk-header h2 {
+  margin: 8px 0;
+  font: 650 29px/1.2 var(--font-ui);
+}
+
+.jobdesk-header p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.jobdesk-close {
+  flex: 0 0 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.jobdesk-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.jobdesk-card {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.jobdesk-card h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.jobdesk-role {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.jobdesk-card ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 16px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
 .world-label {
   position: absolute;
   top: 26px;
@@ -416,7 +625,7 @@ h1 em {
   align-items: center;
   gap: 9px;
   white-space: nowrap;
-  font-size: 8px;
+  font-size: 12px;
   z-index: 1;
   pointer-events: none;
 }
@@ -431,7 +640,7 @@ h1 em {
   justify-content: center;
   gap: 14px;
   color: var(--muted);
-  font: italic 15px Georgia, serif;
+  font: 500 15px/1.5 var(--font-ui);
   pointer-events: none;
 }
 
@@ -467,9 +676,9 @@ h1 em {
 .right-panel {
   position: absolute;
   right: 34px;
-  top: 113px;
-  bottom: 110px;
-  width: 260px;
+  top: 116px;
+  bottom: 112px;
+  width: 312px;
   z-index: 2;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -487,7 +696,7 @@ h1 em {
 
 .availability {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   gap: 5px;
   white-space: nowrap;
 }
@@ -498,7 +707,7 @@ h1 em {
 }
 
 .inspector .section-heading .eyebrow {
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 1px;
 }
 
@@ -519,18 +728,18 @@ h1 em {
 
 .role-label {
   color: var(--orange);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1.3px;
 }
 
 .profile-heading h2 {
-  font: 32px Georgia, serif;
+  font: 650 32px/1.2 var(--font-ui);
   letter-spacing: -1px;
   margin: 3px 0 4px;
 }
 
 .profile-heading h2 span {
-  font: 11px "Segoe UI", sans-serif;
+  font: 14px var(--font-ui);
   color: var(--muted);
   margin-left: 9px;
 }
@@ -538,12 +747,12 @@ h1 em {
 .profile-heading p {
   margin: 0;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .profile-bio {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.8;
   margin: 17px 0;
 }
@@ -558,7 +767,7 @@ h1 em {
 }
 
 .task-icon {
-  font-size: 19px;
+  font-size: 22px;
   color: var(--green);
 }
 
@@ -570,13 +779,13 @@ h1 em {
 
 .current-task div > span {
   color: var(--muted);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 1px;
   font-weight: 600;
 }
 
 .current-task strong {
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -586,16 +795,16 @@ h1 em {
 
 .need-row {
   display: grid;
-  grid-template-columns: 55px 1fr 22px;
+  grid-template-columns: 72px 1fr 28px;
   align-items: center;
   gap: 10px;
   margin: 13px 0;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .need-row b {
-  font-size: 10px;
+  font-size: 14px;
   color: var(--ink);
   text-align: right;
   font-weight: 600;
@@ -631,7 +840,7 @@ h1 em {
   justify-content: space-between;
   width: 100%;
   padding: 13px 0 0;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -654,20 +863,20 @@ h1 em {
 
 .main-quest-progress {
   color: var(--green);
-  font-size: 12px;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
 
 .main-quest-title {
   margin: 0;
-  font: 17px/1.3 Georgia, "Times New Roman", serif;
+  font: 650 22px/1.35 var(--font-ui);
   letter-spacing: -0.3px;
 }
 
 .main-quest-copy,
 .main-quest-stage-count {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -706,20 +915,20 @@ h1 em {
 
 .main-quest-current > span {
   color: var(--muted);
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 650;
   letter-spacing: 0.9px;
 }
 
 .main-quest-current strong {
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.45;
 }
 
 .main-quest-current p {
   margin: 0;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .main-quest-steps {
@@ -735,7 +944,7 @@ h1 em {
   align-items: flex-start;
   gap: 7px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -748,7 +957,7 @@ h1 em {
   content: "";
   border: 1px solid var(--line);
   border-radius: 50%;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .quest-step.current {
@@ -770,25 +979,25 @@ h1 em {
 
 .mission-total {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .mission-copy {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 14px;
   margin: -5px 0 16px;
 }
 
 .mission {
   display: grid;
-  grid-template-columns: 18px 1fr;
+  grid-template-columns: 22px 1fr;
   gap: 9px;
   margin: 15px 0;
 }
 
 .mission-check {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border: 1px solid #bbc5b4;
   border-radius: 5px;
   margin-top: 1px;
@@ -814,14 +1023,14 @@ h1 em {
 }
 
 .mission strong {
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .mission p {
   color: var(--muted);
   margin: 5px 0 0;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -836,7 +1045,7 @@ h1 em {
   padding-top: 13px;
   margin-top: 19px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .reward-line strong {
@@ -845,13 +1054,13 @@ h1 em {
 
 .save-status {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.6;
   margin: 12px 0 0;
 }
 
 .local-note {
-  font-size: 7px;
+  font-size: 12px;
   color: var(--muted);
   margin: 20px 0 5px;
   text-align: center;
@@ -867,7 +1076,7 @@ h1 em {
 .local-note > span:last-child {
   display: block;
   margin-top: 7px;
-  font: italic 11px Georgia, serif;
+  font: 400 14px/1.5 var(--font-ui);
   letter-spacing: 0;
 }
 
@@ -876,7 +1085,7 @@ h1 em {
   bottom: 0;
   left: 34px;
   right: 34px;
-  height: 83px;
+  height: 94px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -888,7 +1097,7 @@ h1 em {
 
 .camera-hint {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -921,12 +1130,12 @@ h1 em {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  height: 33px;
-  padding: 0 10px;
+  height: 44px;
+  padding: 0 12px;
   border: 0;
   background: transparent;
   border-radius: 7px;
-  font-size: 10px;
+  font-size: 14px;
   transition: background 0.2s;
   white-space: nowrap;
 }
@@ -950,13 +1159,13 @@ h1 em {
 }
 
 .speed-button {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   min-width: 37px;
 }
 
 .version {
-  font-size: 8px;
+  font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -974,7 +1183,7 @@ h1 em {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s, transform 0.2s;
-  font-size: 11px;
+  font-size: 14px;
   z-index: 10;
   max-width: calc(100vw - 30px);
   text-align: center;
@@ -986,7 +1195,7 @@ h1 em {
 }
 
 /* Laptop pendek: rapatkan panel agar semua tombol tetap terlihat. */
-@media (max-height: 800px) and (min-width: 1001px) {
+@media (max-height: 800px) and (min-width: 1201px) {
   .left-panel {
     top: 105px;
   }
@@ -1052,7 +1261,7 @@ h1 em {
 }
 
 /* Tablet dan ponsel: dunia 3D berada di antara daftar tim dan panel. */
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
   body {
     overflow-y: auto;
   }
@@ -1091,12 +1300,18 @@ h1 em {
   }
 
   .intro-copy {
-    font-size: 11px;
+    font-size: 14px;
   }
 
   .team-section {
     margin-top: 0;
     align-self: center;
+    grid-column: 1 / -1;
+  }
+
+  .location-menu {
+    margin-top: 0;
+    align-self: start;
   }
 
   .team-list {
@@ -1135,7 +1350,7 @@ h1 em {
 
   .scene-caption {
     bottom: 15px;
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .right-panel {
@@ -1171,7 +1386,7 @@ h1 em {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 77px;
+    height: 90px;
     background: var(--background);
     justify-content: center;
   }
@@ -1183,6 +1398,23 @@ h1 em {
 }
 
 @media (max-width: 540px) {
+  .jobdesk-dialog {
+    padding: 16px;
+  }
+
+  .jobdesk-list {
+    grid-template-columns: 1fr;
+  }
+
+  .jobdesk-header h2 {
+    font-size: 24px;
+  }
+
+  .room-navigation button {
+    padding: 6px 7px;
+    font-size: 14px;
+  }
+
   .brand {
     font-size: 22px;
   }
@@ -1194,6 +1426,7 @@ h1 em {
   .left-panel {
     padding: 25px 16px 0;
     gap: 10px;
+    grid-template-columns: 1fr;
   }
 
   .team-section {
@@ -1211,7 +1444,7 @@ h1 em {
   }
 
   .intro .eyebrow {
-    font-size: 6px;
+    font-size: 12px;
   }
 
   h1 {
@@ -1223,16 +1456,16 @@ h1 em {
   }
 
   .crew-info strong {
-    font-size: 12px;
+    font-size: 15px;
   }
 
   .crew-info > span {
-    font-size: 8px;
+    font-size: 12px;
   }
 
   .crew-info .crew-state {
     max-width: 95px;
-    font-size: 8px;
+    font-size: 12px;
   }
 
   .crew-info > span {
@@ -1240,8 +1473,8 @@ h1 em {
   }
 
   .crew-avatar {
-    width: 31px;
-    height: 38px;
+    width: 40px;
+    height: 48px;
   }
 
   .right-panel {

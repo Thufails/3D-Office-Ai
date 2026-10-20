@@ -1,0 +1,121 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1200"
+  height="400"
+  viewBox="0 0 1200 400"
+  role="img"
+  aria-labelledby="title description"
+>
+  <title id="title">Pawffice — a little room for big ideas</title>
+  <desc id="description">
+    Banner sage dan cream: dua kucing berseragam bekerja di meja komputer
+    bersama secangkir kopi hangat.
+  </desc>
+  <defs>
+    <linearGradient id="paper" x2="1" y2="1">
+      <stop stop-color="#faf4e8"/>
+      <stop offset="1" stop-color="#dce8d8"/>
+    </linearGradient>
+    <g id="paw" fill="currentColor">
+      <ellipse cx="0" cy="6" rx="10" ry="8"/>
+      <ellipse cx="-11" cy="-6" rx="4" ry="5" transform="rotate(-25 -11 -6)"/>
+      <ellipse cx="0" cy="-12" rx="4" ry="5"/>
+      <ellipse cx="11" cy="-6" rx="4" ry="5" transform="rotate(25 11 -6)"/>
+    </g>
+    <g id="cat-face">
+      <path d="M-36-12-34-52-9-29M9-29 34-52 36-12" fill="currentColor"/>
+      <path d="M-29-29-28-43-16-30M16-30 28-43 29-29" fill="#e7ada0"/>
+      <ellipse rx="40" ry="34" fill="currentColor"/>
+      <ellipse cy="12" rx="24" ry="17" fill="#fff3dc"/>
+      <g fill="#30473b">
+        <ellipse cx="-14" cy="-1" rx="4" ry="6"/>
+        <ellipse cx="14" cy="-1" rx="4" ry="6"/>
+      </g>
+      <g fill="#fff9ee">
+        <circle cx="-15" cy="-3" r="1.4"/>
+        <circle cx="13" cy="-3" r="1.4"/>
+      </g>
+      <path d="m-4 9 4 4 4-4Z" fill="#c18078"/>
+      <g stroke="#7c715f" stroke-width="1.5" stroke-linecap="round" fill="none">
+        <path d="M0 13v5m0-1q-5 6-8 0m8 0q5 6 8 0"/>
+        <path d="m-24 12-20-3m20 9-19 4m67-10 20-3m-20 9 19 4"/>
+      </g>
+    </g>
+  </defs>
+
+  <rect width="1200" height="400" rx="28" fill="url(#paper)"/>
+  <circle cx="1110" cy="40" r="145" fill="#cbdcc7" opacity=".45"/>
+  <circle cx="750" cy="400" r="150" fill="#ead7b7" opacity=".38"/>
+
+  <g font-family="Segoe UI, Arial, sans-serif" fill="#2d4638">
+    <rect x="48" y="42" width="52" height="52" rx="17" fill="#2d4638"/>
+    <use href="#paw" x="74" y="69" color="#fbf6e8"/>
+    <text x="115" y="77" font-size="16" font-weight="700" letter-spacing="2">
+      YOUR LITTLE VIRTUAL SOFTWARE HOUSE
+    </text>
+    <text x="47" y="171" font-size="76" font-weight="750" letter-spacing="-4">
+      pawffice<tspan fill="#d18a59">.</tspan>
+    </text>
+    <text x="51" y="215" font-size="24">Delapan rekan berbulu. Satu tim kecil.</text>
+    <text x="51" y="250" font-size="24">Dari ide, jadi karya — one paw at a time.</text>
+    <g font-size="15" font-weight="650" text-anchor="middle">
+      <rect x="50" y="285" width="116" height="36" rx="18" fill="#ccdcca"/>
+      <text x="108" y="309">8 CAT ROLES</text>
+      <rect x="176" y="285" width="110" height="36" rx="18" fill="#ead4b1"/>
+      <text x="231" y="309">4 ROOMS</text>
+      <rect x="296" y="285" width="148" height="36" rx="18" fill="#e8c8ba"/>
+      <text x="370" y="309">LOCAL SANDBOX</text>
+    </g>
+    <text x="51" y="363" font-size="15" fill="#647660">
+      Three.js · Vanilla JavaScript · Offline-friendly · WIB live clock
+    </text>
+  </g>
+
+  <g transform="translate(725 40)">
+    <rect width="425" height="318" rx="24" fill="#f8faf3" stroke="#c5d3bf"/>
+    <rect x="24" y="22" width="377" height="136" rx="8" fill="#d6e4df"/>
+    <g stroke="#f8faf3" stroke-width="3">
+      <path d="M24 102h377M130 22v136M238 22v136M346 22v136"/>
+    </g>
+    <path d="M30 300h365" stroke="#dfd9c5" stroke-width="3" stroke-linecap="round"/>
+    <g transform="translate(120 158)">
+      <path d="M-23 30q23-19 46 0l10 66h-66Z" fill="#f3ecdb"/>
+      <path d="m-12 20 12 14 12-14M0 34v48" stroke="#647e63" stroke-width="8" fill="none"/>
+      <use href="#cat-face" color="#dca35b"/>
+      <g stroke="#576b55" stroke-width="2.5" fill="none">
+        <circle cx="-14" cy="-1" r="11"/>
+        <circle cx="14" cy="-1" r="11"/>
+        <path d="M-3-1h6"/>
+      </g>
+    </g>
+    <g transform="translate(293 158)">
+      <path d="M-23 30q23-19 46 0l10 66h-66Z" fill="#92a58a"/>
+      <path d="m-12 20 12 14 12-14M0 34v48" stroke="#f3ecdb" stroke-width="7" fill="none"/>
+      <use href="#cat-face" color="#a5afaa"/>
+    </g>
+    <g fill="#6c836f">
+      <rect x="65" y="244" width="12" height="49" rx="3"/>
+      <rect x="349" y="244" width="12" height="49" rx="3"/>
+    </g>
+    <rect x="45" y="235" width="335" height="15" rx="6" fill="#dbc49d"/>
+    <rect x="68" y="194" width="94" height="54" rx="5" fill="#435d4c"/>
+    <rect x="74" y="200" width="82" height="35" rx="2" fill="#63816a"/>
+    <g transform="translate(115 218) scale(.5)">
+      <use href="#paw" color="#dae5c9"/>
+    </g>
+    <rect x="239" y="194" width="94" height="54" rx="5" fill="#435d4c"/>
+    <g stroke="#a4bb9c" stroke-width="4" stroke-linecap="round">
+      <path d="M248 205h70m-70 11h50m-50 11h60"/>
+    </g>
+    <g fill="#b87d54">
+      <rect x="185" y="214" width="24" height="23" rx="5"/>
+      <path d="M207 217h7v13h-7" stroke="#b87d54" stroke-width="4" fill="none"/>
+    </g>
+    <path d="M192 205q-5-7 0-13m9 13q-5-7 0-13" stroke="#a2b39a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g fill="#829b73">
+      <ellipse cx="38" cy="212" rx="8" ry="18" transform="rotate(-30 38 212)"/>
+      <ellipse cx="45" cy="201" rx="8" ry="18" transform="rotate(15 45 201)"/>
+    </g>
+    <path d="M27 224h29l-4 21H31Z" fill="#c4a67e"/>
+  </g>
+</svg>
