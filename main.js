@@ -27,7 +27,7 @@
       id: "miko",
       name: "Miko",
       gender: "♂",
-      role: "Project Coordinator",
+      role: "Project Manager",
       title: "THE PLANNER",
       bio: "Penggemar to-do list, kopi hangat, dan memastikan semua ide punya tempat.",
       fur: 0xd99553,
@@ -37,20 +37,43 @@
       pants: 0x3c5950,
       accent: 0x4c7463,
       portrait: 0xe9d7b9,
+      uniform: "tie",
+      desk: new THREE.Vector3(-3.75, 0, -2.08),
+      tasks: [
+        "Menyusun ruang lingkup proyek",
+        "Mengatur prioritas tim",
+        "Memeriksa progres proyek",
+      ],
+    },
+    {
+      id: "nori",
+      name: "Nori",
+      gender: "♀",
+      role: "System Analyst",
+      title: "THE OBSERVER",
+      bio: "Teliti mendengarkan kebutuhan dan merapikannya menjadi alur sistem.",
+      fur: 0xc7a873,
+      patch: 0xf2e3c9,
+      darkFur: 0x9a7950,
+      shirt: 0xf1ead9,
+      pants: 0x596a5a,
+      accent: 0x65816b,
+      portrait: 0xe8ddc5,
+      uniform: "vest",
       desk: new THREE.Vector3(-2.25, 0, -2.08),
       tasks: [
-        "Menyusun rencana",
-        "Merapikan to-do list",
-        "Mengecek ide tim",
+        "Mencatat kebutuhan klien",
+        "Menyusun alur pemesanan",
+        "Merinci kebutuhan sistem",
       ],
     },
     {
       id: "luna",
       name: "Luna",
       gender: "♀",
-      role: "Visual Designer",
+      role: "UI/UX Designer",
       title: "THE DAYDREAMER",
-      bio: "Meramu warna, menggambar ide, dan menemukan inspirasi di sela-sela rebahan.",
+      bio: "Meramu warna dan alur yang membuat website terasa nyaman digunakan.",
       fur: 0x929da3,
       patch: 0xf2ece0,
       darkFur: 0x6c777e,
@@ -58,13 +81,105 @@
       pants: 0x555d62,
       accent: 0xd99a77,
       portrait: 0xd9e2d1,
-      desk: new THREE.Vector3(1.65, 0, -2.08),
+      uniform: "cardigan",
+      desk: new THREE.Vector3(-0.75, 0, -2.08),
       tasks: [
-        "Menggambar ide",
-        "Memilih palet warna",
-        "Membuat moodboard",
+        "Menyusun wireframe booking",
+        "Memilih palet warna website",
+        "Merapikan desain halaman",
       ],
     },
+    {
+      id: "kiko",
+      name: "Kiko",
+      gender: "♂",
+      role: "Frontend Developer",
+      title: "THE BUILDER",
+      bio: "Mengubah desain menjadi halaman web yang responsif dan interaktif.",
+      fur: 0xb97c55,
+      patch: 0xf0d7b7,
+      darkFur: 0x8b5940,
+      shirt: 0xe8eee2,
+      pants: 0x50645b,
+      accent: 0x72917b,
+      portrait: 0xe4d4bd,
+      uniform: "apron",
+      desk: new THREE.Vector3(0.75, 0, -2.08),
+      tasks: [
+        "Membangun halaman pemesanan",
+        "Merapikan tampilan mobile",
+        "Menghubungkan tombol dan formulir",
+      ],
+    },
+    {
+      id: "bimo",
+      name: "Bimo",
+      gender: "♂",
+      role: "Backend Developer",
+      title: "THE ENGINEER",
+      bio: "Menjaga data jadwal dan reservasi bekerja rapi di balik layar.",
+      fur: 0x92928b,
+      patch: 0xe9e2d4,
+      darkFur: 0x6b6b66,
+      shirt: 0xe2e9e1,
+      pants: 0x47574f,
+      accent: 0x728b80,
+      portrait: 0xdbe2d7,
+      uniform: "vest",
+      desk: new THREE.Vector3(2.25, 0, -2.08),
+      tasks: [
+        "Menyusun data jadwal",
+        "Menyiapkan logika reservasi",
+        "Memeriksa alur penyimpanan",
+      ],
+    },
+    {
+      id: "piko",
+      name: "Piko",
+      gender: "♀",
+      role: "QA / Tester",
+      title: "THE BUG HUNTER",
+      bio: "Menguji alur booking dan memastikan detail kecil tidak terlewat.",
+      fur: 0xc68f91,
+      patch: 0xf4e2d8,
+      darkFur: 0x986c73,
+      shirt: 0xf4eadf,
+      pants: 0x68665e,
+      accent: 0xb77c78,
+      portrait: 0xead8d0,
+      uniform: "cardigan",
+      desk: new THREE.Vector3(3.75, 0, -2.08),
+      tasks: [
+        "Menguji formulir booking",
+        "Mencari bug tampilan",
+        "Memeriksa hasil perbaikan",
+      ],
+    },
+  ];
+
+  const MAIN_QUEST = {
+    title: "Sistem booking online untuk barbershop",
+    description: "Dari brief klien sampai alur reservasi siap diuji.",
+    stageWorkSeconds: 30,
+    stages: [
+      { roleId: "miko", title: "Tentukan ruang lingkup proyek" },
+      { roleId: "nori", title: "Rangkum kebutuhan pelanggan" },
+      { roleId: "luna", title: "Rancang alur dan tampilan" },
+      { roleId: "kiko", title: "Bangun halaman pemesanan" },
+      { roleId: "bimo", title: "Siapkan jadwal dan reservasi" },
+      { roleId: "piko", title: "Uji alur dan siapkan serah-terima" },
+    ],
+  };
+
+  const DAILY_QUEST_POOL = [
+    { id: "focus", title: "Sesi fokus singkat", detail: "Biarkan tim bekerja selama 30 detik." },
+    { id: "coffee", title: "Rehat kopi", detail: "Ajak satu rekan ke coffee corner." },
+    { id: "huddle", title: "Sinkronisasi tim", detail: "Kumpulkan tim untuk team huddle." },
+    { id: "lounge", title: "Cari inspirasi", detail: "Ajak satu rekan beristirahat sebentar." },
+    { id: "collaborate", title: "Libatkan tiga role", detail: "Biarkan tiga rekan berbeda ikut bekerja." },
+    { id: "project", title: "Majukan proyek", detail: "Selesaikan satu tahap quest utama." },
+    { id: "meet-three", title: "Kenalan dengan rekan", detail: "Pilih tiga anggota tim yang berbeda." },
+    { id: "meet-all", title: "Kenalan dengan seluruh tim", detail: "Pilih semua enam anggota tim." },
   ];
 
   const simulation = {
@@ -73,15 +188,31 @@
     night: false,
     themeOverride: null,
     elapsed: 0,
-    focusSeconds: 0,
     selectedId: "miko",
-    seen: new Set(["miko"]),
+    seen: new Set(),
+    happiness: 0,
+    mainQuest: {
+      stageIndex: 0,
+      stageSeconds: 0,
+    },
+    daily: {
+      dateKey: "",
+      focusSeconds: 0,
+      coffeeVisits: 0,
+      meetingRounds: 0,
+      loungeVisits: 0,
+      stageCompletions: 0,
+      seenToday: new Set(),
+      contributors: new Set(),
+      completedQuestIds: new Set(),
+      meetingWasTogether: false,
+    },
     coffee: false,
-    missions: [false, false, false],
     events: [],
   };
 
-  const PROGRESS_KEY = "pawffice.progress.v1";
+  const PROGRESS_KEY = "pawffice.progress.v2";
+  const LEGACY_PROGRESS_KEY = "pawffice.progress.v1";
   const JAKARTA_TIME_ZONE = "Asia/Jakarta";
 
   const MEETING_TABLE = {
@@ -91,8 +222,12 @@
   };
 
   const MEETING_SEATS = [
-    { ownerId: "miko", x: 0.2, z: 2.85 },
-    { ownerId: "luna", x: 3.2, z: 2.85 },
+    { ownerId: "miko", x: 0.19, z: 3.03 },
+    { ownerId: "nori", x: 1.70, z: 3.90 },
+    { ownerId: "luna", x: 3.21, z: 3.03 },
+    { ownerId: "kiko", x: 3.21, z: 1.27 },
+    { ownerId: "bimo", x: 1.70, z: 0.40 },
+    { ownerId: "piko", x: 0.19, z: 1.27 },
   ];
 
   const jakartaPartsFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -138,6 +273,7 @@
   let toastTimeout;
   let lastUIUpdate = 0;
   let lastMissionSignature = "";
+  let lastMainQuestSignature = "";
   let lastSavedProgress = "";
   let lastProgressSaveAt = 0;
   let storageErrorShown = false;
@@ -157,12 +293,42 @@
 
   // ---------- Progres quest: simpan di browser, pulihkan saat refresh ----------
 
+  function resetDailyProgress(dateKey) {
+    simulation.daily = {
+      dateKey,
+      focusSeconds: 0,
+      coffeeVisits: 0,
+      meetingRounds: 0,
+      loungeVisits: 0,
+      stageCompletions: 0,
+      seenToday: new Set(),
+      contributors: new Set(),
+      completedQuestIds: new Set(),
+      meetingWasTogether: false,
+    };
+  }
+
   function progressSnapshot() {
     return {
-      version: 1,
+      version: 2,
       selectedId: simulation.selectedId,
       seen: [...simulation.seen].sort(),
-      focusSeconds: Math.min(30, simulation.focusSeconds),
+      happiness: simulation.happiness,
+      mainQuest: {
+        stageIndex: simulation.mainQuest.stageIndex,
+        stageSeconds: simulation.mainQuest.stageSeconds,
+      },
+      daily: {
+        dateKey: simulation.daily.dateKey,
+        focusSeconds: simulation.daily.focusSeconds,
+        coffeeVisits: simulation.daily.coffeeVisits,
+        meetingRounds: simulation.daily.meetingRounds,
+        loungeVisits: simulation.daily.loungeVisits,
+        stageCompletions: simulation.daily.stageCompletions,
+        seenToday: [...simulation.daily.seenToday].sort(),
+        contributors: [...simulation.daily.contributors].sort(),
+        completedQuestIds: [...simulation.daily.completedQuestIds].sort(),
+      },
       coffee: simulation.coffee,
     };
   }
@@ -192,7 +358,8 @@
     let raw;
 
     try {
-      raw = window.localStorage.getItem(PROGRESS_KEY);
+      raw = window.localStorage.getItem(PROGRESS_KEY)
+        || window.localStorage.getItem(LEGACY_PROGRESS_KEY);
     } catch (error) {
       reportStorageError(error);
       return;
@@ -205,7 +372,7 @@
     try {
       const saved = JSON.parse(raw);
 
-      if (!saved || saved.version !== 1) {
+      if (!saved || ![1, 2].includes(saved.version)) {
         return;
       }
 
@@ -217,23 +384,72 @@
         );
       }
 
-      if (Number.isFinite(saved.focusSeconds)) {
-        simulation.focusSeconds = Math.max(0, Math.min(30, saved.focusSeconds));
-      }
-
       simulation.coffee = saved.coffee === true;
+
+      if (saved.version === 2) {
+        if (Number.isFinite(saved.happiness)) {
+          simulation.happiness = Math.max(0, saved.happiness);
+        }
+
+        if (saved.mainQuest && Number.isFinite(saved.mainQuest.stageIndex)) {
+          simulation.mainQuest.stageIndex = Math.max(
+            0,
+            Math.min(MAIN_QUEST.stages.length, Math.floor(saved.mainQuest.stageIndex))
+          );
+          const stageLimit = MAIN_QUEST.stageWorkSeconds;
+          const stageSeconds = Number(saved.mainQuest.stageSeconds);
+          simulation.mainQuest.stageSeconds = Number.isFinite(stageSeconds)
+            ? Math.max(0, Math.min(stageLimit - 0.001, stageSeconds))
+            : 0;
+        }
+
+        const today = readJakartaTime().dateKey;
+        const daily = saved.daily;
+
+        if (daily && daily.dateKey === today) {
+          simulation.daily.dateKey = today;
+          simulation.daily.focusSeconds = Number.isFinite(daily.focusSeconds)
+            ? Math.max(0, daily.focusSeconds)
+            : 0;
+          simulation.daily.coffeeVisits = Math.max(0, Number(daily.coffeeVisits) || 0);
+          simulation.daily.meetingRounds = Math.max(0, Number(daily.meetingRounds) || 0);
+          simulation.daily.loungeVisits = Math.max(0, Number(daily.loungeVisits) || 0);
+          simulation.daily.stageCompletions = Math.max(0, Number(daily.stageCompletions) || 0);
+          simulation.daily.seenToday = new Set(
+            Array.isArray(daily.seenToday)
+              ? daily.seenToday.filter((id) => validIds.has(id))
+              : []
+          );
+          simulation.daily.contributors = new Set(
+            Array.isArray(daily.contributors)
+              ? daily.contributors.filter((id) => validIds.has(id))
+              : []
+          );
+          simulation.daily.completedQuestIds = new Set(
+            Array.isArray(daily.completedQuestIds)
+              ? daily.completedQuestIds.filter((id) => DAILY_QUEST_POOL.some((quest) => quest.id === id))
+              : []
+          );
+        } else {
+          resetDailyProgress(today);
+        }
+      } else {
+        // Data versi lama tetap membawa anggota yang sudah dikenal ke versi baru.
+        resetDailyProgress(readJakartaTime().dateKey);
+        simulation.happiness = Array.isArray(saved.missions)
+          ? saved.missions.filter(Boolean).length * 25
+          : 0;
+      }
 
       if (validIds.has(saved.selectedId)) {
         simulation.selectedId = saved.selectedId;
       }
 
-      // Pulihkan status langsung, agar refresh tidak mengulang hadiah / toast misi.
-      simulation.missions = [
-        simulation.seen.size >= 2,
-        simulation.focusSeconds >= 30,
-        simulation.coffee,
-      ];
-      lastSavedProgress = JSON.stringify(progressSnapshot());
+      // Migrasikan simpanan lama tanpa mengulang hadiah quest harian.
+      lastSavedProgress = saved.version === 2
+        ? JSON.stringify(progressSnapshot())
+        : "";
+      saveProgress(true);
       setSaveStatus("Progres tersimpan di browser ini.");
     } catch (error) {
       // Data lama yang rusak tidak boleh menghentikan kantor 3D.
@@ -286,10 +502,39 @@
     };
   }
 
+  function dateOrdinal(dateKey) {
+    const [year, month, day] = dateKey.split("-").map(Number);
+    return Math.floor(Date.UTC(year, month - 1, day) / 86400000);
+  }
+
+  function dailyQuestsForDate(dateKey) {
+    const start = dateOrdinal(dateKey) % DAILY_QUEST_POOL.length;
+
+    return [0, 1, 2].map((offset) => {
+      return DAILY_QUEST_POOL[(start + offset) % DAILY_QUEST_POOL.length];
+    });
+  }
+
+  function ensureDailyDate(dateKey) {
+    if (simulation.daily.dateKey === dateKey) {
+      return false;
+    }
+
+    resetDailyProgress(dateKey);
+    lastMissionSignature = "";
+    return true;
+  }
+
   function updateLiveClock() {
     const time = readJakartaTime();
     $("clock").textContent = time.clockText;
     $("day-label").textContent = time.dateLabel;
+    $("daily-quest-date").textContent = `${time.dateLabel} · WIB`;
+
+    if (ensureDailyDate(time.dateKey)) {
+      renderMissions();
+      saveProgress(true);
+    }
 
     // Jarum menit/jam juga mengikuti waktu nyata, termasuk detiknya.
     clockMinute.rotation.z = -(time.minute + time.second / 60) * Math.PI / 30;
@@ -664,35 +909,35 @@
     const x = data.desk.x;
     const z = -0.96;
     const wood = 0xe4ccaa;
-    box(2.8, 0.15, 1.25, wood, x, 0.98, z);
-    box(2.7, 0.08, 1.17, 0xcfb18a, x, 0.88, z);
+    box(1.34, 0.15, 1.25, wood, x, 0.98, z);
+    box(1.27, 0.08, 1.17, 0xcfb18a, x, 0.88, z);
 
     for (const side of [-1, 1]) {
-      box(0.09, 0.82, 0.93, 0x65735e, x + side * 1.18, 0.51, z);
+      box(0.09, 0.82, 0.93, 0x65735e, x + side * 0.53, 0.51, z);
     }
 
-    obstacle(x, z, 2.85, 1.29);
-    createMonitor(index === 1, x - 0.35, z - 0.14);
-    box(0.8, 0.035, 0.27, 0xdddcd0, x - 0.32, 1.08, z - 0.43);
+    obstacle(x, z, 1.39, 1.29);
+    createMonitor(index === 2, x - 0.03, z - 0.14);
+    box(0.72, 0.035, 0.25, 0xdddcd0, x - 0.02, 1.08, z - 0.43);
 
     for (let row = 0; row < 3; row += 1) {
-      for (let column = 0; column < 9; column += 1) {
-        box(0.055, 0.013, 0.035, 0xc2c6b8,
-          x - 0.63 + column * 0.076,
+      for (let column = 0; column < 7; column += 1) {
+        box(0.052, 0.013, 0.035, 0xc2c6b8,
+          x - 0.25 + column * 0.076,
           1.105,
           z - 0.51 + row * 0.066
         );
       }
     }
 
-    sphere(0.09, 0xf2ead7, x + 0.25, 1.10, z - 0.42, scene, [0.7, 0.4, 1]);
-    createMug(x + 0.91, 1.075, z - 0.25, data.accent);
-    box(0.45, 0.045, 0.54, data.accent, x + 0.75, 1.08, z + 0.22);
-    box(0.40, 0.018, 0.49, 0xf6eed9, x + 0.75, 1.11, z + 0.22);
+    sphere(0.07, 0xf2ead7, x + 0.31, 1.10, z - 0.42, scene, [0.7, 0.4, 1]);
+    createMug(x + 0.48, 1.075, z - 0.25, data.accent);
+    box(0.28, 0.045, 0.42, data.accent, x + 0.34, 1.08, z + 0.25);
+    box(0.25, 0.018, 0.38, 0xf6eed9, x + 0.34, 1.11, z + 0.25);
 
-    const plate = label(data.name.toUpperCase(), 0.55, 0.17, "#e4ccaa", "#5e6c56");
-    plate.position.set(x + 0.55, 0.98, z + 0.637);
-    createChair(x, data.desk.z, index ? 0x9eaa8d : 0xb69672, data.id);
+    const plate = label(data.name.toUpperCase(), 0.48, 0.15, "#e4ccaa", "#5e6c56");
+    plate.position.set(x, 0.98, z + 0.637);
+    createChair(x, data.desk.z, index % 2 ? 0x9eaa8d : 0xb69672, data.id);
   }
 
   function createChair(x, z, color, ownerId) {
@@ -879,17 +1124,23 @@
     collarLeft.rotation.z = -0.40;
     collarRight.rotation.z = 0.40;
 
-    if (data.id === "miko") {
+    if (data.uniform === "tie") {
       box(0.10, 0.11, 0.045, data.accent, 0, 1.28, 0.30, body);
       const tie = box(0.12, 0.30, 0.035, data.accent, 0, 1.08, 0.30, body);
       tie.rotation.z = 0.05;
-    } else {
+    } else if (data.uniform === "cardigan") {
       box(0.20, 0.49, 0.055, 0xf5edda, 0, 1.05, 0.283, body);
 
       for (const x of [-0.16, 0.16]) {
         const cord = box(0.018, 0.44, 0.023, 0xd5ab7f, x / 2, 1.12, 0.32, body);
         cord.rotation.z = x > 0 ? -0.28 : 0.28;
       }
+    } else if (data.uniform === "apron") {
+      box(0.44, 0.47, 0.055, data.accent, 0, 1.05, 0.29, body);
+      box(0.22, 0.14, 0.025, 0xf2ead7, 0, 0.90, 0.325, body);
+    } else {
+      box(0.43, 0.48, 0.055, data.accent, 0, 1.05, 0.29, body);
+      box(0.12, 0.46, 0.025, 0xf5edda, 0, 1.05, 0.325, body);
     }
 
     box(0.15, 0.19, 0.026, 0xf8f2df, 0.20, 0.99, 0.30, body);
@@ -990,7 +1241,15 @@
     ], 0.09, data.fur, tail);
     sphere(0.094, data.darkFur, 0.57, 0.55, -0.42, tail);
 
-    const speech = createSpeech(data.id === "miko" ? "one paw at a time." : "ideas need naps.");
+    const speechLines = {
+      miko: "one paw at a time.",
+      nori: "let's map the flow.",
+      luna: "ideas need color.",
+      kiko: "building the page.",
+      bimo: "data stays tidy.",
+      piko: "let's test it!",
+    };
+    const speech = createSpeech(speechLines[data.id]);
     speech.position.set(0, 2.66, 0);
     root.add(speech);
 
@@ -1019,9 +1278,9 @@
       navCooldown: 0,
       navStall: 0,
       motion: 0,
-      energy: data.id === "miko" ? 92 : 88,
-      mood: data.id === "miko" ? 94 : 97,
-      timer: data.id === "miko" ? 32 : 43,
+      energy: 92 - cats.length * 1.5,
+      mood: 94 + (cats.length % 4),
+      timer: 32 + cats.length * 3,
       workProgress: 0,
       facing: 0,
       phase: cats.length * 2.7,
@@ -1029,6 +1288,51 @@
     };
     cats.push(cat);
     return cat;
+  }
+
+  function renderCrewCards() {
+    const list = $("team-list");
+    list.replaceChildren();
+    $("team-count").textContent = String(TEAM.length).padStart(2, "0");
+
+    for (const member of TEAM) {
+      const button = document.createElement("button");
+      button.className = member.id === simulation.selectedId
+        ? "crew-card selected"
+        : "crew-card";
+      button.id = `crew-${member.id}`;
+      button.dataset.cat = member.id;
+      button.setAttribute("aria-pressed", String(member.id === simulation.selectedId));
+
+      const portrait = document.createElement("img");
+      portrait.className = "crew-avatar";
+      portrait.id = `portrait-${member.id}`;
+      portrait.alt = `${member.name}, kucing kantor dengan seragam ${member.role}`;
+
+      const info = document.createElement("span");
+      info.className = "crew-info";
+
+      const name = document.createElement("strong");
+      name.textContent = member.name;
+
+      const role = document.createElement("span");
+      role.textContent = member.role;
+
+      const state = document.createElement("span");
+      state.className = "crew-state";
+      state.id = `state-${member.id}`;
+      state.textContent = "● Menyiapkan pekerjaan";
+      info.append(name, role, state);
+
+      const arrow = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      arrow.classList.add("crew-arrow");
+      const arrowIcon = document.createElementNS("http://www.w3.org/2000/svg", "use");
+      arrowIcon.setAttribute("href", "#i-arrow");
+      arrow.append(arrowIcon);
+
+      button.append(portrait, info, arrow);
+      list.append(button);
+    }
   }
 
   function createSpeech(text) {
@@ -1438,9 +1742,13 @@
     const seat = MEETING_SEATS.find((item) => item.ownerId === cat.data.id);
     const targets = {
       work: cat.data.desk,
-      coffee: new THREE.Vector3(3.85 + index * 0.95, 0, -2.45),
-      lounge: new THREE.Vector3(-3.70, 0, 0.95 + index * 0.18),
-      meeting: new THREE.Vector3(seat.x, 0, seat.z),
+      coffee: new THREE.Vector3(5.0, 0, -2.45),
+      lounge: new THREE.Vector3(
+        -2.4 + (index % 3),
+        0,
+        index < 3 ? 0.35 : 1.35
+      ),
+      meeting: seat ? new THREE.Vector3(seat.x, 0, seat.z) : null,
     };
     const target = targets[activity];
 
@@ -1497,7 +1805,9 @@
     } else if (cat.mode === "coffee") {
       cat.facing = Math.PI;
       simulation.coffee = true;
+      simulation.daily.coffeeVisits += 1;
       addEvent(cat.data.name, "menemukan kebahagiaan dalam secangkir kopi.");
+      checkDailyMissions();
     } else if (cat.mode === "meeting") {
       cat.facing = Math.atan2(
         MEETING_TABLE.x - cat.root.position.x,
@@ -1506,7 +1816,9 @@
       addEvent(cat.data.name, "sudah duduk dan siap bertukar ide.");
     } else {
       cat.facing = -Math.PI / 2;
+      simulation.daily.loungeVisits += 1;
       addEvent(cat.data.name, "istirahat sebentar. Ide juga perlu ruang.");
+      checkDailyMissions();
     }
   }
 
@@ -1601,7 +1913,7 @@
     simulation.elapsed += dt;
 
     if (cats.some((cat) => cat.mode === "work")) {
-      simulation.focusSeconds = Math.min(30, simulation.focusSeconds + dt);
+      simulation.daily.focusSeconds += dt;
     }
 
     for (const cat of cats) {
@@ -1630,6 +1942,8 @@
           cat.energy = Math.max(20, cat.energy - dt * 0.17);
           cat.mood = Math.max(45, cat.mood - dt * 0.025);
           cat.workProgress += dt;
+          simulation.daily.contributors.add(cat.data.id);
+          advanceMainQuest(cat, dt);
 
           if (cat.workProgress > 18) {
             cat.workProgress = 0;
@@ -1650,7 +1964,49 @@
       }
     }
 
-    checkMissions();
+    const wholeTeamInMeeting = cats.length === TEAM.length
+      && cats.every((cat) => cat.activity === "meeting" && cat.mode === "meeting");
+
+    if (wholeTeamInMeeting && !simulation.daily.meetingWasTogether) {
+      simulation.daily.meetingRounds += 1;
+      addEvent("Tim", "berkumpul untuk membahas proyek utama.");
+      checkDailyMissions();
+    }
+
+    simulation.daily.meetingWasTogether = wholeTeamInMeeting;
+    checkDailyMissions();
+  }
+
+  function advanceMainQuest(cat, dt) {
+    const stage = MAIN_QUEST.stages[simulation.mainQuest.stageIndex];
+
+    if (!stage || stage.roleId !== cat.data.id) {
+      return;
+    }
+
+    simulation.mainQuest.stageSeconds += dt;
+
+    if (simulation.mainQuest.stageSeconds < MAIN_QUEST.stageWorkSeconds) {
+      return;
+    }
+
+    simulation.mainQuest.stageIndex += 1;
+    simulation.mainQuest.stageSeconds = 0;
+    simulation.daily.stageCompletions += 1;
+    simulation.happiness += 25;
+    addEvent(cat.data.name, `menuntaskan tahap “${stage.title.toLowerCase()}”.`);
+
+    if (simulation.mainQuest.stageIndex === MAIN_QUEST.stages.length) {
+      addEvent("Pawffice", "menyelesaikan sistem booking dan siap menyerahkannya ke klien.");
+      toast("Quest utama selesai! Sistem booking siap diserahkan ✧");
+    } else {
+      const nextStage = MAIN_QUEST.stages[simulation.mainQuest.stageIndex];
+      const nextOwner = TEAM.find((member) => member.id === nextStage.roleId);
+      toast(`${stage.title} selesai. Berikutnya giliran ${nextOwner.name} ✧`);
+    }
+
+    checkDailyMissions();
+    saveProgress(true);
   }
 
   function animateCat(cat, dt) {
@@ -1754,6 +2110,7 @@
     selected = cat;
     simulation.selectedId = cat.data.id;
     simulation.seen.add(cat.data.id);
+    simulation.daily.seenToday.add(cat.data.id);
     $("selected-portrait").src = cat.portrait;
     $("selected-portrait").alt = `Avatar ${cat.data.name}`;
     $("selected-name").textContent = cat.data.name;
@@ -1771,69 +2128,180 @@
       button.setAttribute("aria-pressed", String(active));
     }
 
-    checkMissions();
+    checkDailyMissions();
     saveProgress(true);
     updateUI();
   }
 
-  function checkMissions() {
-    let completedMission = false;
-    const next = [
-      simulation.seen.size >= 2,
-      simulation.focusSeconds >= 30,
-      simulation.coffee,
-    ];
+  function getDailyQuestStatus(quest) {
+    const daily = simulation.daily;
+    const seenToday = daily.seenToday.size;
 
-    next.forEach((done, index) => {
-      if (done && !simulation.missions[index]) {
-        simulation.missions[index] = true;
-        completedMission = true;
-        const names = ["Kenalan dengan tim", "Satu putaran fokus", "Coffee break dulu"];
-        toast(`Misi selesai: ${names[index]} ✧`);
-        addEvent("Misi", `“${names[index]}” selesai. Kantor makin happy.`);
+    switch (quest.id) {
+      case "focus": {
+        const progress = Math.min(30, Math.floor(daily.focusSeconds));
+        return {
+          done: daily.focusSeconds >= 30,
+          detail: `Biarkan tim bekerja · ${progress}/30 dtk`,
+        };
       }
-    });
+      case "coffee":
+        return {
+          done: daily.coffeeVisits >= 1,
+          detail: `Kunjungan coffee corner · ${Math.min(1, daily.coffeeVisits)}/1`,
+        };
+      case "huddle":
+        return {
+          done: daily.meetingRounds >= 1,
+          detail: `Diskusi bersama tim · ${Math.min(1, daily.meetingRounds)}/1`,
+        };
+      case "lounge":
+        return {
+          done: daily.loungeVisits >= 1,
+          detail: `Kunjungan area santai · ${Math.min(1, daily.loungeVisits)}/1`,
+        };
+      case "collaborate":
+        return {
+          done: daily.contributors.size >= 3,
+          detail: `Role yang ikut bekerja · ${Math.min(3, daily.contributors.size)}/3`,
+        };
+      case "project":
+        return {
+          done: daily.stageCompletions >= 1,
+          detail: `Tahap proyek diselesaikan · ${Math.min(1, daily.stageCompletions)}/1`,
+        };
+      case "meet-three":
+        return {
+          done: seenToday >= 3,
+          detail: `Pilih rekan yang berbeda · ${Math.min(3, seenToday)}/3`,
+        };
+      case "meet-all":
+        return {
+          done: seenToday >= TEAM.length,
+          detail: `Kenali seluruh anggota · ${Math.min(TEAM.length, seenToday)}/${TEAM.length}`,
+        };
+      default:
+        return { done: false, detail: quest.detail };
+    }
+  }
+
+  function checkDailyMissions() {
+    let completedQuest = false;
+
+    for (const quest of dailyQuestsForDate(simulation.daily.dateKey)) {
+      const status = getDailyQuestStatus(quest);
+
+      if (status.done && !simulation.daily.completedQuestIds.has(quest.id)) {
+        simulation.daily.completedQuestIds.add(quest.id);
+        simulation.happiness += 10;
+        completedQuest = true;
+        toast(`Quest sampingan selesai: ${quest.title} ✧`);
+        addEvent("Quest", `“${quest.title}” selesai. Tim mendapat +10 happiness.`);
+      }
+    }
 
     renderMissions();
-    saveProgress(completedMission);
+    saveProgress(completedQuest);
   }
 
   function renderMissions() {
-    const progress = Math.min(30, Math.floor(simulation.focusSeconds));
-    const signature = `${simulation.missions}:${simulation.seen.size}:${progress}`;
+    const quests = dailyQuestsForDate(
+      simulation.daily.dateKey || readJakartaTime().dateKey
+    );
+    const signature = JSON.stringify({
+      quests: quests.map((quest) => quest.id),
+      completed: [...simulation.daily.completedQuestIds].sort(),
+      focus: Math.floor(simulation.daily.focusSeconds),
+      coffee: simulation.daily.coffeeVisits,
+      meeting: simulation.daily.meetingRounds,
+      lounge: simulation.daily.loungeVisits,
+      stages: simulation.daily.stageCompletions,
+      contributors: simulation.daily.contributors.size,
+      seen: simulation.daily.seenToday.size,
+      happiness: simulation.happiness,
+    });
 
     if (signature === lastMissionSignature) {
       return;
     }
 
     lastMissionSignature = signature;
-    const missions = [
-      ["Kenalan dengan tim", `Pilih Miko dan Luna · ${simulation.seen.size}/2`],
-      ["Satu putaran fokus", `Biarkan tim bekerja · ${progress}/30 dtk`],
-      ["Coffee break dulu", "Ajak tim mampir ke coffee corner"],
-    ];
     const container = $("mission-list");
     container.replaceChildren();
 
-    missions.forEach(([title, detail], index) => {
+    for (const quest of quests) {
+      const status = getDailyQuestStatus(quest);
       const row = document.createElement("div");
       const checkbox = document.createElement("span");
       const content = document.createElement("div");
       const heading = document.createElement("strong");
       const description = document.createElement("p");
-      row.className = simulation.missions[index] ? "mission done" : "mission";
+
+      row.className = status.done ? "mission done" : "mission";
       checkbox.className = "mission-check";
       checkbox.innerHTML = '<svg><use href="#i-check"/></svg>';
-      heading.textContent = title;
-      description.textContent = detail;
+      heading.textContent = quest.title;
+      description.textContent = status.detail;
       content.append(heading, description);
       row.append(checkbox, content);
       container.append(row);
-    });
+    }
 
-    const completed = simulation.missions.filter(Boolean).length;
-    $("mission-total").textContent = `${completed} / 3`;
-    $("happiness").textContent = `+${completed * 25}`;
+    const completed = quests.filter((quest) => {
+      return simulation.daily.completedQuestIds.has(quest.id);
+    }).length;
+    $("mission-total").textContent = `${completed} / ${quests.length}`;
+    $("happiness").textContent = `+${simulation.happiness}`;
+  }
+
+  function renderMainQuest() {
+    const stages = MAIN_QUEST.stages;
+    const stageIndex = simulation.mainQuest.stageIndex;
+    const currentStage = stages[stageIndex];
+    const stageProgress = currentStage
+      ? Math.min(1, simulation.mainQuest.stageSeconds / MAIN_QUEST.stageWorkSeconds)
+      : 0;
+    const percent = Math.min(100, Math.round(
+      ((stageIndex + stageProgress) / stages.length) * 100
+    ));
+    const signature = `${stageIndex}:${Math.floor(simulation.mainQuest.stageSeconds)}:${percent}`;
+
+    if (signature === lastMainQuestSignature) {
+      return;
+    }
+
+    lastMainQuestSignature = signature;
+    $("main-quest-percent").textContent = `${percent}%`;
+    $("main-quest-fill").style.width = `${percent}%`;
+    $("main-quest-progressbar").setAttribute("aria-valuenow", String(percent));
+    $("main-quest-stage-count").textContent = currentStage
+      ? `Tahap ${stageIndex + 1} dari ${stages.length} · ${Math.floor(stageProgress * 100)}% tahap ini`
+      : `Semua ${stages.length} tahap selesai`;
+    $("main-quest-stage").textContent = currentStage
+      ? currentStage.title
+      : "Proyek siap diserahkan ke klien";
+
+    const owner = currentStage
+      ? TEAM.find((member) => member.id === currentStage.roleId)
+      : null;
+    $("main-quest-owner").textContent = owner
+      ? `${owner.name} · ${owner.role}`
+      : "Tim Pawffice · proyek selesai";
+
+    const list = $("main-quest-steps");
+    list.replaceChildren();
+
+    stages.forEach((stage, index) => {
+      const member = TEAM.find((person) => person.id === stage.roleId);
+      const item = document.createElement("li");
+      item.className = index < stageIndex
+        ? "quest-step done"
+        : index === stageIndex
+          ? "quest-step current"
+          : "quest-step";
+      item.textContent = `${member.name} · ${stage.title}`;
+      list.append(item);
+    });
   }
 
   function updateUI() {
@@ -1848,6 +2316,9 @@
       $("energy-value").textContent = Math.round(selected.energy);
       $("mood-value").textContent = Math.round(selected.mood);
     }
+
+    renderMainQuest();
+    renderMissions();
   }
 
   // ---------- Kamera orbit: seret, zoom, fokus, dan kembali ----------
@@ -2085,18 +2556,14 @@
     });
 
     $("coffee-button").addEventListener("click", () => {
-      let moved = false;
-
-      for (const cat of cats) {
-        moved = navigate(cat, "coffee") || moved;
-      }
+      const moved = navigate(selected, "coffee");
 
       if (moved) {
         toast(simulation.paused
-          ? "Coffee break siap. Lanjutkan waktu agar tim mulai berjalan."
-          : "Kopi dulu! Miko dan Luna menuju coffee corner."
+          ? `Coffee break ${selected.data.name} siap. Lanjutkan waktu agar mulai berjalan.`
+          : `${selected.data.name} menuju coffee corner. Ambil jeda sebentar!`
         );
-        addEvent("Tim", "mengambil jeda kopi bersama.");
+        addEvent(selected.data.name, "mengambil jeda kopi sebentar.");
       }
     });
 
@@ -2128,10 +2595,12 @@
         togglePause();
       } else if (event.key.toLowerCase() === "r" || event.key === "Escape") {
         resetCamera();
-      } else if (event.key === "1") {
-        selectCat(cats[0]);
-      } else if (event.key === "2") {
-        selectCat(cats[1]);
+      } else if (/^[1-6]$/.test(event.key)) {
+        const index = Number(event.key) - 1;
+
+        if (cats[index]) {
+          selectCat(cats[index]);
+        }
       }
     });
   }
@@ -2216,6 +2685,7 @@
     TEAM.forEach(createDesk);
     createCoffeeCorner();
     TEAM.forEach(createCat);
+    renderCrewCards();
     createPortraits();
 
     selectionRing = new THREE.Mesh(
@@ -2233,8 +2703,9 @@
 
     updateLiveClock();
     selectCat(cats.find((cat) => cat.data.id === simulation.selectedId) || cats[0]);
-    addEvent("Miko", "menyiapkan rencana untuk hari yang menyenangkan.");
-    addEvent("Luna", "membuka kanvas baru. Banyak ide menunggu.");
+    addEvent("Miko", "menyusun rencana proyek website booking.");
+    addEvent("Nori", "membaca brief klien dan mencatat kebutuhan.");
+    addEvent("Luna", "menyiapkan kanvas desain untuk website.");
     installCameraControls();
     installButtons();
     resize();

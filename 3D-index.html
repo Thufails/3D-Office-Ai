@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#edf0e8">
     <meta
       name="description"
-      content="Kantor kecil, dua kucing, dan ide-ide besar."
+      content="Simulasi software house lokal dengan tim kucing, proyek website, dan quest harian."
     >
 
     <title>Pawffice — a little room for big ideas</title>
@@ -175,7 +175,7 @@
             versi <em>meng.</em>
           </h1>
           <p class="intro-copy">
-            Dua rekan berbulu.<br>
+            Enam rekan berbulu.<br>
             Sejuta kemungkinan kecil.
           </p>
         </div>
@@ -186,50 +186,9 @@
         >
           <div class="section-heading">
             <h2 id="team-title">Penghuni kantor</h2>
-            <span class="count-tag">02</span>
+            <span class="count-tag" id="team-count">06</span>
           </div>
-
-          <button
-            class="crew-card selected"
-            id="crew-miko"
-            data-cat="miko"
-            aria-pressed="true"
-          >
-            <img
-              class="crew-avatar"
-              id="portrait-miko"
-              alt="Miko, kucing oren berkemeja"
-            >
-            <span class="crew-info">
-              <strong>Miko</strong>
-              <span>Project Coordinator</span>
-              <span class="crew-state" id="state-miko">● Menyusun rencana</span>
-            </span>
-            <svg class="crew-arrow">
-              <use href="#i-arrow" />
-            </svg>
-          </button>
-
-          <button
-            class="crew-card"
-            id="crew-luna"
-            data-cat="luna"
-            aria-pressed="false"
-          >
-            <img
-              class="crew-avatar"
-              id="portrait-luna"
-              alt="Luna, kucing abu-abu memakai cardigan"
-            >
-            <span class="crew-info">
-              <strong>Luna</strong>
-              <span>Visual Designer</span>
-              <span class="crew-state" id="state-luna">● Menggambar ide</span>
-            </span>
-            <svg class="crew-arrow">
-              <use href="#i-arrow" />
-            </svg>
-          </button>
+          <div class="team-list" id="team-list"></div>
         </section>
 
         <section
@@ -253,7 +212,7 @@
       <section
         class="world"
         id="world"
-        aria-label="Kantor kucing 3D interaktif"
+        aria-label="Kantor software house kucing 3D interaktif"
       >
         <div class="world-label">
           <span class="live-dot"></span>
@@ -300,7 +259,7 @@
             <div>
               <span class="role-label" id="selected-role">THE PLANNER</span>
               <h2 id="selected-name">Miko<span>♂</span></h2>
-              <p id="selected-job">Project Coordinator</p>
+              <p id="selected-job">Project Manager</p>
             </div>
           </div>
 
@@ -342,15 +301,45 @@
           </button>
         </section>
 
-        <section
-          class="mission-panel panel"
-          aria-labelledby="mission-title"
-        >
+        <section class="main-quest-panel panel" aria-labelledby="main-quest-title">
+          <div class="section-heading quest-heading">
+            <span class="eyebrow">PROYEK UTAMA</span>
+            <strong class="main-quest-progress" id="main-quest-percent">0%</strong>
+          </div>
+          <h2 class="main-quest-title" id="main-quest-title">
+            Sistem booking online untuk barbershop
+          </h2>
+          <p class="main-quest-copy" id="main-quest-description">
+            Dari brief klien sampai alur reservasi siap diuji.
+          </p>
+          <div
+            class="main-quest-track"
+            id="main-quest-progressbar"
+            role="progressbar"
+            aria-label="Progres proyek utama"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <span id="main-quest-fill"></span>
+          </div>
+          <p class="main-quest-stage-count" id="main-quest-stage-count">
+            Tahap 1 dari 6
+          </p>
+          <div class="main-quest-current" id="main-quest-current">
+            <span>TAHAP SEKARANG</span>
+            <strong id="main-quest-stage">Tentukan ruang lingkup proyek</strong>
+            <p id="main-quest-owner">Miko · Project Manager</p>
+          </div>
+          <ol class="main-quest-steps" id="main-quest-steps"></ol>
+        </section>
+
+        <section class="mission-panel panel" aria-labelledby="mission-title">
           <div class="section-heading">
-            <h2 id="mission-title">Misi kecil hari ini</h2>
+            <h2 id="mission-title">Quest sampingan hari ini</h2>
             <span class="mission-total" id="mission-total">0 / 3</span>
           </div>
-          <p class="mission-copy">Pelan-pelan juga sampai.</p>
+          <p class="mission-copy" id="daily-quest-date">WIB · quest berganti tiap hari</p>
           <div id="mission-list"></div>
           <div class="reward-line">
             <span>✧ Office happiness</span>
@@ -363,8 +352,8 @@
 
         <div class="local-note">
           <span class="local-dot"></span>
-          LOCAL SIMULATION
-          <span>Just cats. Just vibes.</span>
+          SOFTWARE HOUSE SIMULATION
+          <span>Proyek website fiktif · tanpa backend</span>
         </div>
       </aside>
 
@@ -394,7 +383,7 @@
             class="tool-button"
             id="coffee-button"
             aria-label="Coffee break"
-            title="Ajak tim ke coffee corner"
+            title="Ajak rekan terpilih istirahat di coffee corner"
           >
             <svg>
               <use href="#i-coffee" />
