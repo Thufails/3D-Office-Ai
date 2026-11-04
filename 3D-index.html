@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="style.css">
 
     <script defer src="Three.js"></script>
+    <script defer src="project-engine.js"></script>
+    <script defer src="project-ui.js"></script>
     <script defer src="main.js"></script>
   </head>
 
@@ -194,6 +196,15 @@
           </nav>
         </details>
 
+        <button
+          class="project-primary project-entry"
+          id="project-shortcut"
+          aria-haspopup="dialog"
+          title="Buka Project Hub (P)"
+        >
+          📋 Project Hub
+        </button>
+
         <section
           class="team-section"
           aria-labelledby="team-title"
@@ -337,10 +348,10 @@
             <strong class="main-quest-progress" id="main-quest-percent">0%</strong>
           </div>
           <h2 class="main-quest-title" id="main-quest-title">
-            Sistem booking online untuk barbershop
+            Belum ada proyek aktif
           </h2>
           <p class="main-quest-copy" id="main-quest-description">
-            Dari brief klien sampai alur reservasi siap diuji.
+            Buat brief klien dan susun pekerjaan tim lewat Project Hub.
           </p>
           <div
             class="main-quest-track"
@@ -354,14 +365,18 @@
             <span id="main-quest-fill"></span>
           </div>
           <p class="main-quest-stage-count" id="main-quest-stage-count">
-            Tahap 1 dari 6
+            0 dari 8 tugas selesai
           </p>
           <div class="main-quest-current" id="main-quest-current">
-            <span>TAHAP SEKARANG</span>
-            <strong id="main-quest-stage">Tentukan ruang lingkup proyek</strong>
-            <p id="main-quest-owner">Miko · Project Manager</p>
+            <span>FOKUS BERIKUTNYA</span>
+            <strong id="main-quest-stage">Siapkan brief proyek</strong>
+            <p id="main-quest-owner">Owner + PM · tentukan kebutuhan klien</p>
           </div>
           <ol class="main-quest-steps" id="main-quest-steps"></ol>
+          <button class="project-primary" id="project-hub-button" aria-haspopup="dialog">
+            📋 Buka Project Hub
+          </button>
+          <p class="save-status">Progres berdasarkan tugas yang disetujui, bukan timer.</p>
         </section>
 
         <section class="mission-panel panel" aria-labelledby="mission-title">
@@ -475,6 +490,52 @@
     </dialog>
 
     <div class="toast" id="toast" role="status"></div>
+    <dialog
+      class="project-dialog"
+      id="project-dialog"
+      aria-labelledby="project-dialog-title"
+    >
+      <header class="project-dialog-header">
+        <div>
+          <p class="eyebrow">PAWFFICE · PROJECT HUB</p>
+          <h2 id="project-dialog-title">Dari brief, jadi pekerjaan tim.</h2>
+          <p>Kelola proyek dan dokumen simulasi lokal. Belum menghasilkan website nyata.</p>
+        </div>
+        <button class="jobdesk-close" id="project-close" aria-label="Tutup Project Hub">×</button>
+      </header>
+      <nav class="project-tabs" aria-label="Bagian Project Hub" id="project-tabs">
+        <button data-project-tab="brief" aria-current="page">🌱 Brief</button>
+        <button data-project-tab="board">📋 Papan tugas</button>
+        <button data-project-tab="meetings">🤝 Notulen</button>
+        <button data-project-tab="archive">🗂️ Arsip</button>
+        <button data-project-tab="backup">💾 Cadangan</button>
+      </nav>
+      <p class="project-message" id="project-message" role="status" aria-live="polite"></p>
+      <div id="project-content" class="project-content"></div>
+    </dialog>
+    <dialog
+      class="confirmation-dialog"
+      id="project-confirm"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="project-confirm-title"
+      aria-describedby="project-confirm-description"
+    >
+      <button
+        class="jobdesk-close confirmation-close"
+        id="project-confirm-close"
+        type="button"
+        aria-label="Batalkan konfirmasi"
+      >×</button>
+      <span class="confirmation-icon" id="project-confirm-icon" aria-hidden="true">🐾</span>
+      <p class="eyebrow">PAWFFICE · KONFIRMASI</p>
+      <h2 id="project-confirm-title">Lanjutkan tindakan ini?</h2>
+      <p class="confirmation-description" id="project-confirm-description"></p>
+      <div class="confirmation-actions">
+        <button class="project-button" id="project-confirm-cancel" type="button">Batal</button>
+        <button class="project-primary" id="project-confirm-accept" type="button">Lanjutkan</button>
+      </div>
+    </dialog>
     <noscript>Aktifkan JavaScript di browser untuk membuka kantor 3D ini.</noscript>
   </body>
 </html>

@@ -14,10 +14,16 @@
   "use strict";
 
   const $ = (id) => document.getElementById(id);
+  const Projects = window.PawfficeProjects;
 
   if (!window.THREE) {
     $("loading").lastElementChild.textContent =
       "Three.js belum terbaca. Pastikan file Three.js ada di folder yang sama.";
+    return;
+  }
+  if (!Projects || !window.PawfficeProjectUI) {
+    $("loading").lastElementChild.textContent =
+      "Project Hub belum terbaca. Pastikan project-engine.js dan project-ui.js ada di folder yang sama.";
     return;
   }
 
@@ -336,20 +342,6 @@
 
   const COFFEE_TARGET = new THREE.Vector3(0, 0, 5.4);
 
-  const MAIN_QUEST = {
-    title: "Sistem booking online untuk barbershop",
-    description: "Dari brief klien sampai alur reservasi siap diuji.",
-    stageWorkSeconds: 30,
-    stages: [
-      { roleId: "miko", title: "Tentukan ruang lingkup proyek" },
-      { roleId: "nori", title: "Rangkum kebutuhan pelanggan" },
-      { roleId: "luna", title: "Rancang alur dan tampilan" },
-      { roleId: "kiko", title: "Bangun halaman pemesanan" },
-      { roleId: "bimo", title: "Siapkan jadwal dan reservasi" },
-      { roleId: "piko", title: "Uji alur dan siapkan serah-terima" },
-    ],
-  };
-
   const WORKSTATION = {
     seatToDesk: 1.2,
     seatedHeight: 0.06,
@@ -375,10 +367,7 @@
     selectedId: "miko",
     seen: new Set(),
     happiness: 0,
-    mainQuest: {
-      stageIndex: 0,
-      stageSeconds: 0,
-    },
+    projects: Projects.emptyWorkspace(),
     daily: {
       dateKey: "",
       focusSeconds: 0,
@@ -389,13 +378,15 @@
       seenToday: new Set(),
       contributors: new Set(),
       completedQuestIds: new Set(),
+      questIds: [],
       meetingWasTogether: false,
     },
     coffee: false,
     events: [],
   };
 
-  const PROGRESS_KEY = "pawffice.progress.v2";
+  const PROGRESS_KEY = "pawffice.progress.v3";
+  const PREVIOUS_PROGRESS_KEY = "pawffice.progress.v2";
   const LEGACY_PROGRESS_KEY = "pawffice.progress.v1";
   const JAKARTA_TIME_ZONE = "Asia/Jakarta";
 
@@ -487,6 +478,8 @@
   let lastProgressSaveAt = 0;
   let storageErrorShown = false;
   let appliedTheme = null;
+  let projectUI;
+  let progressWriteBlocked = false;
   let viewportWidth = 1;
   let viewportHeight = 1;
 
@@ -515,20 +508,18 @@
       seenToday: new Set(),
       contributors: new Set(),
       completedQuestIds: new Set(),
+      questIds: [],
       meetingWasTogether: false,
     };
   }
 
   function progressSnapshot() {
     return {
-      version: 2,
+      version: 3,
       selectedId: simulation.selectedId,
       seen: [...simulation.seen].sort(),
       happiness: simulation.happiness,
-      mainQuest: {
-        stageIndex: simulation.mainQuest.stageIndex,
-        stageSeconds: simulation.mainQuest.stageSeconds,
-      },
+      projects: Projects.clone(simulation.projects),
       daily: {
         dateKey: simulation.daily.dateKey,
         focusSeconds: simulation.daily.focusSeconds,
@@ -539,6 +530,7 @@
         seenToday: [...simulation.daily.seenToday].sort(),
         contributors: [...simulation.daily.contributors].sort(),
         completedQuestIds: [...simulation.daily.completedQuestIds].sort(),
+        questIds: [...simulation.daily.questIds],
       },
       coffee: simulation.coffee,
     };
@@ -570,6 +562,7 @@
 
     try {
       raw = window.localStorage.getItem(PROGRESS_KEY)
+        || window.localStorage.getItem(PREVIOUS_PROGRESS_KEY)
         || window.localStorage.getItem(LEGACY_PROGRESS_KEY);
     } catch (error) {
       reportStorageError(error);
@@ -583,92 +576,195 @@
     try {
       const saved = JSON.parse(raw);
 
-      if (!saved || ![1, 2].includes(saved.version)) {
-        return;
-      }
-
-      const validIds = new Set(TEAM.map((member) => member.id));
-
-      if (Array.isArray(saved.seen)) {
-        simulation.seen = new Set(
-          saved.seen.filter((id) => validIds.has(id))
-        );
-      }
-
-      simulation.coffee = saved.coffee === true;
-
-      if (saved.version === 2) {
-        if (Number.isFinite(saved.happiness)) {
-          simulation.happiness = Math.max(0, saved.happiness);
-        }
-
-        if (saved.mainQuest && Number.isFinite(saved.mainQuest.stageIndex)) {
-          simulation.mainQuest.stageIndex = Math.max(
-            0,
-            Math.min(MAIN_QUEST.stages.length, Math.floor(saved.mainQuest.stageIndex))
-          );
-          const stageLimit = MAIN_QUEST.stageWorkSeconds;
-          const stageSeconds = Number(saved.mainQuest.stageSeconds);
-          simulation.mainQuest.stageSeconds = Number.isFinite(stageSeconds)
-            ? Math.max(0, Math.min(stageLimit - 0.001, stageSeconds))
-            : 0;
-        }
-
-        const today = readJakartaTime().dateKey;
-        const daily = saved.daily;
-
-        if (daily && daily.dateKey === today) {
-          simulation.daily.dateKey = today;
-          simulation.daily.focusSeconds = Number.isFinite(daily.focusSeconds)
-            ? Math.max(0, daily.focusSeconds)
-            : 0;
-          simulation.daily.coffeeVisits = Math.max(0, Number(daily.coffeeVisits) || 0);
-          simulation.daily.meetingRounds = Math.max(0, Number(daily.meetingRounds) || 0);
-          simulation.daily.loungeVisits = Math.max(0, Number(daily.loungeVisits) || 0);
-          simulation.daily.stageCompletions = Math.max(0, Number(daily.stageCompletions) || 0);
-          simulation.daily.seenToday = new Set(
-            Array.isArray(daily.seenToday)
-              ? daily.seenToday.filter((id) => validIds.has(id))
-              : []
-          );
-          simulation.daily.contributors = new Set(
-            Array.isArray(daily.contributors)
-              ? daily.contributors.filter((id) => validIds.has(id))
-              : []
-          );
-          simulation.daily.completedQuestIds = new Set(
-            Array.isArray(daily.completedQuestIds)
-              ? daily.completedQuestIds.filter((id) => DAILY_QUEST_POOL.some((quest) => quest.id === id))
-              : []
-          );
-        } else {
-          resetDailyProgress(today);
-        }
-      } else {
-        // Data versi lama tetap membawa anggota yang sudah dikenal ke versi baru.
-        resetDailyProgress(readJakartaTime().dateKey);
-        simulation.happiness = Array.isArray(saved.missions)
-          ? saved.missions.filter(Boolean).length * 25
-          : 0;
-      }
-
-      if (validIds.has(saved.selectedId)) {
-        simulation.selectedId = saved.selectedId;
-      }
-
-      // Migrasikan simpanan lama tanpa mengulang hadiah quest harian.
-      lastSavedProgress = saved.version === 2
-        ? JSON.stringify(progressSnapshot())
-        : "";
+      restoreProgress(saved);
       saveProgress(true);
-      setSaveStatus("Progres tersimpan di browser ini.");
     } catch (error) {
-      // Data lama yang rusak tidak boleh menghentikan kantor 3D.
+      // Jangan timpa simpanan rusak dengan proyek kosong secara otomatis.
+      progressWriteBlocked = true;
+      setSaveStatus("Simpanan tidak terbaca. Impor cadangan untuk memulihkan; data lama tidak ditimpa.");
       console.warn("Data progres Pawffice tidak terbaca:", error);
     }
   }
 
+  function restoreProgress(input) {
+    const saved = validateProgress(input);
+
+    const validIds = new Set(TEAM.map((member) => member.id));
+
+    if (Array.isArray(saved.seen)) {
+      simulation.seen = new Set(
+        saved.seen.filter((id) => validIds.has(id))
+      );
+    }
+
+    simulation.coffee = saved.coffee === true;
+
+    simulation.projects = saved.version === 3
+      ? Projects.validateWorkspace(saved.projects)
+      : Projects.migrateLegacy(saved.mainQuest);
+
+    if (saved.version >= 2) {
+      if (Number.isFinite(saved.happiness)) {
+        simulation.happiness = Math.max(0, saved.happiness);
+      }
+
+      const today = readJakartaTime().dateKey;
+      const daily = saved.daily;
+      resetDailyProgress(today);
+
+      if (daily && daily.dateKey === today) {
+        simulation.daily.dateKey = today;
+        simulation.daily.focusSeconds = Number.isFinite(daily.focusSeconds)
+          ? Math.max(0, daily.focusSeconds)
+          : 0;
+        simulation.daily.coffeeVisits = Math.max(0, Number(daily.coffeeVisits) || 0);
+        simulation.daily.meetingRounds = Math.max(0, Number(daily.meetingRounds) || 0);
+        simulation.daily.loungeVisits = Math.max(0, Number(daily.loungeVisits) || 0);
+        simulation.daily.stageCompletions = Math.max(0, Number(daily.stageCompletions) || 0);
+        simulation.daily.seenToday = new Set(
+          Array.isArray(daily.seenToday)
+            ? daily.seenToday.filter((id) => validIds.has(id))
+            : []
+        );
+        simulation.daily.contributors = new Set(
+          Array.isArray(daily.contributors)
+            ? daily.contributors.filter((id) => validIds.has(id))
+            : []
+        );
+        simulation.daily.completedQuestIds = new Set(
+          Array.isArray(daily.completedQuestIds)
+            ? daily.completedQuestIds.filter((id) => DAILY_QUEST_POOL.some((quest) => quest.id === id))
+            : []
+        );
+        simulation.daily.questIds = Array.isArray(daily.questIds)
+          ? [...daily.questIds] : [];
+      } else {
+        resetDailyProgress(today);
+      }
+    } else {
+      // Data versi lama tetap membawa anggota yang sudah dikenal ke versi baru.
+      resetDailyProgress(readJakartaTime().dateKey);
+      simulation.happiness = Array.isArray(saved.missions)
+        ? saved.missions.filter(Boolean).length * 25
+        : 0;
+    }
+
+    if (validIds.has(saved.selectedId)) {
+      simulation.selectedId = saved.selectedId;
+    }
+
+    lastSavedProgress = "";
+    lastMainQuestSignature = "";
+    lastMissionSignature = "";
+    progressWriteBlocked = false;
+  }
+
+  function validateProgress(input) {
+    if (!input || ![1, 2, 3].includes(input.version)) {
+      throw new Error("Versi progres tidak didukung.");
+    }
+    const validIds = TEAM.map((member) => member.id);
+    const questIds = DAILY_QUEST_POOL.map((quest) => quest.id);
+    const number = (value = 0) => {
+      if (!Number.isFinite(value) || value < 0) throw new Error("Angka progres tidak valid.");
+      return value;
+    };
+    const ids = (value = [], valid) => {
+      if (!Array.isArray(value) || value.length > valid.length
+        || value.some((item) => !valid.includes(item))
+        || new Set(value).size !== value.length) {
+        throw new Error("Daftar anggota atau quest tidak valid.");
+      }
+      return [...value];
+    };
+    const result = {
+      version: input.version,
+      selectedId: validIds.includes(input.selectedId) ? input.selectedId : "miko",
+      seen: ids(input.seen, validIds),
+      coffee: input.coffee === true,
+      happiness: number(input.happiness),
+    };
+    if (input.version === 3) result.projects = Projects.validateWorkspace(input.projects);
+    else {
+      result.mainQuest = {
+        stageIndex: Math.min(6, Math.floor(number(input.mainQuest?.stageIndex))),
+        stageSeconds: Math.min(29.999, number(input.mainQuest?.stageSeconds)),
+      };
+      result.missions = Array.isArray(input.missions)
+        ? input.missions.filter((item) => item === true) : [];
+    }
+    const daily = input.daily;
+    if (daily) {
+      const day = new Date(`${daily.dateKey}T00:00:00Z`);
+      if (typeof daily.dateKey !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(daily.dateKey)
+        || !Number.isFinite(day.getTime()) || day.toISOString().slice(0, 10) !== daily.dateKey) {
+        throw new Error("Tanggal quest harian tidak valid.");
+      }
+      result.daily = { dateKey: daily.dateKey };
+      for (const key of ["focusSeconds", "coffeeVisits", "meetingRounds", "loungeVisits", "stageCompletions"]) {
+        result.daily[key] = number(daily[key]);
+      }
+      result.daily.seenToday = ids(daily.seenToday, validIds);
+      result.daily.contributors = ids(daily.contributors, validIds);
+      result.daily.completedQuestIds = ids(daily.completedQuestIds, questIds);
+      result.daily.questIds = ids(daily.questIds, questIds);
+      if (![0, 3].includes(result.daily.questIds.length)) {
+        throw new Error("Jumlah quest harian tidak valid.");
+      }
+    }
+    return result;
+  }
+
+  function installProjectHub() {
+    projectUI = window.PawfficeProjectUI.mount({
+      engine: Projects,
+      team: TEAM,
+      getWorkspace: () => simulation.projects,
+      onChange(action, result) {
+        if (action === "approve") {
+          simulation.daily.stageCompletions += 1;
+          simulation.happiness += 25;
+          const definition = Projects.TASKS.find((task) => task.id === result.id);
+          const member = TEAM.find((person) => person.id === definition.ownerId);
+          addEvent(member.name, `menyelesaikan review “${definition.output}”.`);
+        } else if (["create", "archive", "resume"].includes(action)) {
+          addEvent("Proyek", `${result.title} · ${action === "create" ? "brief baru dibuat" : action === "archive" ? "diarsipkan" : "dilanjutkan"}.`);
+        }
+        lastMainQuestSignature = "";
+        checkDailyMissions();
+        renderMainQuest();
+        saveProgress(true);
+      },
+      makeBackup() {
+        return {
+          format: "pawffice-backup",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          progress: progressSnapshot(),
+        };
+      },
+      checkBackup(input) {
+        if (!input || input.format !== "pawffice-backup" || input.version !== 1) {
+          throw new Error("Pilih file cadangan JSON resmi Pawffice.");
+        }
+        return validateProgress(input.progress);
+      },
+      importProgress(input) {
+        // Validasi penuh terjadi sebelum state aktif disentuh.
+        const validated = validateProgress(input);
+        restoreProgress(validated);
+        simulation.daily.meetingWasTogether = cats.every((cat) => cat.mode === "meeting");
+        selectCat(cats.find((cat) => cat.data.id === simulation.selectedId) || cats[0]);
+        updateUI();
+        return saveProgress(true);
+      },
+    });
+    $("project-hub-button").addEventListener("click", () => projectUI.open());
+    $("project-shortcut").addEventListener("click", () => projectUI.open());
+  }
+
   function saveProgress(force = false) {
+    if (progressWriteBlocked) return false;
     const now = performance.now();
 
     // Progres fokus disimpan paling sering sekali per detik.
@@ -681,15 +777,17 @@
     const payload = JSON.stringify(progressSnapshot());
 
     if (payload === lastSavedProgress) {
-      return;
+      return true;
     }
 
     try {
       window.localStorage.setItem(PROGRESS_KEY, payload);
       lastSavedProgress = payload;
       setSaveStatus("Progres tersimpan di browser ini.");
+      return true;
     } catch (error) {
       reportStorageError(error);
+      return false;
     }
   }
 
@@ -719,11 +817,26 @@
   }
 
   function dailyQuestsForDate(dateKey) {
+    const daily = simulation.daily;
     const start = dateOrdinal(dateKey) % DAILY_QUEST_POOL.length;
-
-    return [0, 1, 2].map((offset) => {
-      return DAILY_QUEST_POOL[(start + offset) % DAILY_QUEST_POOL.length];
-    });
+    if (daily.questIds.length !== 3) {
+      daily.questIds = [0, 1, 2].map((offset) => {
+        return DAILY_QUEST_POOL[(start + offset) % DAILY_QUEST_POOL.length].id;
+      });
+    }
+    // Pilihan lain tetap stabil; hanya quest proyek yang mustahil yang diganti.
+    const cannotAdvance = !simulation.projects.active
+      || Projects.summary(simulation.projects.active).complete;
+    if (cannotAdvance && !daily.stageCompletions
+      && !daily.completedQuestIds.has("project") && daily.questIds.includes("project")) {
+      const replacement = DAILY_QUEST_POOL.find((quest) => {
+        return quest.id !== "project" && !daily.questIds.includes(quest.id);
+      });
+      daily.questIds = daily.questIds.map((questId) => {
+        return questId === "project" ? replacement.id : questId;
+      });
+    }
+    return daily.questIds.map((questId) => DAILY_QUEST_POOL.find((quest) => quest.id === questId));
   }
 
   function ensureDailyDate(dateKey) {
@@ -2409,7 +2522,6 @@
           cat.mood = Math.max(45, cat.mood - dt * 0.025);
           cat.workProgress += dt;
           simulation.daily.contributors.add(cat.data.id);
-          advanceMainQuest(cat, dt);
 
           if (cat.workProgress > 18) {
             cat.workProgress = 0;
@@ -2436,43 +2548,21 @@
     if (wholeTeamInMeeting && !simulation.daily.meetingWasTogether) {
       simulation.daily.meetingRounds += 1;
       addEvent("Tim", "berkumpul untuk membahas proyek utama.");
+      try {
+        const note = Projects.recordMeeting(simulation.projects);
+        if (note) {
+          addEvent("Sasa", "menyimpan notulen dan tindak lanjut di Project Hub.");
+          projectUI?.refresh();
+          saveProgress(true);
+        }
+      } catch (error) {
+        toast(error.message);
+      }
       checkDailyMissions();
     }
 
     simulation.daily.meetingWasTogether = wholeTeamInMeeting;
     checkDailyMissions();
-  }
-
-  function advanceMainQuest(cat, dt) {
-    const stage = MAIN_QUEST.stages[simulation.mainQuest.stageIndex];
-
-    if (!stage || stage.roleId !== cat.data.id) {
-      return;
-    }
-
-    simulation.mainQuest.stageSeconds += dt;
-
-    if (simulation.mainQuest.stageSeconds < MAIN_QUEST.stageWorkSeconds) {
-      return;
-    }
-
-    simulation.mainQuest.stageIndex += 1;
-    simulation.mainQuest.stageSeconds = 0;
-    simulation.daily.stageCompletions += 1;
-    simulation.happiness += 25;
-    addEvent(cat.data.name, `menuntaskan tahap “${stage.title.toLowerCase()}”.`);
-
-    if (simulation.mainQuest.stageIndex === MAIN_QUEST.stages.length) {
-      addEvent("Pawffice", "menyelesaikan sistem booking dan siap menyerahkannya ke klien.");
-      toast("Quest utama selesai! Sistem booking siap diserahkan ✧");
-    } else {
-      const nextStage = MAIN_QUEST.stages[simulation.mainQuest.stageIndex];
-      const nextOwner = TEAM.find((member) => member.id === nextStage.roleId);
-      toast(`${stage.title} selesai. Berikutnya giliran ${nextOwner.name} ✧`);
-    }
-
-    checkDailyMissions();
-    saveProgress(true);
   }
 
   function animateCat(cat, dt) {
@@ -2733,48 +2823,46 @@
   }
 
   function renderMainQuest() {
-    const stages = MAIN_QUEST.stages;
-    const stageIndex = simulation.mainQuest.stageIndex;
-    const currentStage = stages[stageIndex];
-    const stageProgress = currentStage
-      ? Math.min(1, simulation.mainQuest.stageSeconds / MAIN_QUEST.stageWorkSeconds)
-      : 0;
-    const percent = Math.min(100, Math.round(
-      ((stageIndex + stageProgress) / stages.length) * 100
-    ));
-    const signature = `${stageIndex}:${Math.floor(simulation.mainQuest.stageSeconds)}:${percent}`;
+    const project = simulation.projects.active;
+    const summary = Projects.summary(project);
+    const task = project?.tasks.find((item) => {
+      return item.status !== "done" && !Projects.blockers(project, item.id).length;
+    });
+    const definition = task && Projects.TASKS.find((item) => item.id === task.id);
+    const signature = JSON.stringify([project?.id, project?.updatedAt,
+      project?.tasks.map((item) => item.status), summary.percent]);
 
     if (signature === lastMainQuestSignature) {
       return;
     }
 
     lastMainQuestSignature = signature;
-    $("main-quest-percent").textContent = `${percent}%`;
-    $("main-quest-fill").style.width = `${percent}%`;
-    $("main-quest-progressbar").setAttribute("aria-valuenow", String(percent));
-    $("main-quest-stage-count").textContent = currentStage
-      ? `Tahap ${stageIndex + 1} dari ${stages.length} · ${Math.floor(stageProgress * 100)}% tahap ini`
-      : `Semua ${stages.length} tahap selesai`;
-    $("main-quest-stage").textContent = currentStage
-      ? currentStage.title
-      : "Proyek siap diserahkan ke klien";
-
-    const owner = currentStage
-      ? TEAM.find((member) => member.id === currentStage.roleId)
+    $("main-quest-title").textContent = project?.title || "Belum ada proyek aktif";
+    $("main-quest-description").textContent = project
+      ? `${project.client} · ${project.kind}` : "Buat brief klien melalui Project Hub.";
+    $("main-quest-percent").textContent = `${summary.percent}%`;
+    $("main-quest-fill").style.width = `${summary.percent}%`;
+    $("main-quest-progressbar").setAttribute("aria-valuenow", String(summary.percent));
+    $("main-quest-stage-count").textContent = `${summary.done} dari ${summary.total} tugas disetujui`;
+    $("main-quest-stage").textContent = definition?.title
+      || (project ? "Dokumen simulasi siap diarsipkan" : "Siapkan brief proyek");
+    const owner = definition
+      ? TEAM.find((member) => member.id === definition.ownerId)
       : null;
     $("main-quest-owner").textContent = owner
       ? `${owner.name} · ${owner.role}`
-      : "Tim Pawffice · proyek selesai";
+      : "Kelola hasil dan review di Project Hub";
 
     const list = $("main-quest-steps");
     list.replaceChildren();
 
-    stages.forEach((stage, index) => {
-      const member = TEAM.find((person) => person.id === stage.roleId);
+    (project?.tasks || []).forEach((itemTask) => {
+      const stage = Projects.TASKS.find((item) => item.id === itemTask.id);
+      const member = TEAM.find((person) => person.id === stage.ownerId);
       const item = document.createElement("li");
-      item.className = index < stageIndex
+      item.className = itemTask.status === "done"
         ? "quest-step done"
-        : index === stageIndex
+        : itemTask.id === task?.id
           ? "quest-step current"
           : "quest-step";
       item.textContent = `${member.name} · ${stage.title}`;
@@ -2783,12 +2871,25 @@
   }
 
   function updateUI() {
+    const taskLabel = (cat) => {
+      if (cat.mode !== "work") return cat.task;
+      const task = simulation.projects.active?.tasks.find((item) => {
+        return Projects.TASKS.find((definition) => definition.id === item.id).ownerId === cat.data.id;
+      });
+      if (!task) return "Menunggu brief proyek";
+      const definition = Projects.TASKS.find((item) => item.id === task.id);
+      if (task.status === "doing") return definition.title;
+      if (task.status === "review") return `Menunggu review ${definition.output.toLowerCase()}`;
+      if (task.status === "done") return "Hasil tugas telah disetujui";
+      return Projects.blockers(simulation.projects.active, task.id).length
+        ? "Menunggu hasil rekan kerja" : "Siap mulai tugas di Project Hub";
+    };
     for (const cat of cats) {
-      $(`state-${cat.data.id}`).textContent = `● ${cat.task}`;
+      $(`state-${cat.data.id}`).textContent = `● ${taskLabel(cat)}`;
     }
 
     if (selected) {
-      $("selected-task").textContent = selected.task;
+      $("selected-task").textContent = taskLabel(selected);
       $("energy-bar").style.width = `${selected.energy}%`;
       $("mood-bar").style.width = `${selected.mood}%`;
       $("energy-value").textContent = Math.round(selected.energy);
@@ -3110,6 +3211,7 @@
       if (jobdeskDialog.open) {
         return;
       }
+      if ($("project-dialog").open) return;
 
       if (["INPUT", "TEXTAREA", "SELECT"].includes(tag) || event.target.isContentEditable) {
         return;
@@ -3122,6 +3224,8 @@
         resetCamera();
       } else if (event.key.toLowerCase() === "j") {
         jobdeskDialog.showModal();
+      } else if (event.key.toLowerCase() === "p") {
+        projectUI?.open();
       } else if (/^[1-8]$/.test(event.key)) {
         const index = Number(event.key) - 1;
 
@@ -3236,9 +3340,12 @@
 
     updateLiveClock();
     selectCat(cats.find((cat) => cat.data.id === simulation.selectedId) || cats[0]);
-    addEvent("Miko", "menyusun rencana proyek website booking.");
+    addEvent("Miko", simulation.projects.active
+      ? `meninjau proyek ${simulation.projects.active.title}.`
+      : "menunggu brief klien baru di Project Hub.");
     addEvent("Nori", "membaca brief klien dan mencatat kebutuhan.");
-    addEvent("Luna", "menyiapkan kanvas desain untuk website.");
+    addEvent("Luna", "menyiapkan ruang untuk ide baru.");
+    installProjectHub();
     installCameraControls();
     installButtons();
     resize();

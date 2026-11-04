@@ -34,7 +34,9 @@ progres quest berjalan di browser tanpa backend atau koneksi AI.
 | 🐈 | Avatar kucing berseragam, role, dan jobdesk masing-masing. |
 | 🏢 | Ruang kerja, ruang meeting, ruang Owner + PA, serta pantry. |
 | ☕ | Coffee break, istirahat bersama, dan rapat di meja panjang. |
-| 🎯 | Progres proyek utama dan tiga quest sampingan harian. |
+| 📋 | Project Hub: brief klien, papan tugas, dokumen, dan review per role. |
+| 🎯 | Progres berbasis tugas yang disetujui dan tiga quest sampingan harian. |
+| 🗂️ | Arsip proyek, notulen rapat, unduhan Markdown, dan cadangan JSON. |
 | 🌙 | Jam WIB live, siang/malam otomatis, dan penyimpanan lokal. |
 
 ## 🚀 Cara membuka
@@ -49,6 +51,47 @@ Sudah memakai Live Server? Lanjutkan dari alamat yang biasanya kamu buka.
 > `file:///...`, `http://localhost:5500`, dan `http://127.0.0.1:5500` memiliki
 > penyimpanan berbeda. Setelah edit kode, refresh tab yang sama; bila perlu
 > gunakan **Ctrl + Shift + R**.
+
+## 🌱 Mulai dari Project Hub
+
+Klik **📋 Project Hub** di panel kiri, tombol **Buka Project Hub** pada panel
+proyek, atau tekan **P**. Area dokumen dibuka terpisah dari kantor 3D.
+
+| Tab | Yang bisa dilakukan |
+| --- | --- |
+| 🌱 **Brief** | Isi nama proyek, klien, jenis website, tujuan, fitur, dan target tanggal opsional. |
+| 📋 **Papan tugas** | Mulai tugas, buat draf template, edit dokumen, lalu review hasil. |
+| 🤝 **Notulen** | Baca catatan Sasa dan tindak lanjut yang mengacu ke tugas tim. |
+| 🗂️ **Arsip** | Simpan proyek selesai/berjalan, baca dokumen, dan lanjutkan proyek lama. |
+| 💾 **Cadangan** | Ekspor seluruh progres sebagai JSON atau pulihkan cadangan yang valid. |
+
+Satu proyek aktif dalam satu waktu. Untuk klien baru, arsipkan proyek aktif
+dahulu. Arsip parsial tidak menghapus hasil kerja dan dapat dilanjutkan.
+Instalasi baru dimulai tanpa proyek; contoh barbershop hanya dibawa jika ada
+progres dari versi lama. Brief memuat 1–20 kebutuhan, satu kebutuhan per baris.
+
+### 📋 Alur tugas yang menghasilkan dokumen
+
+**Belum mulai → Dikerjakan → Review → Selesai.**
+
+1. Pilih kartu tugas dan klik **Mulai tugas** jika prasyaratnya selesai.
+2. Klik **Buat draf template**. Isi dokumen dibuat dari brief secara lokal.
+3. Perbaiki teks bila perlu, lalu **Simpan draf / ajukan review**.
+4. Periksa seluruh checklist sebelum **Setujui hasil**.
+5. Bila belum sesuai, gunakan **Minta revisi**. Dokumen yang berubah mengulang
+   checklist review; dokumen final dikunci agar tugas turunannya konsisten.
+
+Review dilakukan **manual oleh pengguna sebagai pengelola simulasi**.
+Pemilihan avatar tidak menjadi autentikasi reviewer. Draf yang belum disimpan
+tidak dihapus oleh refresh otomatis panel; keluar tab/dialog meminta konfirmasi.
+Konfirmasi memakai modal Pawffice bertema sage/cream, bukan popup browser.
+Arsip proyek, penggantian progres, dan meninggalkan draf memiliki pesan serta
+tombol sesuai tindakan. Fokus awal berada pada tombol batal; Escape, tombol ×,
+atau klik backdrop membatalkan tanpa menerapkan tindakan tersebut.
+
+> 🪄 Hasilnya adalah **dokumen template simulasi**, bukan website, desain gambar,
+> API yang sudah berjalan, atau bukti pengujian nyata. Dokumen QA secara eksplisit
+> menyatakan pengujian belum dijalankan pada website nyata. Belum ada panggilan AI.
 
 ## 🐾 Kenalan dengan tim
 
@@ -118,6 +161,8 @@ software house; kegiatan coding dan pengujian proyek masih berupa simulasi.
 - Tombol angka 1–8: pilih anggota tim sesuai urutan kartu.
 - Lihat jobdesk tim atau tombol J: buka daftar tanggung jawab delapan role.
   Tutup dengan tombol ×, Escape, atau klik di luar daftar.
+- Project Hub atau tombol P: kelola brief, tugas, hasil kerja, arsip, dan cadangan.
+  Saat mengisi form atau membuka dialog, shortcut kantor tidak mengganggu input.
 - Menu **Lokasi kantor** di panel kiri: pilih Semua ruangan, Ruang kerja,
   Meeting, Owner + PA, atau Pantry & istirahat. Menu menutup setelah dipilih.
 
@@ -157,6 +202,11 @@ ikut berhenti.
 
 Pada Team huddle, setiap karakter melewati pintu menuju kursi rapatnya sendiri,
 duduk menghadap meja, lalu menunggu temannya sebelum waktu diskusi dihitung.
+Setelah seluruh tim berkumpul, Sasa menyimpan satu notulen template untuk
+pertemuan tersebut pada proyek aktif. Catatan berisi progres dan tindak lanjut
+ke tugas yang belum selesai; status tugas pada daftar tindak lanjut mengikuti
+papan tugas. Ini bukan transkrip percakapan AI. Notulen juga ikut diarsipkan
+dan disertakan dalam unduhan dokumen proyek.
 
 Panel kiri bisa digulir ketika tinggi jendela tidak cukup. Cerita hari ini
 tetap berada di dalam panel dan tidak menimpa toolbar bawah. Pada layar
@@ -164,37 +214,64 @@ tablet/ponsel, cerita juga ditampilkan dan dapat dibaca lewat gulir halaman.
 
 ## 🎯 Dari brief sampai siap diuji
 
-Quest utama Pawffice adalah menyelesaikan **sistem booking online untuk
-barbershop fiktif**. Progres ditampilkan sebagai persentase dan mengikuti
-enam tahap kerja: Miko menentukan lingkup, Nori merangkum kebutuhan, Luna
-merancang alur dan tampilan, Kiko membangun halaman, Bimo menyiapkan jadwal
-serta reservasi, lalu Piko menguji hasilnya. Tahap role yang bersangkutan
-maju saat ia bekerja selama 30 detik waktu simulasi. Satu tahap memberi
-25 office happiness. Owner dan PA mendukung arah layanan, koordinasi klien,
-dan agenda tim melalui aktivitas harian mereka.
+Proyek utama mengikuti **brief klien yang kamu buat**, bukan satu judul
+yang dikunci di kode. Progres adalah jumlah tugas berstatus **Selesai** dibagi
+delapan tugas. Waktu duduk, kecepatan simulasi, dan timer 30 detik tidak lagi
+menyelesaikan tugas proyek secara otomatis. Setiap persetujuan tugas memberi
+25 happiness sekali; migrasi, reload, dan melanjutkan arsip tidak memberi ulang hadiah.
 
 | Tahap | Penanggung jawab | Fokus |
 | :---: | --- | --- |
-| 1 | 📋 Miko | Tentukan lingkup proyek. |
-| 2 | 🔎 Nori | Rangkum kebutuhan pelanggan. |
-| 3 | 🎨 Luna | Rancang alur dan tampilan. |
-| 4 | 🧩 Kiko | Bangun halaman pemesanan. |
-| 5 | 🗄️ Bimo | Siapkan jadwal dan reservasi. |
-| 6 | 🧪 Piko | Uji alur dan siapkan serah-terima. |
+| 1 | 📋 Miko | Scope proyek dan rencana kerja. |
+| 2 | 🔎 Nori | Spesifikasi kebutuhan setelah scope disetujui. |
+| 3 | 🎨 Luna | Rancangan UI/UX tertulis setelah analisis. |
+| 4 | 🧩 Kiko | Rencana frontend setelah rancangan UI/UX. |
+| 5 | 🗄️ Bimo | Rencana backend setelah analisis; bisa paralel dengan desain/FE. |
+| 6 | 🧪 Piko | Skenario uji setelah rencana FE dan BE disetujui. |
+| 7 | 🗓️ Sasa | Ringkasan serah-terima setelah dokumen QA. |
+| 8 | 👑 Oji | Review akhir dan persetujuan simulasi. |
 
 Tiga quest sampingan dipilih dari rotasi harian. Pilihan dan progresnya
 tetap sama setelah refresh pada hari yang sama, lalu berganti saat tanggal
 WIB berubah. Quest dapat meminta tim fokus, istirahat, rapat, berkolaborasi,
 atau memilih rekan. Setiap quest sampingan yang selesai memberi 10 office
 happiness. Progres proyek utama dan happiness berlanjut lintas hari.
+Quest **Majukan proyek** berarti menyetujui satu tugas. Jika tidak ada proyek
+aktif atau semua tugas sudah selesai dan quest itu belum dapat dipenuhi,
+quest tersebut diganti dengan kegiatan harian lain. Dua pilihan lain tetap
+stabil; quest yang sudah selesai tidak ditarik atau diberi hadiah ulang.
 
 ### 💾 Progres tidak perlu mulai dari nol
 
-Status proyek, tahap yang sedang dikerjakan, anggota tim yang dikenal,
+Brief, tugas, dokumen, notulen, arsip, anggota tim yang dikenal,
 quest harian, serta happiness disimpan otomatis di localStorage browser.
 Membuka ulang halaman pada browser, profil, dan alamat yang sama memulihkan
 progres. Data versi lama dimigrasikan saat tersedia. Aktivitas tidak berjalan
 selama tab ditutup.
+
+Penyimpanan baru memakai `pawffice.progress.v3`; simpanan v1/v2 tidak dihapus.
+Tahap lama yang sudah selesai dibawa ke tugas baru. Proyek lama yang sudah
+100% tetap 100%, disertai catatan bahwa status berasal dari simulasi timer lama.
+Sisa detik tahap lama dicatat di brief, bukan dipakai untuk mengesahkan dokumen.
+Pada proyek parsial, persentase mengikuti delapan tugas baru; jumlah tahap
+lama yang sudah selesai tetap dipertahankan. Jika simpanan rusak, aplikasi
+tidak otomatis menimpanya dengan data kosong.
+
+### 💾 Ekspor, impor, dan unduh hasil
+
+- **Brief / Arsip → Unduh dokumen .md:** seluruh hasil kerja dan notulen proyek.
+- **Cadangan → Unduh cadangan JSON:** simpanan proyek aktif, arsip, quest,
+  anggota yang dikenal, dan happiness. Posisi kamera/avatar bukan bagian backup.
+- **Cadangan → pilih JSON:** format dan isi divalidasi sebelum preview ditampilkan.
+  File yang salah tidak menyentuh progres aktif. Batas impor adalah 16 MB.
+- **Ganti progres:** perlu konfirmasi karena mengganti seluruh simpanan lokal,
+  bukan menggabungkan data. Unduh cadangan kondisi sekarang terlebih dahulu.
+- Jika browser menolak penyimpanan atau kapasitasnya habis, data masih ada di
+  memori tab; ekspor JSON sebelum menutupnya. Simpan backup secara pribadi
+  bila brief atau dokumen memuat informasi klien.
+
+Batas pengaman saat ini: 100 arsip dan 100 notulen per proyek. Tidak ada data
+yang dikirim ke server. Jam, animasi, dan pilihan suasana bukan hasil proyek.
 
 Penyimpanan berlaku di browser/profil dan alamat halaman yang sama.
 Menghapus data situs, memakai mode privat, atau memindahkan file lokal
@@ -223,15 +300,33 @@ bisa digunakan untuk mencoba suasana lain.
 - `style.css`: warna, panel, dan tampilan responsif.
 - `main.js`: data delapan role, dunia 3D, animasi, navigasi, serta quest utama
   dan sampingan.
+- `project-engine.js`: aturan brief, dependensi tugas, template, migrasi, dan validasi.
+- `project-ui.js`: Project Hub, editor hasil, review, arsip, dan cadangan.
+- `tests/`: pengujian aturan proyek, handler UI, migrasi, serta model gerak kantor.
 - `Three.js`: library Three.js r160 versi tidak dipadatkan.
 - `THREE-LICENSE.txt`: lisensi MIT library Three.js.
 - `index.html`: pintasan menuju halaman utama.
 - `assets/readme-banner.svg`: banner dokumentasi berwarna sage/cream.
+- `CHANGELOG.md`: rincian fitur, perubahan, perbaikan, dan batas simulasi.
 
 Data karakter dan quest berada di bagian atas `main.js`. Model kucing,
 meja, serta furnitur dibuat dari kode; tidak membutuhkan file model
 eksternal. Progres quest saat ini mengikuti aturan simulasi JavaScript.
 Role belum menjalankan model AI atau mengirim permintaan API.
+
+### 🧪 Pemeriksaan pengembangan (opsional)
+
+Node.js **hanya untuk menjalankan tes**, tidak diperlukan untuk membuka kantor.
+Tidak ada paket tambahan atau proses build yang harus diinstal.
+
+```powershell
+node --test tests/project-engine.test.cjs tests/project-ui.test.cjs
+node tests/office-integration.cjs
+```
+
+Tes UI memakai DOM tiruan untuk memeriksa handler/state dan tes kantor memakai
+model Three.js tanpa rendering. Keduanya bukan pengganti pemeriksaan visual
+browser untuk tata letak, fokus keyboard, dan interaksi sentuh.
 
 Banner memakai SVG lokal dan ikon dokumentasi memakai emoji, tanpa layanan
 badge atau gambar eksternal. Warnanya tetap tampil saat dibaca offline.

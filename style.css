@@ -1194,6 +1194,388 @@ h1 em {
   opacity: 1;
 }
 
+/* Project Hub: area kerja dokumen terpisah agar kantor 3D tetap lapang. */
+.project-entry {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.project-dialog {
+  width: min(1140px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  padding: 26px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  color: var(--ink);
+  background: var(--background);
+  box-shadow: 0 24px 80px rgba(18, 35, 27, 0.24);
+}
+
+.project-dialog::backdrop {
+  background: rgba(29, 44, 37, 0.5);
+}
+
+.confirmation-dialog {
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  padding: 32px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 28px 90px rgba(18, 35, 27, 0.3);
+}
+
+.confirmation-dialog::backdrop {
+  background: rgba(29, 44, 37, 0.58);
+  backdrop-filter: blur(5px);
+}
+
+.confirmation-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.confirmation-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--background);
+  font-size: 28px;
+}
+
+.confirmation-dialog h2 {
+  margin: 10px 0;
+  font-size: 26px;
+  line-height: 1.3;
+}
+
+.confirmation-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.confirmation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.confirmation-actions button {
+  flex: 1 1 140px;
+}
+
+.confirmation-dialog[data-tone="warning"] .confirmation-icon {
+  border-color: var(--orange);
+}
+
+.confirmation-dialog button:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 4px;
+}
+
+@media (max-width: 540px) {
+  .confirmation-dialog {
+    padding: 26px 20px;
+  }
+
+  .confirmation-actions {
+    flex-direction: column;
+  }
+
+  .confirmation-actions button {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
+
+.project-dialog-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.project-dialog-header h2 {
+  margin: 6px 0;
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.25;
+}
+
+.project-dialog-header p:last-child,
+.project-muted {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.project-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 20px 0 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.project-tabs button,
+.project-button,
+.project-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.project-tabs button[aria-current="page"],
+.project-primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--paper);
+}
+
+.project-dialog button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.project-dialog button:focus-visible,
+.project-dialog input:focus-visible,
+.project-dialog select:focus-visible,
+.project-dialog textarea:focus-visible,
+.project-dialog summary:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 3px;
+}
+
+.project-message {
+  min-height: 24px;
+  margin: 10px 0 16px;
+  color: var(--green);
+  font-size: 14px;
+}
+
+.project-message.is-error {
+  color: var(--ink);
+  padding: 10px;
+  border-left: 4px solid var(--orange);
+  background: var(--paper);
+}
+
+.project-section-title {
+  font-size: 21px;
+  margin: 0 0 10px;
+  overflow-wrap: anywhere;
+}
+
+.project-content p,
+.project-content li {
+  overflow-wrap: anywhere;
+}
+
+.project-callout,
+.project-note,
+.project-task-detail {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  margin: 16px 0;
+}
+
+.project-callout {
+  border-left: 4px solid var(--orange);
+  line-height: 1.65;
+}
+
+.project-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.project-field {
+  display: grid;
+  gap: 7px;
+  margin: 14px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.project-form .project-field:has(textarea),
+.project-form > button {
+  grid-column: 1 / -1;
+}
+
+.project-field input,
+.project-field select,
+.project-field textarea {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 15px/1.6 var(--font-ui);
+}
+
+.project-field textarea {
+  resize: vertical;
+}
+
+.project-artifact {
+  white-space: pre-wrap;
+}
+
+.project-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.project-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.project-column {
+  min-width: 0;
+  min-height: 130px;
+  border-top: 4px solid var(--line);
+  border-radius: 9px;
+  padding: 12px;
+  background: var(--panel);
+}
+
+.project-column h4 {
+  font-size: 14px;
+  margin: 0 0 14px;
+}
+
+.project-column.status-doing {
+  border-top-color: var(--orange);
+}
+
+.project-column.status-review {
+  border-top-color: #a497b3;
+}
+
+.project-column.status-done {
+  border-top-color: var(--green);
+}
+
+.project-task-card {
+  display: grid;
+  gap: 9px;
+  width: 100%;
+  padding: 13px;
+  margin: 10px 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.project-task-card[aria-pressed="true"] {
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+
+.project-task-owner {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.project-review {
+  padding: 16px;
+  margin: 18px 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.project-review label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  font-size: 14px;
+}
+
+.project-review input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--green);
+}
+
+.project-note summary {
+  cursor: pointer;
+  font-weight: 650;
+  padding: 4px 0;
+}
+
+.project-archive-document {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+
+.project-archive-document pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 400 14px/1.65 var(--font-ui);
+}
+
+@media (max-width: 800px) {
+  .project-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  .project-dialog {
+    padding: 16px;
+  }
+
+  .project-board,
+  .project-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .project-tabs button {
+    flex: 1 1 120px;
+  }
+}
+
 /* Laptop pendek: rapatkan panel agar semua tombol tetap terlihat. */
 @media (max-height: 800px) and (min-width: 1201px) {
   .left-panel {
