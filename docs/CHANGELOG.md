@@ -2,6 +2,19 @@
 
 ## 4 November 2026 · Project Hub lokal
 
+### 🗂️ Penataan struktur folder
+
+- Kode aplikasi dikelompokkan ke `src/css/` dan `src/js/`; kode Project Hub
+  berada di `src/js/projects/`.
+- Three.js dan lisensinya dipindahkan ke `vendor/three/`.
+- Banner lokal berada di `assets/images/`.
+- Changelog, ringkasan Word, dan catatan rencana berada di `docs/`.
+- Skrip bantu Word berada di `tools/docs/`; hasil QA lokal diabaikan oleh Git.
+- Path pada HTML, README, pesan pemuatan, dan tes mengikuti lokasi baru.
+- Alamat halaman `3D-index.html` dan kunci penyimpanan progres tidak berubah.
+- README memuat pohon folder dan penjelasan tanggung jawab setiap kelompok.
+- Logika metode Waterfall, Agile, dan Hybrid belum diimplementasikan.
+
 ### 🪟 Revisi modal konfirmasi
 
 - Popup konfirmasi bawaan browser diganti modal custom Pawffice.

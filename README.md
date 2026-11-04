@@ -1,6 +1,6 @@
 <p align="center">
   <img
-    src="assets/readme-banner.svg"
+    src="assets/images/readme-banner.svg"
     alt="Pawffice: dua kucing berseragam, meja komputer, dan secangkir kopi."
     width="1200"
   >
@@ -296,23 +296,81 @@ bisa digunakan untuk mencoba suasana lain.
 
 ## 🧰 Di balik meja
 
-- `3D-index.html`: struktur halaman dan tombol.
-- `style.css`: warna, panel, dan tampilan responsif.
-- `main.js`: data delapan role, dunia 3D, animasi, navigasi, serta quest utama
-  dan sampingan.
-- `project-engine.js`: aturan brief, dependensi tugas, template, migrasi, dan validasi.
-- `project-ui.js`: Project Hub, editor hasil, review, arsip, dan cadangan.
-- `tests/`: pengujian aturan proyek, handler UI, migrasi, serta model gerak kantor.
-- `Three.js`: library Three.js r160 versi tidak dipadatkan.
-- `THREE-LICENSE.txt`: lisensi MIT library Three.js.
-- `index.html`: pintasan menuju halaman utama.
-- `assets/readme-banner.svg`: banner dokumentasi berwarna sage/cream.
-- `CHANGELOG.md`: rincian fitur, perubahan, perbaikan, dan batas simulasi.
+### 🗂️ Susunan folder proyek
 
-Data karakter dan quest berada di bagian atas `main.js`. Model kucing,
+```text
+3D-Office-Ai/
+├── 3D-index.html                          # Halaman utama tetap di alamat lama
+├── index.html                             # Pintasan ke 3D-index.html
+├── README.md                              # Panduan proyek dan penggunaan
+├── .gitattributes                         # Normalisasi file teks Git
+├── .gitignore                             # Abaikan file sementara dan hasil QA
+├── src/
+│   ├── css/
+│   │   └── style.css                      # Tema dan layout responsif
+│   └── js/
+│       ├── main.js                        # Kantor 3D dan penghubung aplikasi
+│       └── projects/
+│           ├── project-engine.js          # Aturan dan data proyek
+│           └── project-ui.js              # Antarmuka Project Hub
+├── vendor/
+│   └── three/
+│       ├── Three.js                       # Library Three.js lokal
+│       └── THREE-LICENSE.txt              # Lisensi library
+├── assets/
+│   └── images/
+│       └── readme-banner.svg              # Ilustrasi dokumentasi
+├── docs/
+│   ├── CHANGELOG.md                        # Riwayat pengembangan
+│   ├── Ringkasan_Fitur_dan_Alur_Pawffice.docx
+│   └── notes/
+│       └── Catatan Pengembangan AI.txt     # Catatan rencana pengembangan
+├── tests/
+│   ├── project-engine.test.cjs             # Tes aturan proyek
+│   ├── project-ui.test.cjs                 # Tes handler dan modal UI
+│   ├── project-structure.test.cjs          # Tes path dan struktur proyek
+│   └── office-integration.cjs              # Tes integrasi dan gerak kantor
+└── tools/
+    └── docs/
+        └── build-summary.py               # Alat bantu pembuatan dokumen Word
+```
+
+Folder `tools/docs/.qa/` dapat berisi hasil pemeriksaan dokumen lokal dan
+diabaikan oleh Git. Folder `.git/` adalah metadata repositori, bukan kode aplikasi.
+
+### 🧩 Fungsi tiap kelompok
+
+| Kelompok | Isi dan tanggung jawab |
+| --- | --- |
+| `src/css/` | Warna, font, panel, dialog, dan tampilan responsif. |
+| `src/js/main.js` | Avatar, ruangan, animasi, navigasi, kamera, quest harian, serta penyimpanan dan integrasi Project Hub. |
+| `src/js/projects/` | Aturan brief, dependensi, hasil kerja, migrasi, validasi, serta antarmuka pengelolaan proyek. |
+| `vendor/three/` | Library pihak ketiga beserta lisensinya; terpisah dari kode yang kita kembangkan. |
+| `assets/images/` | Gambar dan ilustrasi lokal. |
+| `docs/` | Dokumentasi, ringkasan Word, dan catatan pengembangan. |
+| `tests/` | Pengujian aturan, handler UI, struktur file, dan model kantor. |
+| `tools/docs/` | Skrip bantu dokumentasi; tidak dimuat saat kantor dibuka. |
+
+Halaman utama **tidak dipindahkan**: tetap buka `3D-index.html` pada browser,
+profil, host, dan port yang sama. Penataan folder tidak mengubah kunci localStorage
+atau mereset proyek. Tidak ada backend, bundler, atau instalasi baru.
+
+HTML memuat file dengan urutan: library Three.js, engine proyek, UI proyek,
+kemudian `main.js`. Path stylesheet, gambar README, lisensi, dan tes sudah
+disesuaikan ke lokasi baru. Jangan membuka file JavaScript sebagai halaman utama.
+
+Data karakter dan quest berada di bagian atas `src/js/main.js`. Model kucing,
 meja, serta furnitur dibuat dari kode; tidak membutuhkan file model
 eksternal. Progres quest saat ini mengikuti aturan simulasi JavaScript.
 Role belum menjalankan model AI atau mengirim permintaan API.
+
+### 🧭 Rencana pemisahan metode
+
+Logika Waterfall, Agile, dan Hybrid **belum ditambahkan**. Untuk pengembangan
+berikutnya, modul metode dapat ditempatkan di `src/js/projects/methods/`
+dengan file `waterfall.js`, `agile.js`, dan `hybrid.js`. Folder dan modul ini
+belum menjadi bagian aplikasi saat ini; `project-engine.js` nantinya bertindak
+sebagai penghubung ke metode yang dipilih dalam brief.
 
 ### 🧪 Pemeriksaan pengembangan (opsional)
 
@@ -320,7 +378,7 @@ Node.js **hanya untuk menjalankan tes**, tidak diperlukan untuk membuka kantor.
 Tidak ada paket tambahan atau proses build yang harus diinstal.
 
 ```powershell
-node --test tests/project-engine.test.cjs tests/project-ui.test.cjs
+node --test tests/project-engine.test.cjs tests/project-ui.test.cjs tests/project-structure.test.cjs
 node tests/office-integration.cjs
 ```
 
@@ -333,7 +391,9 @@ badge atau gambar eksternal. Warnanya tetap tampil saat dibaca offline.
 
 📦 Library: [Three.js](https://threejs.org/) ·
 [Repositori Three.js](https://github.com/mrdoob/three.js) ·
-[Lisensi library](THREE-LICENSE.txt)
+[Lisensi library](vendor/three/THREE-LICENSE.txt) ·
+[Catatan pengembangan](docs/CHANGELOG.md) ·
+[Ringkasan Word](docs/Ringkasan_Fitur_dan_Alur_Pawffice.docx)
 
 ---
 

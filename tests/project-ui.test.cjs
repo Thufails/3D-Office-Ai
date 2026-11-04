@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const P = require('../project-engine.js');
+const P = require('../src/js/projects/project-engine.js');
 
 // DOM kecil untuk menguji handler/state; bukan pengganti pemeriksaan visual browser.
 class Node {
@@ -109,7 +109,7 @@ function setup() {
       [Symbol.iterator]() { return this.values[Symbol.iterator](); }
     },
   });
-  vm.runInContext(fs.readFileSync(require.resolve('../project-ui.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(require.resolve('../src/js/projects/project-ui.js'), 'utf8'), context);
   const workspace = P.emptyWorkspace();
   const team = P.TASKS.map((task) => ({ id: task.ownerId, name: task.ownerId, role: task.ownerId }));
   const calls = [];

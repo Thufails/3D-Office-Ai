@@ -18,12 +18,12 @@
 
   if (!window.THREE) {
     $("loading").lastElementChild.textContent =
-      "Three.js belum terbaca. Pastikan file Three.js ada di folder yang sama.";
+      "Three.js belum terbaca. Pastikan file vendor/three/Three.js tersedia.";
     return;
   }
   if (!Projects || !window.PawfficeProjectUI) {
     $("loading").lastElementChild.textContent =
-      "Project Hub belum terbaca. Pastikan project-engine.js dan project-ui.js ada di folder yang sama.";
+      "Project Hub belum terbaca. Pastikan project-engine.js dan project-ui.js tersedia di src/js/projects/.";
     return;
   }
 

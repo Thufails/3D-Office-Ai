@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const P = require('../project-engine.js');
+const P = require('../src/js/projects/project-engine.js');
 
 const brief = () => ({
   title: 'Website studio tanaman',

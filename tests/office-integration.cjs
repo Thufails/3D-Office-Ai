@@ -3,8 +3,8 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const { performance } = require('node:perf_hooks');
 const root = require('node:path').resolve(__dirname, '..');
-const Projects = require(`${root}/project-engine.js`);
-const THREE = require(`${root}/Three.js`);
+const Projects = require(`${root}/src/js/projects/project-engine.js`);
+const THREE = require(`${root}/vendor/three/Three.js`);
 const viewport = { width: 1000, height: 700 };
 const surfaceOffset = { left: 0, top: 0 };
 
@@ -74,7 +74,7 @@ const context = vm.createContext({
   clearTimeout() {},
 });
 
-const source = fs.readFileSync(`${root}/main.js`, 'utf8');
+const source = fs.readFileSync(`${root}/src/js/main.js`, 'utf8');
 assert.equal(source.split('    boot();').length, 2);
 const instrumented = source.replace('    boot();', `
     globalThis.office = {
@@ -110,7 +110,7 @@ const instrumented = source.replace('    boot();', `
       }
     };
 `);
-vm.runInContext(instrumented, context, { filename: 'main.js' });
+vm.runInContext(instrumented, context, { filename: 'src/js/main.js' });
 const office = context.office;
 office.initialize();
 office.simulation.projects = Projects.migrateLegacy({ stageIndex: 0 });
@@ -178,7 +178,7 @@ for (const match of source.matchAll(/\$\("([^"]+)"\)/g)) {
 }
 assert.ok(html.indexOf('class="room-navigation"') < html.indexOf('class="world"'),
   'location navigation must be outside the 3D viewport');
-const css = fs.readFileSync(`${root}/style.css`, 'utf8');
+const css = fs.readFileSync(`${root}/src/css/style.css`, 'utf8');
 assert.ok(!/Georgia/.test(css), 'UI headings use the new sans-serif font');
 for (const match of css.matchAll(/font-size:\s*(\d+)px/g)) {
   assert.ok(Number(match[1]) >= 12, `small UI text: ${match[0]}`);
@@ -277,8 +277,8 @@ office.createWorkspaceLabels();
 checkLabelAnchors();
 assert.ok(oldAnchors.every((anchor) => anchor.parent === null));
 assert.match(css, /transform-origin: center bottom/);
-assert.ok(fs.existsSync(`${root}/assets/readme-banner.svg`));
-assert.match(fs.readFileSync(`${root}/README.md`, 'utf8'), /assets\/readme-banner\.svg/);
+assert.ok(fs.existsSync(`${root}/assets/images/readme-banner.svg`));
+assert.match(fs.readFileSync(`${root}/README.md`, 'utf8'), /assets\/images\/readme-banner\.svg/);
 console.log('PASS: scrolling, moving avatars, offscreen labels and label recreation do not shift other roles; local README banner is linked.');
 if (process.argv.includes('--ui-only')) process.exit(0);
 

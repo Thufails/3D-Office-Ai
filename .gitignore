@@ -1,0 +1,7 @@
+# Berkas sementara Python dan Microsoft Word
+__pycache__/
+*.py[cod]
+~$*.docx
+
+# Hasil render pemeriksaan dokumen lokal
+tools/docs/.qa/
