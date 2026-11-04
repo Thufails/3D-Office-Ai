@@ -939,6 +939,10 @@ h1 em {
   list-style: none;
 }
 
+#project-hub-button {
+  margin-top: 20px;
+}
+
 .quest-step {
   display: flex;
   align-items: flex-start;
