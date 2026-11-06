@@ -16,13 +16,14 @@
   const $ = (id) => document.getElementById(id);
   const Projects = window.PawfficeProjects;
   const Schedule = window.PawfficeSchedule;
+  const Campus = window.PawfficeCampus;
 
   if (!window.THREE) {
     $("loading").lastElementChild.textContent =
       "Three.js belum terbaca. Pastikan file vendor/three/Three.js tersedia.";
     return;
   }
-  if (!Projects || !window.PawfficeProjectUI || !Schedule || !window.PawfficeOfficeUI) {
+  if (!Projects || !window.PawfficeProjectUI || !Schedule || !window.PawfficeOfficeUI || !Campus) {
     $("loading").lastElementChild.textContent =
       "Modul kantor belum lengkap. Pastikan skrip di src/js/projects/ dan src/js/office/ tersedia.";
     return;
@@ -224,6 +225,26 @@
     },
   ];
 
+  TEAM.push(
+    {
+      id: "rani", name: "Rani", gender: "♀", role: "Receptionist", title: "THE WELCOMER",
+      operational: "reception", bio: "Menyambut tamu dan menjaga penerimaan kantor tetap tertata.",
+      fur: 0xc99c80, patch: 0xf5e2ce, darkFur: 0x946952, shirt: 0x87a79c,
+      pants: 0x53695e, accent: 0x678c7c, portrait: 0xe6d4c0, uniform: "cardigan", partition: 0xb5c8bc,
+      desk: new THREE.Vector3(0, 0, 16.8), deskFacing: 1,
+      tasks: ["Menjaga lobby dan penerimaan tamu", "Merapikan buku tamu", "Mengarahkan tamu sesuai agenda"],
+    },
+    {
+      id: "tomo", name: "Tomo", gender: "♂", role: "Office Boy", title: "THE CARETAKER",
+      operational: "cleaner", bio: "Datang lebih pagi untuk merawat kebersihan seluruh ruangan kantor.",
+      fur: 0x8b9291, patch: 0xe6e3d8, darkFur: 0x59635e, shirt: 0x7c9baf,
+      pants: 0x485b65, accent: 0x789aa5, portrait: 0xd3dfdc, uniform: "vest", partition: 0xb5c8bc,
+      desk: new THREE.Vector3(-15, 0, -20.8), deskFacing: 1,
+      tasks: ["Membersihkan ruangan", "Merapikan alat kebersihan", "Membantu kebutuhan operasional kantor"],
+    },
+  );
+  const PROJECT_TEAM = TEAM.filter((person) => !person.operational);
+
   const ROLE_DETAILS = {
     miko: {
       label: "Project Manager",
@@ -291,12 +312,16 @@
     },
   };
 
+  ROLE_DETAILS.rani = { label: "Receptionist", jobdesk: ["Menyambut dan mengarahkan tamu.", "Menjaga lobby serta buku penerimaan.", "Berkoordinasi dengan PA mengenai agenda tamu."] };
+  ROLE_DETAILS.tomo = { label: "Office Boy", jobdesk: ["Membersihkan seluruh ruangan pada 05.00–07.00.", "Merawat perlengkapan dan area servis.", "Membantu kebutuhan operasional hingga akhir shift."] };
+
   const OFFICE_ROOMS = {
+    ...Campus.ROOMS,
     work: {
       name: "Ruang kerja",
       x: -8.1,
       z: -4.1,
-      zoom: 1.55,
+      zoom: 3.0,
       minX: -19.2,
       maxX: 3.0,
       minZ: -11.2,
@@ -306,7 +331,7 @@
       name: "Ruang meeting",
       x: 11.1,
       z: -5.6,
-      zoom: 2.05,
+      zoom: 3.8,
       minX: 3.0,
       maxX: 19.2,
       minZ: -11.2,
@@ -316,7 +341,7 @@
       name: "Ruang Owner + PA",
       x: 11.1,
       z: 5.6,
-      zoom: 2.05,
+      zoom: 3.8,
       minX: 3.0,
       maxX: 19.2,
       minZ: 0,
@@ -326,7 +351,7 @@
       name: "Pantry & istirahat",
       x: -8.1,
       z: 7.1,
-      zoom: 1.9,
+      zoom: 3.0,
       minX: -19.2,
       maxX: 3.0,
       minZ: 3.0,
@@ -399,7 +424,7 @@
     depth: 2.7,
   };
 
-  const MEETING_SEATS = TEAM.map((member, index) => {
+  const MEETING_SEATS = PROJECT_TEAM.map((member, index) => {
     const offsets = [
       [-2.6, -2.3], [0, -2.3], [2.6, -2.3],
       [-2.6, 2.3], [0, 2.3], [2.6, 2.3],
@@ -417,7 +442,7 @@
   });
 
   const PANTRY_TABLES = [{ x: -11.5, z: 7.1 }, { x: -5.6, z: 7.1 }];
-  const LOUNGE_SEATS = TEAM.map((member, index) => {
+  const LOUNGE_SEATS = PROJECT_TEAM.map((member, index) => {
     const table = PANTRY_TABLES[Math.floor(index / 4)];
     const angle = index % 4 * Math.PI / 2;
     const x = table.x + Math.sin(angle) * 1.7;
@@ -430,6 +455,8 @@
   const LOUNGE_SPOTS = LOUNGE_SEATS.map((seat) => {
     return new THREE.Vector3(seat.x, 0, seat.z);
   });
+  const STAFF_REST = Campus.STAFF_REST;
+  const facilityState = { vehicles: [], receptionScreen: null };
 
   const jakartaPartsFormatter = new Intl.DateTimeFormat("en-GB", {
     timeZone: JAKARTA_TIME_ZONE,
@@ -493,11 +520,11 @@
     theta: 0.62,
     phi: 0.90,
     zoom: 1,
-    target: new THREE.Vector3(0, 0.8, 0),
+    target: new THREE.Vector3(3.5, 0.8, 1),
     goalTheta: 0.62,
     goalPhi: 0.90,
     goalZoom: 1,
-    goalTarget: new THREE.Vector3(0, 0.8, 0),
+    goalTarget: new THREE.Vector3(3.5, 0.8, 1),
     follow: false,
   };
 
@@ -768,7 +795,7 @@
         const validated = validateProgress(input);
         restoreProgress(validated);
         if (officeUI) syncOfficeSchedule();
-        simulation.daily.meetingWasTogether = cats.every((cat) => cat.mode === "meeting");
+        simulation.daily.meetingWasTogether = cats.filter((cat) => !cat.data.operational).every((cat) => cat.mode === "meeting");
         selectCat(cats.find((cat) => cat.data.id === simulation.selectedId) || cats[0]);
         updateUI();
         return saveProgress(true);
@@ -931,9 +958,11 @@
         cat.root.add(cat.overtimeSpeech);
       }
       if (cat.overtimeSpeech) cat.overtimeSpeech.visible = record.overtime.status === "pending";
-      if (cat.officePhase === status.id && !initial) continue;
+      const phaseKey = `${status.id}:${status.targetIndex ?? ""}:${status.prayerKey || ""}`;
+      if (cat.officePhase === phaseKey && !initial) continue;
       const oldPhase = cat.officePhase;
-      cat.officePhase = status.id;
+      cat.officePhase = phaseKey;
+      cat.cleaningTarget = status.targetIndex ?? 0;
       if (status.goal === "away") {
         if (initial || !oldPhase || !cat.root.visible) {
           cat.root.visible = false;
@@ -945,11 +974,14 @@
       } else {
         const wasHidden = !cat.root.visible;
         cat.root.visible = true;
-        if (initial && ["work", "prepare", "report"].includes(status.goal)) {
+        if (initial && ["work", "prepare", "report", "reception", "support"].includes(status.goal)) {
           cat.activity = status.goal;
           arrive(cat);
         } else {
-          if (wasHidden) cat.root.position.set(-18.1, 0.10, 0);
+          if (wasHidden) {
+            const spot = Campus.parkingSpot(cat.data.id);
+            cat.root.position.set(spot.targetX, 0.10, spot.z);
+          }
           if (!navigate(cat, status.goal, true)) cat.officePhase = null;
         }
       }
@@ -963,6 +995,13 @@
       const atDesk = cat.root.visible && ["work", "prepare", "report"].includes(cat.mode);
       screen.color.setHex(atDesk ? 0xffffff : 0x1d2625);
       lamp.emissiveIntensity = atDesk ? (simulation.night ? 1.7 : 0.15) : 0;
+    }
+    for (const vehicle of facilityState.vehicles) {
+      vehicle.root.visible = cats.find((cat) => cat.data.id === vehicle.ownerId).root.visible;
+    }
+    if (facilityState.receptionScreen) {
+      const receptionist = cats.find((cat) => cat.data.operational === "reception");
+      facilityState.receptionScreen.color.setHex(receptionist.root.visible && receptionist.mode === "reception" ? 0xffffff : 0x1d2625);
     }
     if (sunlight && ambient && simulation.night) {
       const occupied = cats.some((cat) => cat.root.visible && cat.mode !== "away");
@@ -1001,6 +1040,12 @@
   }
 
   // ---------- Bentuk dasar yang dipakai berulang kali ----------
+
+  function createCampus() {
+    Object.assign(facilityState, Campus.build({
+      THREE, scene, box, sphere, cylinder, label, obstacle, createDoorFrame, createChair, createMonitor, team: TEAM,
+    }));
+  }
 
   function material(color, options = {}) {
     const key = `${color}:${JSON.stringify(options)}`;
@@ -1159,9 +1204,11 @@
     const back = new THREE.Group();
     scene.add(back);
     wallGroups.push({ group: back, axis: "z" });
-    box(38.5, 0.9, 0.18, 0xe8e3cf, 0, 0.55, -11.2, back);
+    for (const [left, right] of [[-19.2, -1.1], [2.1, 19.2]]) {
+      box(right - left, 0.9, 0.18, 0xe8e3cf, (left + right) / 2, 0.55, -11.2, back);
+      box(right - left, 0.13, 0.26, 0xa6b09a, (left + right) / 2, 0.2, -11.05, back);
+    }
     box(38.5, 0.3, 0.2, 0xe8e3cf, 0, 3.45, -11.2, back);
-    box(38.5, 0.13, 0.26, 0xa6b09a, 0, 0.2, -11.05, back);
     box(38.5, 0.1, 0.28, 0xf8f0da, 0, 3.62, -11.2, back);
     for (const x of [-17.45, 17.45]) {
       box(3.4, 2.3, 0.18, 0xe8e3cf, x, 2.1, -11.2, back);
@@ -1169,13 +1216,16 @@
 
     const sky = new THREE.MeshBasicMaterial({ color: 0xc7dcd9 });
     windowMaterials.push(sky);
-    addMesh(new THREE.PlaneGeometry(31.6, 2.4), sky, [0, 2.1, -11.35], back);
-    for (const x of [-15.6, -11.7, -7.8, -3.9, 0, 3.9, 7.8, 11.7, 15.6]) {
+    addMesh(new THREE.PlaneGeometry(14.5, 2.4), sky, [-8.35, 2.1, -11.35], back);
+    addMesh(new THREE.PlaneGeometry(13.5, 2.4), sky, [8.85, 2.1, -11.35], back);
+    for (const x of [-15.6, -11.7, -7.8, -3.9, 3.9, 7.8, 11.7, 15.6]) {
       box(0.09, 2.46, 0.17, 0xf8f0da, x, 2.1, -11.0, back);
     }
-    box(31.6, 0.09, 0.16, 0xf8f0da, 0, 2.35, -10.99, back);
-    box(31.7, 0.13, 0.38, 0xf8f0da, 0, 0.98, -10.96, back);
-    for (const x of [-13.0, -8.0, -3.0, 2.0, 7.0, 12.0]) {
+    for (const [x, width] of [[-8.35, 14.5], [8.85, 13.5]]) {
+      box(width, 0.09, 0.16, 0xf8f0da, x, 2.35, -10.99, back);
+      box(width, 0.13, 0.38, 0xf8f0da, x, 0.98, -10.96, back);
+    }
+    for (const x of [-13.0, -8.0, -3.0, 7.0, 12.0]) {
       sphere(0.66, 0x9daf94, x, 1.35, -11.21, back, [0.9, 1.4, 0.08]);
       sphere(0.48, 0xb4c4a5, x + 0.4, 1.1, -11.19, back, [1, 1.5, 0.09]);
     }
@@ -1220,10 +1270,12 @@
       createPartition((start + end) / 2, 0, end - start, 0.18);
     }
     ROOM_DOORS.forEach(createDoorFrame);
-    createDoorFrame({ x: -19.2, z: 0, axis: "z", width: 4.0, label: "WELCOME" });
+    box(0.18, 3.6, 4.0, 0xb9c4ab, -19.2, 1.87, 0, left);
 
     box(0.18, 0.8, 22.4, 0xc7d1c5, 19.2, 0.5, 0);
-    box(38.4, 0.8, 0.18, 0xc7d1c5, 0, 0.5, 11.2);
+    for (const [leftEdge, rightEdge] of [[-19.2, -10.1], [-6.9, 3.2], [6.4, 19.2]]) {
+      box(rightEdge - leftEdge, 0.8, 0.18, 0xc7d1c5, (leftEdge + rightEdge) / 2, 0.5, 11.2);
+    }
     box(1.3, 0.025, 3.0, 0x8d9d8c, -17.9, 0.12, 0);
     const welcome = label("WELCOME", 2.4, 0.35, "#8d9d8c", "#f5f1e5");
     welcome.rotation.set(-Math.PI / 2, 0, Math.PI / 2);
@@ -1871,10 +1923,18 @@
       piko: "let's test it!",
       owner: "a clear direction.",
       sasa: "keeping us in sync.",
+      rani: "welcome to pawffice!",
+      tomo: "a fresh start today.",
     };
     const speech = createSpeech(speechLines[data.id]);
     speech.position.set(0, 2.66, 0);
     root.add(speech);
+    const cleaningTool = new THREE.Group();
+    cleaningTool.position.set(0.55, 0.1, 0.35);
+    cylinder(0.025, 0.025, 1.45, 0xa08a65, 0, 0.72, 0, cleaningTool);
+    box(0.55, 0.08, 0.22, 0xbfc5ae, 0, 0.04, 0, cleaningTool);
+    cleaningTool.visible = false;
+    root.add(cleaningTool);
 
     root.traverse((object) => {
       if (object.isMesh) {
@@ -1901,6 +1961,7 @@
       heldMug,
       tail,
       speech,
+      cleaningTool,
       mode: "work",
       activity: "work",
       task: data.tasks[0],
@@ -2119,22 +2180,57 @@
   // ---------- Navigasi A*: cari jalur yang tidak menembus furnitur ----------
 
   const navigation = {
-    minX: -18.7,
-    minZ: -10.7,
-    step: 0.32,
-    columns: 118,
-    rows: 68,
+    minX: -32.5,
+    minZ: -31.5,
+    step: 0.4,
+    columns: 181,
+    rows: 163,
     radius: 0.40,
     agentSeparation: 0.92,
     arrivalRadius: 0.10,
   };
 
+  let indexedObstacleCount = -1;
+  const obstacleBuckets = new Map();
+
+  function nearbyObstacles(x, z, endX = x, endZ = z) {
+    const cellSize = 4;
+    if (indexedObstacleCount !== obstacles.length) {
+      obstacleBuckets.clear();
+      for (const item of obstacles) {
+        const halfX = (item.type === "circle" ? item.radius : item.width / 2) + navigation.radius;
+        const halfZ = (item.type === "circle" ? item.radius : item.depth / 2) + navigation.radius;
+        for (let row = Math.floor((item.z - halfZ) / cellSize); row <= Math.floor((item.z + halfZ) / cellSize); row += 1) {
+          for (let column = Math.floor((item.x - halfX) / cellSize); column <= Math.floor((item.x + halfX) / cellSize); column += 1) {
+            const key = `${column}:${row}`;
+            if (!obstacleBuckets.has(key)) obstacleBuckets.set(key, []);
+            obstacleBuckets.get(key).push(item);
+          }
+        }
+      }
+      indexedObstacleCount = obstacles.length;
+    }
+    const left = Math.floor(Math.min(x, endX) / cellSize);
+    const right = Math.floor(Math.max(x, endX) / cellSize);
+    const top = Math.floor(Math.min(z, endZ) / cellSize);
+    const bottom = Math.floor(Math.max(z, endZ) / cellSize);
+    if (left === right && top === bottom) return obstacleBuckets.get(`${left}:${top}`) || [];
+    if ((right - left + 1) * (bottom - top + 1) > 64) return obstacles;
+    const items = new Set();
+    for (let row = top; row <= bottom; row += 1) {
+      for (let column = left; column <= right; column += 1) {
+        for (const item of obstacleBuckets.get(`${column}:${row}`) || []) items.add(item);
+      }
+    }
+    return [...items];
+  }
+
   function blocked(x, z, mover = null, avoidCats = false) {
-    if (x < -18.7 || x > 18.7 || z < -10.7 || z > 10.7) {
+    if (x < -32.5 || x > 39.5 || z < -31.5 || z > 33.5) {
       return true;
     }
 
-    const hitsFurniture = obstacles.some((item) => {
+    const hitsFurniture = nearbyObstacles(x, z).some((item) => {
       if (mover && item.ownerId === mover.data.id) {
         return false;
       }
@@ -2216,7 +2312,7 @@
 
     // Uji seluruh ruas secara geometris. Sampling jarang bisa melewatkan
     // sudut meja, lalu karakter tersangkut ketika langkah kecil menyentuhnya.
-    for (const item of obstacles) {
+    for (const item of nearbyObstacles(start.x, start.z, end.x, end.z)) {
       if (mover && item.ownerId === mover.data.id) {
         continue;
       }
@@ -2305,6 +2401,8 @@
     }
   }
 
+  const navigationMaps = new Map();
+
   function findPath(start, end, mover = null, avoidCats = false) {
     if (blocked(end.x, end.z, mover, avoidCats)) {
       return [];
@@ -2321,14 +2419,56 @@
       0,
       grid.minZ + Math.floor(index / grid.columns) * grid.step
     );
-    const walkable = new Uint8Array(count);
-
-    for (let i = 0; i < count; i += 1) {
-      const position = point(i);
-      walkable[i] = blocked(position.x, position.z, mover, avoidCats) ? 0 : 1;
+    // Furnitur tetap: simpan peta dasar per pemilik kursi. Avatar bergerak
+    // ditambahkan sebagai penghalang sementara tanpa memindai seluruh halaman.
+    const cacheKey = `${mover?.data.id || "none"}:${obstacles.length}`;
+    if (!navigationMaps.has(cacheKey)) {
+      const base = new Uint8Array(count);
+      for (let i = 0; i < count; i += 1) {
+        const position = point(i);
+        base[i] = blocked(position.x, position.z, mover, false) ? 0 : 1;
+      }
+      navigationMaps.set(cacheKey, base);
+    }
+    const walkable = navigationMaps.get(cacheKey).slice();
+    if (avoidCats && mover) {
+      for (const other of cats) {
+        if (other === mover || !other.root.visible) continue;
+        const centerX = Math.round((other.root.position.x - grid.minX) / grid.step);
+        const centerZ = Math.round((other.root.position.z - grid.minZ) / grid.step);
+        const radius = Math.ceil(grid.agentSeparation / grid.step) + 1;
+        for (let z = Math.max(0, centerZ - radius); z <= Math.min(grid.rows - 1, centerZ + radius); z += 1) {
+          for (let x = Math.max(0, centerX - radius); x <= Math.min(grid.columns - 1, centerX + radius); x += 1) {
+            if (Math.hypot(grid.minX + x * grid.step - other.root.position.x,
+              grid.minZ + z * grid.step - other.root.position.z) < grid.agentSeparation) walkable[z * grid.columns + x] = 0;
+          }
+        }
+      }
     }
 
     function nearest(position) {
+      const centerX = Math.round((position.x - grid.minX) / grid.step);
+      const centerZ = Math.round((position.z - grid.minZ) / grid.step);
+      // Cari titik terdekat di sekitar avatar dahulu. Pemindaian global hanya
+      // diperlukan bila titik awal benar-benar jauh dari kisi yang dapat dicapai.
+      for (let radius = 0; radius <= 10; radius += 1) {
+        let localIndex = -1;
+        let localDistance = Infinity;
+        for (let z = Math.max(0, centerZ - radius); z <= Math.min(grid.rows - 1, centerZ + radius); z += 1) {
+          for (let x = Math.max(0, centerX - radius); x <= Math.min(grid.columns - 1, centerX + radius); x += 1) {
+            if (radius && Math.max(Math.abs(x - centerX), Math.abs(z - centerZ)) !== radius) continue;
+            const index = z * grid.columns + x;
+            if (!walkable[index]) continue;
+            const candidate = point(index);
+            const distance = Math.hypot(candidate.x - position.x, candidate.z - position.z);
+            if (distance < localDistance && segmentClear(position, candidate, mover, avoidCats)) {
+              localIndex = index;
+              localDistance = distance;
+            }
+          }
+        }
+        if (localIndex >= 0) return localIndex;
+      }
       let bestIndex = -1;
       let bestDistance = Infinity;
 
@@ -2467,13 +2607,26 @@
     }
     const index = cats.indexOf(cat);
     const seat = MEETING_SEATS.find((item) => item.ownerId === cat.data.id);
+    const restSeat = LOUNGE_SEATS.find((item) => item.ownerId === cat.data.id) || STAFF_REST.find((item) => item.ownerId === cat.data.id);
+    const spot = Campus.parkingSpot(cat.data.id);
+    const cleaning = Campus.CLEANING[cat.cleaningTarget || 0];
+    const facility = (name) => {
+      const point = Campus.facilityTarget(name, index);
+      return new THREE.Vector3(point.x, 0, point.z);
+    };
     const targets = {
       work: cat.data.desk,
       prepare: cat.data.desk,
       report: cat.data.desk,
-      exit: new THREE.Vector3(-18.1, 0, -1.4 + index * 0.4),
+      exit: new THREE.Vector3(spot.targetX, 0, spot.z),
+      reception: cat.data.desk,
+      support: cat.data.desk,
+      clean: new THREE.Vector3(cleaning.x, 0, cleaning.z),
+      bathroom: facility("bathroom"),
+      wudu: facility("wudu"),
+      prayer: facility("prayer"),
       coffee: COFFEE_TARGET,
-      lounge: LOUNGE_SPOTS[index % LOUNGE_SPOTS.length],
+      lounge: new THREE.Vector3(restSeat.x, 0, restSeat.z),
       meeting: seat ? new THREE.Vector3(seat.x, 0, seat.z) : null,
     };
     const target = targets[activity];
@@ -2508,6 +2661,12 @@
       prepare: "Datang & absen masuk",
       report: "Menyiapkan daily report",
       exit: "Beres-beres dan menuju pintu pulang",
+      reception: "Menuju meja penerimaan",
+      support: "Menuju ruang staf",
+      clean: `Menuju ${cleaning.room} untuk membersihkan`,
+      bathroom: "Menuju kamar mandi",
+      wudu: "Menuju tempat wudu",
+      prayer: "Menuju musala",
       coffee: "Menuju coffee corner",
       lounge: "Menuju pantry untuk istirahat",
       meeting: "Menuju meja diskusi",
@@ -2533,16 +2692,26 @@
       work: cat.data.tasks[Math.floor(Math.random() * cat.data.tasks.length)],
       prepare: "Persiapan kerja setelah absen masuk",
       report: "Daily report & persiapan pulang",
+      reception: "Menjaga lobby dan penerimaan tamu",
+      support: "Siaga operasional di ruang staf",
+      clean: `Membersihkan ${Campus.CLEANING[cat.cleaningTarget || 0].room}`,
+      bathroom: "Jeda di kamar mandi",
+      wudu: "Berwudu sebelum salat",
+      prayer: "Salat di musala",
       coffee: "Menikmati kopi hangat",
       lounge: "Beristirahat di pantry",
       meeting: "Tukar ide bareng tim",
     }[cat.mode];
 
-    if (["work", "prepare", "report"].includes(cat.mode)) {
+    if (["work", "prepare", "report", "reception", "support"].includes(cat.mode)) {
       cat.facing = workHeading(cat.data);
       cat.root.position.copy(cat.data.desk);
       cat.root.position.y = WORKSTATION.seatedHeight;
       cat.root.rotation.y = cat.facing;
+    } else if (["clean", "bathroom", "wudu", "prayer"].includes(cat.mode)) {
+      cat.facing = cat.mode === "prayer" ? -2.0 : Math.PI;
+      cat.root.rotation.y = cat.facing;
+      if (simulation.office && cat.mode === "clean") Schedule.recordAction(simulation.office, officeTime || readJakartaTime(), cat.data.id, "service", cat.task);
     } else if (cat.mode === "coffee") {
       cat.facing = Math.PI;
       simulation.coffee = true;
@@ -2556,7 +2725,7 @@
       cat.root.position.y = WORKSTATION.seatedHeight;
       addEvent(cat.data.name, "sudah duduk dan siap bertukar ide.");
     } else {
-      const seat = LOUNGE_SEATS.find((item) => item.ownerId === cat.data.id);
+      const seat = LOUNGE_SEATS.find((item) => item.ownerId === cat.data.id) || STAFF_REST.find((item) => item.ownerId === cat.data.id);
       cat.facing = seat.heading;
       cat.root.rotation.y = seat.heading;
       cat.root.position.y = WORKSTATION.seatedHeight;
@@ -2712,8 +2881,9 @@
       }
     }
 
-    const wholeTeamInMeeting = cats.length === TEAM.length
-      && cats.every((cat) => cat.activity === "meeting" && cat.mode === "meeting");
+    const projectCats = cats.filter((cat) => !cat.data.operational);
+    const wholeTeamInMeeting = projectCats.length === PROJECT_TEAM.length
+      && projectCats.every((cat) => cat.activity === "meeting" && cat.mode === "meeting");
 
     if (wholeTeamInMeeting && !simulation.daily.meetingWasTogether) {
       simulation.daily.meetingRounds += 1;
@@ -2738,15 +2908,15 @@
   function animateCat(cat, dt) {
     const t = simulation.elapsed + cat.phase;
     const walking = cat.mode === "walk" && cat.motion > 0.02;
-    const working = cat.mode === "work" || cat.mode === "report";
-    const seated = working || ["prepare", "meeting", "lounge"].includes(cat.mode);
+    const working = ["work", "report", "reception"].includes(cat.mode);
+    const seated = working || ["prepare", "support", "meeting", "lounge"].includes(cat.mode);
     const targetY = seated
       ? WORKSTATION.seatedHeight
       : walking ? 0.105 + Math.sin(t * 12) * 0.035 : 0.10;
     const blend = 1 - Math.exp(-12 * dt);
     cat.root.position.y = THREE.MathUtils.lerp(cat.root.position.y, targetY, blend);
 
-    if (working || cat.mode === "prepare") {
+    if (working || ["prepare", "support"].includes(cat.mode)) {
       cat.root.position.x = cat.data.desk.x;
       cat.root.position.z = cat.data.desk.z;
       cat.facing = workHeading(cat.data);
@@ -2759,6 +2929,9 @@
     cat.root.rotation.y += angle * blend;
     cat.body.rotation.z = seated ? 0 : Math.sin(t * (walking ? 10 : 1.7))
       * (walking ? 0.035 : 0.012);
+    cat.body.rotation.x = cat.mode === "prayer" ? (t % 12 > 4 ? 0.70 : 0) : 0;
+    cat.cleaningTool.visible = cat.mode === "clean";
+    cat.cleaningTool.rotation.z = Math.sin(t * 3) * 0.18;
     cat.head.rotation.y = working ? Math.sin(t * 0.7) * 0.10 : Math.sin(t * 0.9) * 0.15;
     cat.head.rotation.x = working ? 0.08 : Math.sin(t * 1.3) * 0.025;
     cat.tail.rotation.y = Math.sin(t * 2.2) * 0.25;
@@ -2770,6 +2943,12 @@
 
       if (walking) {
         target = Math.sin(t * 9 + index * Math.PI) * 0.45;
+      } else if (cat.mode === "clean") {
+        target = -0.6 + Math.sin(t * 4) * 0.3;
+      } else if (cat.mode === "wudu") {
+        target = -1.3 + Math.sin(t * 2 + index) * 0.3;
+      } else if (cat.mode === "prayer") {
+        target = -0.6;
       } else if (working) {
         target = -1.0 + Math.sin(t * 9 + index * 2) * 0.09;
       } else if (cat.mode === "meeting") {
@@ -3089,7 +3268,7 @@
     const width = Math.max(1, bounds.width);
     const height = Math.max(1, bounds.height);
     const aspect = width / height;
-    const viewHeight = Math.max(30.0, 47.0 / aspect);
+    const viewHeight = Math.max(78.0, 112.0 / aspect);
     viewportWidth = width;
     viewportHeight = height;
     camera.left = -viewHeight * aspect / 2;
@@ -3113,7 +3292,7 @@
     orbit.zoom = THREE.MathUtils.lerp(orbit.zoom, orbit.goalZoom, blend);
     orbit.target.lerp(orbit.goalTarget, blend);
 
-    const radius = 50;
+    const radius = 75;
     camera.position.set(
       orbit.target.x + radius * Math.sin(orbit.phi) * Math.sin(orbit.theta),
       orbit.target.y + radius * Math.cos(orbit.phi),
@@ -3137,7 +3316,7 @@
     orbit.goalTheta = 0.62;
     orbit.goalPhi = 0.90;
     orbit.goalZoom = 1;
-    orbit.goalTarget.set(0, 0.8, 0);
+    orbit.goalTarget.set(3.5, 0.8, 1);
     updateRoomButtons("overview");
   }
 
@@ -3375,7 +3554,7 @@
     $("meeting-button").addEventListener("click", () => {
       let moved = false;
 
-      for (const cat of cats) {
+      for (const cat of cats.filter((item) => !item.data.operational)) {
         moved = navigate(cat, "meeting") || moved;
       }
 
@@ -3410,8 +3589,8 @@
         jobdeskDialog.showModal();
       } else if (event.key.toLowerCase() === "p") {
         projectUI?.open();
-      } else if (/^[1-8]$/.test(event.key)) {
-        const index = Number(event.key) - 1;
+      } else if (/^[0-9]$/.test(event.key)) {
+        const index = event.key === "0" ? 9 : Number(event.key) - 1;
 
         if (cats[index]) {
           selectCat(cats[index]);
@@ -3478,7 +3657,7 @@
     $("scene").append(renderer.domElement);
 
     scene = new THREE.Scene();
-    camera = new THREE.OrthographicCamera(-10, 10, 8, -8, 0.1, 100);
+    camera = new THREE.OrthographicCamera(-10, 10, 8, -8, 0.1, 180);
     ambient = new THREE.HemisphereLight(0xfff3df, 0x819071, 2.3);
     scene.add(ambient);
 
@@ -3507,8 +3686,9 @@
     createPantryRoom();
     createMeetingRoom();
     createOwnerRoom();
-    TEAM.forEach(createDesk);
+    PROJECT_TEAM.forEach(createDesk);
     createCoffeeCorner();
+    createCampus();
     TEAM.forEach(createCat);
     renderCrewCards();
     renderJobdesk();

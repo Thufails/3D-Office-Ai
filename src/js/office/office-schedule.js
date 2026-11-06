@@ -1,7 +1,10 @@
 /* Jadwal WIB dan catatan sesi lokal; tidak menyelesaikan tugas proyek. */
 (() => {
   "use strict";
+  const Prayer = typeof module !== "undefined" && module.exports
+    ? require("./prayer-times.js") : globalThis.PawfficePrayerTimes;
   const SHIFTS = [
+    { id: "early", start: 300, end: 420, label: "OB membersihkan kantor", time: "05.00–07.00" },
     { id: "arrival", start: 420, end: 540, label: "Datang & absen", time: "07.00–09.00" },
     { id: "morning", start: 540, end: 720, label: "Kerja produktif pagi", time: "09.00–12.00" },
     { id: "lunch", start: 720, end: 780, label: "Ishoma", time: "12.00–13.00" },
@@ -28,7 +31,8 @@
       dateKey,
       members: team.map((person, index) => ({
         id: person.id,
-        arrivalMinute: 420 + index * 14 + hash(`${dateKey}:${person.id}`) % 5,
+        arrivalMinute: person.operational === "cleaner" ? 300 : person.operational === "reception" ? 420
+          : 420 + index * 14 + hash(`${dateKey}:${person.id}`) % 5,
         checkedInAt: null, checkedOutAt: null, activeSeconds: 0, actions: [], report: null,
         overtime: { status: "none", requestedAt: null, untilMinute: null, reason: "", endedAt: null, endReason: "" },
       })),
@@ -36,7 +40,7 @@
   }
 
   function create(time, team) {
-    return { version: 1, day: createDay(time.dateKey, team), history: [], notifications: [] };
+    return { version: 1, day: createDay(time.dateKey, team), history: [], notifications: [], settings: { prayerParticipants: [] } };
   }
 
   function notify(state, time, memberId, kind, text) {
@@ -83,8 +87,10 @@
     const actors = context.members || [];
     for (const record of state.day.members) {
       const actor = actors.find((item) => item.id === record.id) || {};
-      if (minute >= record.arrivalMinute && minute < 1020 && !record.checkedInAt) record.checkedInAt = stamp(time);
-      if (minute >= 990 && record.checkedInAt && !record.report) {
+      const checkout = record.id === "tomo" ? 840 : 1020;
+      const reportStart = record.id === "tomo" ? 810 : 990;
+      if (minute >= record.arrivalMinute && minute < checkout && !record.checkedInAt) record.checkedInAt = stamp(time);
+      if (minute >= reportStart && record.checkedInAt && !record.report) {
         record.report = {
           createdAt: stamp(time), projectTitle: context.projectTitle || "Belum ada proyek aktif",
           activeSeconds: record.activeSeconds, actions: clone(record.actions), tasks: clone(actor.tasks || []).slice(0, 40),
@@ -92,7 +98,7 @@
         };
         notify(state, time, record.id, "daily-report", "Daily report tersedia. Baca aktivitas sesi dan status tugas di pusat kantor.");
       }
-      if (minute >= 1020 && record.checkedInAt && !record.checkedOutAt) record.checkedOutAt = stamp(time);
+      if (minute >= checkout && record.checkedInAt && !record.checkedOutAt) record.checkedOutAt = stamp(time);
       if (minute >= 1020 && record.overtime.status === "pending") expire(state, time, record);
       if (record.overtime.status === "approved") {
         if (minute >= record.overtime.untilMinute) finish(state, time, record, "Lembur selesai sesuai batas izin. Saatnya pulang.");
@@ -107,7 +113,7 @@
         const actor = actors.find((item) => item.id === record.id);
         const pending = actor?.tasks?.find((task) => task.status !== "done");
         if (requested >= 3) break;
-        if (!record.checkedInAt || record.overtime.status !== "none" || !pending || !(actor.energy >= 60)) continue;
+        if (["rani", "tomo"].includes(record.id) || !record.checkedInAt || record.overtime.status !== "none" || !pending || !(actor.energy >= 60)) continue;
         record.overtime.status = "pending";
         record.overtime.requestedAt = stamp(time);
         record.overtime.reason = `Ingin melanjutkan “${pending.title}”.`;
@@ -134,11 +140,21 @@
     return record;
   }
 
-  function attendance(state, time, memberId) {
+  function baseAttendance(state, time, memberId) {
     const record = member(state, memberId);
     const minute = minutes(time);
     if (time.dateKey !== state.day.dateKey || minute < record.arrivalMinute || minute >= 1260) {
       return { id: "away", label: minute < 540 ? "Belum datang" : "Sudah pulang", goal: "away" };
+    }
+    if (memberId === "tomo") {
+      if (minute < 420) return { id: "clean", label: "Membersihkan ruangan kantor", goal: "clean", targetIndex: Math.floor((minute - 300) / 10) };
+      if (minute >= 840) return { id: "away", label: "Sudah pulang · shift 05.00–14.00", goal: "away" };
+      if (minute >= 810) return { id: "report", label: "Laporan operasional & persiapan pulang", goal: "report" };
+      if (minute >= 720 && minute < 780) return { id: "lunch", label: "Ishoma staf", goal: "lounge" };
+      return { id: "support", label: "Merapikan perlengkapan & siaga operasional", goal: "support" };
+    }
+    if (memberId === "rani" && minute < 990 && !(minute >= 720 && minute < 780)) {
+      return { id: "reception", label: "Menjaga lobby & penerimaan tamu", goal: "reception" };
     }
     if (minute < 540) return { id: "prepare", label: "Hadir · persiapan kerja", goal: "prepare" };
     if (minute < 720 || (minute >= 780 && minute < 990)) return { id: "work", label: "Bekerja", goal: "work" };
@@ -152,11 +168,48 @@
     return { id: "away", label: "Sudah pulang", goal: "away" };
   }
 
+  const prayerCache = new Map();
+  function prayerTimes(dateKey) {
+    if (!prayerCache.has(dateKey)) {
+      if (prayerCache.size > 30) prayerCache.clear();
+      prayerCache.set(dateKey, Prayer.calculate(dateKey));
+    }
+    return prayerCache.get(dateKey);
+  }
+
+  function attendance(state, time, memberId) {
+    const base = baseAttendance(state, time, memberId);
+    if (["away", "clean", "report", "prepare"].includes(base.id)) return base;
+    const minute = minutes(time);
+    const index = state.day.members.findIndex((record) => record.id === memberId);
+    if (state.settings?.prayerParticipants.includes(memberId)) {
+      const times = prayerTimes(time.dateKey);
+      for (const [key, start] of [["Zuhur", Math.max(720, times.dhuhr)], ["Asar", times.asr]]) {
+        const slot = start + index * 2;
+        if (minute >= slot && minute < slot + 2) return { id: "wudu", label: `Wudu sebelum ${key}`, goal: "wudu", prayerKey: key };
+        if (minute >= slot + 2 && minute < slot + 8) return { id: "prayer", label: `Salat ${key} di musala`, goal: "prayer", prayerKey: key };
+      }
+    }
+    if (minute >= 600 + index * 3 && minute < 602 + index * 3) {
+      return { id: "bathroom", label: "Jeda kamar mandi", goal: "bathroom" };
+    }
+    return base;
+  }
+
+  function setPrayerParticipant(state, memberId, enabled) {
+    member(state, memberId);
+    state.settings ||= { prayerParticipants: [] };
+    const ids = new Set(state.settings.prayerParticipants);
+    if (enabled) ids.add(memberId);
+    else ids.delete(memberId);
+    state.settings.prayerParticipants = [...ids].sort();
+  }
+
   function recordAction(state, time, memberId, action, title) {
-    if (time.dateKey !== state.day.dateKey || !["start", "draft", "save", "revise", "approve"].includes(action)) return;
+    if (time.dateKey !== state.day.dateKey || !["start", "draft", "save", "revise", "approve", "service"].includes(action)) return;
     const record = member(state, memberId);
-    if (!record.checkedInAt || !["work", "report", "overtime", "prepare"].includes(attendance(state, time, memberId).id)) return;
-    const names = { start: "Mulai", draft: "Buat draf", save: "Simpan dokumen", revise: "Revisi", approve: "Hasil disetujui" };
+    if (!record.checkedInAt || !["work", "report", "overtime", "prepare", "clean", "reception", "support"].includes(attendance(state, time, memberId).id)) return;
+    const names = { start: "Mulai", draft: "Buat draf", save: "Simpan dokumen", revise: "Revisi", approve: "Hasil disetujui", service: "Operasional" };
     record.actions.push({ at: stamp(time), text: `${names[action]}: ${title}` });
     record.actions = record.actions.slice(-20);
     if (record.report && minutes(time) < 1020) record.report.actions = clone(record.actions);
@@ -203,10 +256,17 @@
     };
     function day(value) {
       const dateKey = date(value?.dateKey);
-      if (!Array.isArray(value.members) || value.members.length !== validIds.length) throw new Error("Daftar absensi tidak lengkap.");
-      return { dateKey, members: value.members.map((record, index) => {
+      if (!Array.isArray(value.members) || value.members.some((record) => !validIds.includes(record.id))
+        || new Set(value.members.map((record) => record.id)).size !== value.members.length) throw new Error("Daftar absensi tidak valid.");
+      const defaults = createDay(dateKey, team);
+      const records = Array.from(team, (person, index) => {
+        const existing = value.members.find((record) => record.id === person.id);
+        if (!existing && !person.operational) throw new Error("Daftar absensi tidak lengkap.");
+        return existing || defaults.members[index];
+      });
+      return { dateKey, members: records.map((record, index) => {
         if (record.id !== validIds[index] || !Number.isInteger(record.arrivalMinute)
-          || record.arrivalMinute < 420 || record.arrivalMinute >= 540) throw new Error("Anggota atau jam datang tidak valid.");
+          || record.arrivalMinute < (team[index].operational === "cleaner" ? 300 : 420) || record.arrivalMinute >= 540) throw new Error("Anggota atau jam datang tidak valid.");
         const ot = record.overtime;
         if (!ot || !STATES.includes(ot.status) || (ot.untilMinute !== null && !OVERTIME_ENDS.includes(ot.untilMinute))) throw new Error("Status lembur tidak valid.");
         if (["approved", "finished"].includes(ot.status) && !OVERTIME_ENDS.includes(ot.untilMinute)) throw new Error("Batas izin lembur tidak valid.");
@@ -256,10 +316,14 @@
         kind: item.kind, text: text(item.text, 500), createdAt: timestamp(item.createdAt), read: item.read,
       };
     });
-    return { version: 1, day: current, history, notifications };
+    const prayerParticipants = input.settings?.prayerParticipants || [];
+    if (!Array.isArray(prayerParticipants) || prayerParticipants.length > validIds.length
+      || new Set(prayerParticipants).size !== prayerParticipants.length
+      || prayerParticipants.some((id) => !validIds.includes(id))) throw new Error("Pilihan kegiatan ibadah tidak valid.");
+    return { version: 1, day: current, history, notifications, settings: { prayerParticipants: [...prayerParticipants] } };
   }
 
-  const api = { SHIFTS, OVERTIME_ENDS, create, tick, decide, attendance, recordAction, accrue, unread, validate, phase, stamp, formatMinute };
+  const api = { SHIFTS, OVERTIME_ENDS, create, tick, decide, attendance, recordAction, accrue, unread, validate, phase, stamp, formatMinute, prayerTimes, setPrayerParticipant };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else globalThis.PawfficeSchedule = api;
 })();

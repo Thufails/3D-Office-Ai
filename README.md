@@ -1,56 +1,59 @@
-<p align="center">
-  <img
-    src="assets/images/readme-banner.svg"
-    alt="Pawffice: dua kucing berseragam, meja komputer, dan secangkir kopi."
-    width="1200"
-  >
-</p>
+<p align="center"><img src="assets/images/readme-banner.svg" alt="Pawffice, kantor kucing 3D" width="1200"></p>
 
-<h1 align="center">🐾 Pawffice</h1>
+# 🐾 Pawffice
 
-<p align="center">
-  <strong>A little room for big ideas.</strong><br>
-  Delapan rekan berbulu. Empat ruangan. Satu software house kecil.
-</p>
+Kantor software house 3D lokal dengan **10 avatar kucing**, rutinitas WIB, dan simulasi pengelolaan proyek website.
 
-<p align="center">
-  🟢 Lokal &amp; offline-friendly · 🟠 Three.js · 🟣 Tanpa backend · 🐱 8 role
-</p>
+🟢 Three.js lokal · 🏢 Satu lantai · 🐱 8 role proyek + 2 operasional
 
----
+## 🚀 Menjalankan
 
-## 🌱 Selamat datang di kantor
+Buka `3D-index.html` di Chrome/Edge, atau gunakan alamat Live Server yang biasa dipakai. Tidak perlu instalasi, backend, atau akun AI.
 
-Simulasi kantor 3D lokal untuk sebuah software house kecil yang menerima
-proyek pembuatan sistem berbasis website. Semua aktivitas, karakter, dan
-progres quest berjalan di browser tanpa backend atau koneksi AI.
+**Gunakan browser, profil, dan alamat yang sama** agar progres tetap terbaca. `file://`, `localhost`, dan `127.0.0.1` memiliki penyimpanan berbeda. Refresh dengan **Ctrl + Shift + R** setelah memperbarui kode.
 
-> 🧶 **Masih sandbox, belum AI agent sungguhan.**
-> Kegiatan coding dan pengujian proyek masih berupa status simulasi, bukan
-> file website yang dihasilkan model AI.
+## 🏢 Yang tersedia
 
-| | Yang menunggu di dalam |
-| :---: | --- |
-| 🐈 | Avatar kucing berseragam, role, dan jobdesk masing-masing. |
-| 🏢 | Ruang kerja, ruang meeting, ruang Owner + PA, serta pantry. |
-| ☕ | Coffee break, istirahat bersama, dan rapat di meja panjang. |
-| 📋 | Project Hub: brief klien, papan tugas, dokumen, dan review per role. |
-| 🎯 | Progres berbasis tugas yang disetujui dan tiga quest sampingan harian. |
-| 🗂️ | Arsip proyek, notulen rapat, unduhan Markdown, dan cadangan JSON. |
-| 🌙 | Jam WIB live, siang/malam otomatis, dan penyimpanan lokal. |
+- Bangunan satu lantai yang kompak, halaman luas berpohon, serta parkir mobil/motor di sisi kanan.
+- Lobby besar khusus penerimaan dengan empat kelompok sofa dan dua meja tunggu; ruang staf dan fasilitas servis berada di blok belakang.
+- Musala diapit kamar mandi dan tempat wudu, dengan akses terpisah dari koridor.
+- Kendaraan milik avatar mengikuti kehadiran; datang melalui lobby dan kembali ke kendaraan saat pulang.
+- **Rani — resepsionis** menjaga penerimaan 07.00–17.00. **Tomo — OB** membersihkan ruangan 05.00–07.00, lalu siaga sampai 14.00.
+- Project Hub dengan metode **Waterfall, Agile, dan Hybrid**, dokumen, review, arsip, serta backup JSON.
+- Jam WIB, ishoma, daily report, pengajuan lembur dengan notifikasi, dan penyimpanan lokal.
 
-## 🚀 Cara membuka
+## ◷ Jadwal utama WIB
 
-Klik dua kali `3D-index.html`, lalu buka dengan Chrome atau Edge.
-Semua library sudah disimpan lokal. Tidak perlu instalasi, Node.js,
-backend, akun AI, atau koneksi internet untuk menjalankan simulasi.
+| Waktu | Aktivitas |
+| --- | --- |
+| 07.00–09.00 | Datang dan absen masuk |
+| 09.00–12.00 | Kerja pagi |
+| 12.00–13.00 | Ishoma |
+| 13.00–16.30 | Kerja siang |
+| 16.30–17.00 | Daily report dan persiapan pulang |
+| 17.00–18.00 | Pulang / jeda sebelum lembur |
+| 18.00–21.00 | Lembur berizin, maksimal pukul 21.00 |
 
-Sudah memakai Live Server? Lanjutkan dari alamat yang biasanya kamu buka.
+🔔 Pengajuan lembur muncul 16.30–16.50 jika ada tugas tertunda dan energi cukup. Kamu dapat mengizinkan sampai 19.00, 20.00, atau 21.00. Tanpa jawaban sampai 17.00, avatar pulang.
 
-> 💾 **Gunakan browser, profil, dan alamat yang sama agar progres terbaca.**
-> `file:///...`, `http://localhost:5500`, dan `http://127.0.0.1:5500` memiliki
-> penyimpanan berbeda. Setelah edit kode, refresh tab yang sama; bila perlu
-> gunakan **Ctrl + Shift + R**.
+🕌 Pilih avatar yang mengikuti kegiatan ibadah lewat **Jadwal & absen WIB**. Waktu Zuhur/Asar dihitung berdasarkan tanggal dan Jakarta, ditandai sebagai **estimasi simulasi**, bukan jadwal adzan resmi.
+
+## 🎮 Kontrol
+
+| Kontrol | Fungsi |
+| --- | --- |
+| Seret / scroll | Putar / zoom kamera |
+| Lokasi kantor | Fokus ke ruangan atau parkir |
+| P / J | Project Hub / jobdesk tim |
+| 1–8, 9, 0 | Pilih tim proyek, Rani, Tomo |
+| Spasi / R | Pause / kembali ke overview |
+| 🔔 / Jadwal & absen WIB | Notifikasi, jadwal, absen, laporan, dan pilihan ibadah |
+
+Proyek masih menghasilkan **dokumen template simulasi**. Role belum menjalankan AI, membuat website nyata, atau menyelesaikan tugas otomatis lewat timer. Project Hub bisa dikelola kapan saja.
+
+<details>
+<summary>📚 Buka panduan lengkap, jobdesk, struktur folder, dan detail teknis</summary>
+
 
 ## 🌱 Mulai dari Project Hub
 
@@ -180,9 +183,11 @@ atau klik backdrop membatalkan tanpa menerapkan tindakan tersebut.
 | 🧪 **Piko** | QA / Tester | Menguji alur booking dan menyiapkan serah-terima. |
 | 👑 **Oji** | Owner / Founder | Menentukan arah layanan dan meninjau keputusan proyek. |
 | 🗓️ **Sasa** | Personal Assistant / Secretary | Mengatur agenda, komunikasi klien, dan catatan rapat. |
+| 🛎️ **Rani** | Receptionist | Menjaga lobby, buku tamu, dan penerimaan. |
+| 🧹 **Tomo** | Office Boy | Membersihkan ruangan dan membantu operasional. |
 
 Semua anggota divisualisasikan sebagai avatar kucing berseragam. Untuk
-memilih karakter, klik kartu tim atau tekan angka 1–8.
+memilih karakter, klik kartu tim atau tekan angka 1–8; angka 9 memilih Rani dan 0 memilih Tomo.
 
 Tombol **Lihat jobdesk tim** (atau J) membuka seluruh tanggung jawab tanpa
 perlu memilih avatar. Label nama/role menempel di atas avatar dan mengikuti
@@ -192,7 +197,7 @@ meninggalkan label di tepi layar. Papan role fisik tetap ada di setiap bilik.
 Untuk membaca detail saat zoom terlalu jauh, gunakan daftar jobdesk tim.
 
 <details>
-  <summary>📚 Buka jobdesk lengkap delapan aktor</summary>
+  <summary>📚 Buka jobdesk lengkap delapan role proyek</summary>
 
 ### Siapa mengerjakan apa?
 
@@ -233,8 +238,8 @@ software house; kegiatan coding dan pengujian proyek masih berupa simulasi.
   Jam Jakarta tetap berjalan.
 - Tombol 1×: ganti kecepatan aktivitas 1×, 2×, dan 4×.
   Kecepatan ini tidak mengubah jam Jakarta.
-- Tombol angka 1–8: pilih anggota tim sesuai urutan kartu.
-- Lihat jobdesk tim atau tombol J: buka daftar tanggung jawab delapan role.
+- Tombol angka 1–8: pilih role proyek. Angka 9/0 memilih Rani/Tomo.
+- Lihat jobdesk tim atau tombol J: buka tanggung jawab sepuluh role.
   Tutup dengan tombol ×, Escape, atau klik di luar daftar.
 - Project Hub atau tombol P: kelola brief, tugas, hasil kerja, arsip, dan cadangan.
   Saat mengisi form atau membuka dialog, shortcut kantor tidak mengganggu input.
@@ -253,12 +258,19 @@ font dari internet. Pilihan lokasi tidak menutupi area 3D.
 | 🤝 **Meeting** | Kanan belakang | Delapan rekan rapat di meja panjang. |
 | 🌿 **Owner + PA** | Kanan depan | Oji dan Sasa mengatur arah serta agenda tim. |
 | ☕ **Pantry & istirahat** | Kiri depan | Ngopi, duduk santai, dan mengisi energi. |
+| 🛎️ **Lobby** | Hall depan tersendiri | Resepsionis, empat sofa, dan dua meja tunggu. |
+| 🧹 **Ruang staf** | Blok belakang | Locker, alat kebersihan, dan istirahat staf. |
+| 🚻 **Kamar mandi / wudu** | Kedua sisi musala | Jeda fasilitas dan persiapan ibadah. |
+| 🕌 **Musala** | Blok belakang, tengah | Kegiatan ibadah per avatar yang dipilih. |
+| 🅿️ **Parkir** | Samping kanan | Mobil, motor, dan akses pejalan kaki. |
+| 🌳 **Halaman** | Sekeliling gedung | Taman, pepohonan, jalur akses, dan gerbang. |
 
 Enam meja produksi tersusun simetris dalam dua baris berisi tiga bilik.
 Baris pertama berisi PM (Miko), System Analyst (Nori), dan UI/UX Designer
 (Luna). Baris kedua berisi Frontend (Kiko), Backend (Bimo), dan QA (Piko).
-Denah kantor berbentuk persegi panjang memanjang, sekitar 38,8 × 22,8 unit
-dunia. Empat ruangan dipisahkan sekat kaca dengan pintu selebar empat unit:
+Gedung berukuran sekitar 38,4 × 46,4 unit, dengan lahan 73 × 66 unit yang
+lebih mendekati persegi. Lobby menempati seluruh hall depan, fasilitas servis
+berada di belakang, dan parkir di kanan. Empat ruangan inti tetap berada di tengah:
 ruang kerja di kiri belakang, pantry di kiri depan, ruang meeting di kanan
 belakang, dan ruang Owner + PA di kanan depan. Meja Oji dan Sasa berada di
 ruang Owner. Setiap ruangan diperluas, dengan jarak bilik dan lorong lega.
@@ -463,7 +475,9 @@ bisa digunakan untuk mencoba suasana lain.
 │       ├── main.js                        # Kantor 3D dan penghubung aplikasi
 │       ├── office/
 │       │   ├── office-schedule.js          # Aturan WIB, absen, laporan, dan lembur
-│       │   └── office-ui.js                # Lonceng dan pusat kantor
+│       │   ├── office-ui.js                # Lonceng dan pusat kantor
+│       │   ├── office-campus.js            # Model fasilitas dan parkir
+│       │   └── prayer-times.js             # Estimasi waktu salat Jakarta
 │       └── projects/
 │           ├── project-engine.js          # Aturan dan data proyek
 │           ├── project-ui.js              # Antarmuka Project Hub
@@ -490,6 +504,7 @@ bisa digunakan untuk mencoba suasana lain.
 │   ├── project-hybrid.test.cjs             # Tes rencana awal dan perubahan scope
 │   ├── office-schedule.test.cjs            # Tes batas waktu, absen, laporan, izin
 │   ├── office-ui.test.cjs                  # Tes lonceng dan keputusan lembur
+│   ├── office-campus.test.cjs              # Tes shift, ibadah, migrasi, transportasi
 │   ├── project-ui.test.cjs                 # Tes handler dan modal UI
 │   ├── project-structure.test.cjs          # Tes path dan struktur proyek
 │   └── office-integration.cjs              # Tes integrasi dan gerak kantor
@@ -551,7 +566,7 @@ Tidak ada paket tambahan atau proses build yang harus diinstal.
 
 ```powershell
 node --test tests/project-engine.test.cjs tests/project-agile.test.cjs tests/project-hybrid.test.cjs tests/project-ui.test.cjs tests/project-structure.test.cjs
-node --test tests/office-schedule.test.cjs tests/office-ui.test.cjs
+node --test tests/office-campus.test.cjs tests/office-schedule.test.cjs tests/office-ui.test.cjs
 node tests/office-integration.cjs
 ```
 
@@ -567,6 +582,10 @@ browser untuk tata letak, fokus keyboard, dan interaksi sentuh.
 Banner memakai SVG lokal dan ikon dokumentasi memakai emoji, tanpa layanan
 badge atau gambar eksternal. Warnanya tetap tampil saat dibaca offline.
 
+Estimasi waktu salat menggunakan rumus posisi matahari [NOAA](https://gml.noaa.gov/grad/solcalc/solareqns.PDF)
+dan definisi Asar faktor 1 dari [PrayTimes](https://praytimes.org/docs/calculation).
+Lokasi simulasi Jakarta, dengan margin dua menit; perhitungan berlangsung lokal.
+
 📦 Library: [Three.js](https://threejs.org/) ·
 [Repositori Three.js](https://github.com/mrdoob/three.js) ·
 [Lisensi library](vendor/three/THREE-LICENSE.txt) ·
@@ -579,3 +598,5 @@ badge atau gambar eksternal. Warnanya tetap tampil saat dibaca offline.
   🐾 <strong>One paw at a time.</strong><br>
   Kerja pelan-pelan, kopi tetap hangat. ☕
 </p>
+
+</details>

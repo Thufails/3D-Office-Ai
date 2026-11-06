@@ -108,6 +108,25 @@
       }
       content.append(list);
       content.append(node("p", "Jadwal berlaku setiap hari. Jam WIB tetap berjalan saat animasi dijeda atau dipercepat. Pengajuan tidak dijawab sampai 17.00 berarti pulang; tidak ada izin lembur otomatis.", "project-muted"));
+      content.append(node("p", "Tomo (OB): 05.00–07.00 membersihkan semua ruangan, kemudian siaga hingga 14.00. Rani (resepsionis): 07.00–17.00. Keduanya mempunyai ruang staf dan jeda sendiri.", "project-callout"));
+      const prayer = schedule.prayerTimes(state.day.dateKey);
+      content.append(node("h3", "Kegiatan ibadah per avatar"));
+      content.append(node("p", `Jakarta · Zuhur ${schedule.formatMinute(prayer.dhuhr)} · Asar ${schedule.formatMinute(prayer.asr)} WIB. ${prayer.note}`, "project-muted"));
+      content.append(node("p", "Centang avatar yang mengikuti kegiatan salat. Mereka berwudu lalu menuju musala secara bergiliran. Zuhur dimulai dalam ishoma setelah waktunya masuk; Asar menjadi jeda singkat saat masih berada di kantor.", "project-muted"));
+      const preferences = node("fieldset", undefined, "project-review");
+      preferences.append(node("legend", "Avatar yang mengikuti kegiatan ibadah"));
+      for (const person of team) {
+        const label = node("label");
+        const input = node("input");
+        input.type = "checkbox";
+        input.checked = state.settings?.prayerParticipants.includes(person.id) || false;
+        input.addEventListener("change", () => change(() => {
+          schedule.setPrayerParticipant(state, person.id, input.checked);
+        }));
+        label.append(input, node("span", person.name));
+        preferences.append(label);
+      }
+      content.append(preferences);
       content.append(node("h3", "Absen simulasi hari ini"));
       content.append(node("p", "Absen dicatat saat kehadiran teramati di halaman, bukan catatan kehadiran pegawai nyata. Membuka kantor siang hari tidak membuat catatan kedatangan palsu pada pagi hari.", "project-muted"));
       for (const record of state.day.members) {
@@ -168,7 +187,7 @@
       $("office-phase").textContent = schedule.phase(options.now()).label;
       $("office-project-bell").hidden = count === 0;
       $("office-project-bell").textContent = `🔔 ${count} kabar kantor`;
-      const signature = JSON.stringify([schedule.phase(options.now()).id, state.day.dateKey,
+      const signature = JSON.stringify([schedule.phase(options.now()).id, state.day.dateKey, state.settings,
         state.day.members.map((record) => [record.checkedInAt, record.checkedOutAt, record.overtime,
           record.report?.createdAt, record.overtime.status === "pending" ? Math.floor(options.energy(record.id)) : null]), state.notifications]);
       if (dialog.open && (force || signature !== lastSignature)) render();

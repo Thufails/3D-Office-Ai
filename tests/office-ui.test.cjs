@@ -93,6 +93,10 @@ test('membaca notifikasi tidak mengizinkan lembur, pengajuan kedaluwarsa dan lap
   await ui.elements['office-routine-button'].click();
   assert.match(ui.content.textContent, /07.00–09.00/);
   assert.match(ui.content.textContent, /Absen simulasi hari ini/);
+  const participant = ui.content.querySelectorAll('input')[0];
+  participant.checked = true;
+  await participant.emit('change');
+  assert.deepEqual(ui.state.settings.prayerParticipants, ['miko']);
 });
 
 test('klik Lihat avatar menutup pusat kantor dan meneruskan pilihan anggota', async () => {

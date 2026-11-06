@@ -16,7 +16,7 @@ const pending = (state) => state.day.members.filter((record) => record.overtime.
 
 test('batas setiap jadwal WIB tepat termasuk 16.30, 17.00, 18.00 dan 21.00', () => {
   for (const [hour, minute, expected] of [
-    [6, 59, 'closed'], [7, 0, 'arrival'], [8, 59, 'arrival'], [9, 0, 'morning'],
+    [6, 59, 'early'], [7, 0, 'arrival'], [8, 59, 'arrival'], [9, 0, 'morning'],
     [11, 59, 'morning'], [12, 0, 'lunch'], [13, 0, 'afternoon'], [16, 29, 'afternoon'],
     [16, 30, 'report'], [17, 0, 'break'], [18, 0, 'overtime'], [20, 59, 'overtime'], [21, 0, 'closed'],
   ]) assert.equal(S.phase(time(hour, minute)).id, expected);
@@ -43,8 +43,8 @@ test('daily report memakai tindakan nyata dan waktu sesi; tidak mengubah status 
   const state = setup();
   const ctx = context();
   const beforeTasks = JSON.stringify(ctx.members);
-  S.recordAction(state, time(10), 'miko', 'start', 'Scope proyek');
-  S.accrue(state, time(10), 'miko', 10000);
+  S.recordAction(state, time(10, 45), 'miko', 'start', 'Scope proyek');
+  S.accrue(state, time(10, 45), 'miko', 10000);
   assert.equal(state.day.members[0].activeSeconds, 2, 'delta observasi dibatasi; tidak menambah jam offline');
   S.tick(state, time(16, 30), ctx);
   const report = state.day.members[0].report;

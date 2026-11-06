@@ -1,5 +1,32 @@
 # 🐾 Catatan pengembangan Pawffice
 
+## 6 November 2026 · Wing fasilitas dan staf operasional
+
+- Tetap memakai model kantor isometrik satu lantai. Bangunan kompak dengan
+  halaman luas berpohon, gerbang dan jalur akses; parkir berada di sisi kanan.
+- Lobby khusus menempati hall depan dengan empat sofa dan dua meja tunggu.
+  Ruang staf dipindah ke blok belakang, bersama musala yang diapit kamar mandi
+  serta tempat wudu. Setiap fasilitas mempunyai akses koridor sendiri.
+- Rani (resepsionis) dan Tomo (OB) menambah tim menjadi sepuluh avatar.
+  Delapan role proyek tetap mengerjakan Waterfall/Agile/Hybrid seperti sebelumnya.
+- Tomo membersihkan dua belas titik ruangan pada 05.00–07.00, lalu siaga hingga
+  14.00. Rani menjaga penerimaan pada 07.00–17.00. Tersedia kursi istirahat staf.
+- Dua mobil dan enam motor dimiliki avatar. Kehadiran kendaraan mengikuti
+  pemiliknya; jalur kedatangan/kepulangan melewati parkir dan lobby.
+- Avatar mempunyai jeda kamar mandi. Partisipasi ibadah diatur pengguna melalui
+  pusat kantor; avatar berwudu lalu salat Zuhur/Asar pada slot bergiliran.
+- Waktu salat berupa estimasi lokal berdasarkan tanggal dan koordinat Jakarta,
+  tanpa jaringan/geolokasi. Rumus NOAA dan definisi Asar faktor 1 dirujuk di README.
+- Navigasi, kamera, label, pemilihan lokasi, dan shortcut 9/0 mengikuti perluasan.
+- Peta navigasi memakai cache furnitur tetap dan indeks area penghalang supaya
+  halaman besar tidak memerlukan pemeriksaan seluruh furnitur untuk setiap langkah.
+- Simpanan absensi delapan avatar dimigrasikan dengan menambahkan dua staf
+  tanpa menciptakan catatan kehadiran lama yang tidak pernah teramati.
+- README diringkas di bagian depan; panduan panjang, jobdesk, dan struktur folder
+  tetap tersedia dalam bagian details yang tertutup secara default.
+- Pengujian mencakup jadwal staf, partisipasi ibadah, migrasi, dua belas rute
+  bersih-bersih, akses fasilitas, serta kepulangan seluruh avatar ke parkir.
+
 ## 6 November 2026 · Rutinitas kantor WIB dan izin lembur
 
 - Modul baru `src/js/office/office-schedule.js` mengatur jadwal, absen simulasi,

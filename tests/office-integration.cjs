@@ -5,6 +5,7 @@ const { performance } = require('node:perf_hooks');
 const root = require('node:path').resolve(__dirname, '..');
 const Projects = require(`${root}/src/js/projects/project-engine.js`);
 const Schedule = require(`${root}/src/js/office/office-schedule.js`);
+const Campus = require(`${root}/src/js/office/office-campus.js`);
 const THREE = require(`${root}/vendor/three/Three.js`);
 const viewport = { width: 1000, height: 700 };
 const surfaceOffset = { left: 0, top: 0 };
@@ -54,6 +55,7 @@ const context = vm.createContext({
     THREE, localStorage, devicePixelRatio: 1,
     PawfficeProjects: Projects,
     PawfficeSchedule: Schedule,
+    PawfficeCampus: Campus,
     PawfficeOfficeUI: { mount() { return { refresh() {} }; } },
     PawfficeProjectUI: {
       mount(options) {
@@ -81,18 +83,20 @@ const source = fs.readFileSync(`${root}/src/js/main.js`, 'utf8');
 assert.equal(source.split('    boot();').length, 2);
 const instrumented = source.replace('    boot();', `
     globalThis.office = {
-      TEAM, cats, simulation, MEETING_SEATS, LOUNGE_SEATS, LOUNGE_SPOTS, COFFEE_TARGET,
+      TEAM, PROJECT_TEAM, cats, simulation, MEETING_SEATS, LOUNGE_SEATS, LOUNGE_SPOTS, COFFEE_TARGET,
+      Campus, facilityState, createCampus,
       ROLE_DETAILS, OFFICE_ROOMS, ROOM_DOORS, MEETING_TABLE, orbit,
       workspaceLabels, updateCamera,
       get camera() { return camera; },
       findPath, blocked, navigate, moveCat, animateCat,
+      obstacles, nearbyObstacles, segmentHitsBox, segmentHitsCircle,
       progressSnapshot, loadProgress, saveProgress, renderCrewCards,
       restoreProgress, validateProgress, dailyQuestsForDate, readJakartaTime,
       updateSimulation, updateUI, renderMainQuest, resetDailyProgress, installProjectHub,
       syncOfficeSchedule, applyOfficeRoutine, officeContext,
       renderJobdesk, createWorkspaceLabels, updateWorkspaceLabels, installButtons,
       initializeCamera() {
-        camera = new THREE.OrthographicCamera(-16, 16, 12, -12, 0.1, 100);
+        camera = new THREE.OrthographicCamera(-16, 16, 12, -12, 0.1, 180);
         renderer = { setSize() {}, setPixelRatio() {} };
         resize();
         updateCamera(1);
@@ -106,15 +110,20 @@ const instrumented = source.replace('    boot();', `
         createPantryRoom();
         createMeetingRoom();
         createOwnerRoom();
-        TEAM.forEach(createDesk);
+        PROJECT_TEAM.forEach(createDesk);
         createCoffeeCorner();
+        createCampus();
         TEAM.forEach(createCat);
         selected = cats[0];
         scene.updateMatrixWorld(true);
       }
     };
 `);
-vm.runInContext(instrumented, context, { filename: 'src/js/main.js' });
+const traced = process.argv.includes('--trace-routes')
+  ? instrumented.replace('let route = findPath(cat.root.position, target, cat, true);',
+    'console.log("NAV", cat.data.id, activity); const routeStarted = performance.now(); let route = findPath(cat.root.position, target, cat, true); console.log("ROUTE", cat.data.id, Math.round(performance.now() - routeStarted), route.length);')
+  : instrumented;
+vm.runInContext(traced, context, { filename: 'src/js/main.js' });
 const office = context.office;
 office.initialize();
 office.simulation.projects = Projects.migrateLegacy({ stageIndex: 0 });
@@ -125,21 +134,21 @@ office.installButtons();
 office.initializeCamera();
 office.updateWorkspaceLabels();
 
-assert.equal(office.TEAM.length, 8);
-assert.equal(elements.get('team-list').children.length, 8);
+assert.equal(office.TEAM.length, 10);
+assert.equal(elements.get('team-list').children.length, 10);
 assert.deepEqual(Array.from(office.TEAM.slice(0, 3), (x) => x.id),
   ['miko', 'nori', 'luna']);
 assert.deepEqual(Array.from(office.TEAM.slice(3, 6), (x) => x.id),
   ['kiko', 'bimo', 'piko']);
 assert.equal(office.MEETING_SEATS.length, 8);
-assert.equal(Object.keys(office.OFFICE_ROOMS).length, 4);
+assert.equal(Object.keys(office.OFFICE_ROOMS).length, 11);
 const rooms = Object.values(office.OFFICE_ROOMS);
 const officeWidth = Math.max(...rooms.map((x) => x.maxX))
   - Math.min(...rooms.map((x) => x.minX));
 const officeDepth = Math.max(...rooms.map((x) => x.maxZ))
   - Math.min(...rooms.map((x) => x.minZ));
-assert.ok(officeWidth / officeDepth > 1.65, 'office footprint is elongated');
-for (const room of rooms) {
+assert.ok(officeWidth / officeDepth > 0.8 && officeWidth / officeDepth < 1.4, 'campus is broad rather than elongated');
+for (const room of Object.values(office.OFFICE_ROOMS).filter((room) => !Object.values(Campus.ROOMS).includes(room))) {
   assert.ok((room.maxX - room.minX) * (room.maxZ - room.minZ) > 170,
     `${room.name}: room is too small`);
 }
@@ -153,11 +162,11 @@ assert.ok(office.COFFEE_TARGET.x > pantry.minX && office.COFFEE_TARGET.x < pantr
 assert.ok(office.MEETING_TABLE.width / office.MEETING_TABLE.depth > 2.5,
   'meeting table is long and rectangular');
 assert.equal(office.scene.children.filter((x) => x.userData.kind === 'lounge-chair').length, 8);
-assert.equal(elements.get('jobdesk-list').children.length, 8);
+assert.equal(elements.get('jobdesk-list').children.length, 10);
 for (const card of elements.get('jobdesk-list').children) {
   assert.equal(card.children[2].children.length, 3);
 }
-assert.equal(elements.get('workspace-labels').children.length, 8);
+assert.equal(elements.get('workspace-labels').children.length, 10);
 assert.ok(elements.get('workspace-labels').children.every((x) => !x.hidden));
 elements.get('jobdesk-button').listeners.click();
 assert.equal(elements.get('jobdesk-dialog').open, true);
@@ -284,6 +293,18 @@ assert.match(css, /transform-origin: center bottom/);
 assert.ok(fs.existsSync(`${root}/assets/images/readme-banner.svg`));
 assert.match(fs.readFileSync(`${root}/README.md`, 'utf8'), /assets\/images\/readme-banner\.svg/);
 console.log('PASS: scrolling, moving avatars, offscreen labels and label recreation do not shift other roles; local README banner is linked.');
+for (let index = 0; index < 180; index += 1) {
+  const start = { x: -31 + (index * 7.13) % 69, z: -30 + (index * 3.71) % 62 };
+  const end = { x: start.x + (index % 7 - 3) * 1.1, z: start.z + (index % 5 - 2) * 1.2 };
+  const candidates = office.nearbyObstacles(start.x, start.z, end.x, end.z);
+  for (const obstacle of office.obstacles) {
+    const hit = obstacle.type === 'circle'
+      ? office.segmentHitsCircle(start, end, obstacle.x, obstacle.z, obstacle.radius + 0.4)
+      : office.segmentHitsBox(start, end, obstacle);
+    assert.ok(!hit || candidates.includes(obstacle), 'spatial index missed a collision checked by the exact geometry');
+  }
+}
+console.log('PASS: spatial obstacle lookup preserves exact collision candidates across 180 campus segments.');
 if (process.argv.includes('--ui-only')) process.exit(0);
 
 function getObject(kind, ownerId) {
@@ -318,13 +339,14 @@ function checkSeated(cat) {
 for (let tick = 0; tick < 60; tick += 1) {
   for (const cat of office.cats) office.animateCat(cat, 1 / 60);
 }
-for (const cat of office.cats) checkSeated(cat);
+for (const cat of office.cats.filter((cat) => !cat.data.operational)) checkSeated(cat);
 console.log('PASS: all 8 avatars share chair coordinates, face their desks, and have straight monitors.');
 
+const projectCats = office.cats.filter((cat) => !cat.data.operational);
 if (!process.argv.includes('--projects-only') && !process.argv.includes('--schedule-only')) {
-  for (const cat of office.cats) {
+  for (const cat of projectCats.filter((cat) => !cat.data.operational)) {
     const targets = [cat.data.desk, office.COFFEE_TARGET,
-      office.LOUNGE_SPOTS[office.cats.indexOf(cat)]];
+      office.LOUNGE_SPOTS[projectCats.indexOf(cat)]];
     const meeting = office.MEETING_SEATS.find((x) => x.ownerId === cat.data.id);
     targets.push(new THREE.Vector3(meeting.x, 0, meeting.z));
     for (const target of targets) {
@@ -354,7 +376,7 @@ if (!process.argv.includes('--projects-only') && !process.argv.includes('--sched
   }
 
   for (const activity of ['coffee', 'lounge']) {
-    for (const cat of office.cats) {
+    for (const cat of projectCats) {
       assert.ok(office.navigate(cat, activity), `${cat.data.id}: start ${activity}`);
       finishWalking([cat], `${cat.data.id} ${activity}`);
       assert.equal(cat.mode, activity);
@@ -371,31 +393,31 @@ if (!process.argv.includes('--projects-only') && !process.argv.includes('--sched
   }
   console.log('PASS: every avatar walks to coffee/lounge and returns exactly onto its chair.');
 
-  for (const cat of office.cats) assert.ok(office.navigate(cat, 'meeting'));
-  finishWalking(office.cats, 'all-team meeting');
-  assert.ok(office.cats.every((cat) => cat.mode === 'meeting'));
+  for (const cat of projectCats) assert.ok(office.navigate(cat, 'meeting'));
+  finishWalking(projectCats, 'all-team meeting');
+  assert.ok(projectCats.every((cat) => cat.mode === 'meeting'));
   office.updateSimulation(0.01);
   assert.equal(office.simulation.projects.active.meetings.length, 1);
   office.updateSimulation(0.01);
   assert.equal(office.simulation.projects.active.meetings.length, 1,
     'one gathering must not create duplicate minutes every frame');
-  for (const cat of office.cats) {
+  for (const cat of projectCats) {
     const chair = getObject('meeting-chair', cat.data.id);
     assert.ok(Math.hypot(cat.root.position.x - chair.position.x,
       cat.root.position.z - chair.position.z) < 1e-8);
     assert.ok(Math.abs(cat.root.rotation.y - chair.rotation.y) < 1e-8);
   }
-  for (const cat of office.cats) assert.ok(office.navigate(cat, 'work'));
-  finishWalking(office.cats, 'return from meeting');
-  for (const cat of office.cats) checkSeated(cat);
+  for (const cat of projectCats) assert.ok(office.navigate(cat, 'work'));
+  finishWalking(projectCats, 'return from meeting');
+  for (const cat of projectCats) checkSeated(cat);
   console.log('PASS: all 8 avatars attend the meeting together and return to their chairs.');
 
-  for (const cat of office.cats) assert.ok(office.navigate(cat, 'lounge'));
-  finishWalking(office.cats, 'all-team pantry visit');
-  assert.ok(office.cats.every((cat) => cat.mode === 'lounge'));
-  for (const cat of office.cats) assert.ok(office.navigate(cat, 'work'));
-  finishWalking(office.cats, 'return from pantry');
-  for (const cat of office.cats) checkSeated(cat);
+  for (const cat of projectCats) assert.ok(office.navigate(cat, 'lounge'));
+  finishWalking(projectCats, 'all-team pantry visit');
+  assert.ok(projectCats.every((cat) => cat.mode === 'lounge'));
+  for (const cat of projectCats) assert.ok(office.navigate(cat, 'work'));
+  finishWalking(projectCats, 'return from pantry');
+  for (const cat of projectCats) checkSeated(cat);
   console.log('PASS: all 8 avatars rest in the pantry together and return to work.');
 }
 
@@ -555,17 +577,18 @@ console.log('PASS: Hybrid milestones, scope-change decisions, actor labels and v
 
 const officeTimeAt = (hour, minute = 0) => ({ dateKey: '2026-11-06', hour, minute, second: 0 });
 office.simulation.office = null;
-office.syncOfficeSchedule(officeTimeAt(6, 59), true);
+office.syncOfficeSchedule(officeTimeAt(4, 59), true);
 assert.ok(office.cats.every((cat) => !cat.root.visible && cat.mode === 'away'));
 const arrivalMinute = office.simulation.office.day.members[0].arrivalMinute;
 office.syncOfficeSchedule(officeTimeAt(7, arrivalMinute - 420));
 assert.equal(office.cats[0].root.visible, true);
-assert.ok(office.cats.slice(1).every((cat) => !cat.root.visible));
-office.cats[1].root.position.set(-16, 0, 0);
-assert.equal(office.blocked(-16, 0, office.cats[0], true), false,
+assert.ok(office.cats.slice(1).filter((cat) => !cat.data.operational).every((cat) => !cat.root.visible));
+office.cats[1].root.position.set(0, 0, 26);
+assert.equal(office.blocked(0, 26, office.cats[0], true), false,
   'hidden avatars must not obstruct navigation');
 
 function finishRoutineWalking(label) {
+  console.log(`CHECK: ${label}`);
   for (let step = 0; step < 2400 && office.cats.some((cat) => cat.mode === 'walk'); step += 1) {
     for (const cat of office.cats) {
       if (cat.mode === 'walk') office.moveCat(cat, 0.05);
@@ -583,7 +606,8 @@ if (!process.argv.includes('--projects-only')) {
   assert.equal(office.cats[0].mode, 'prepare');
 }
 office.syncOfficeSchedule(officeTimeAt(9), true);
-assert.ok(office.cats.every((cat) => cat.root.visible && cat.mode === 'work'));
+assert.ok(office.cats.filter((cat) => !cat.data.operational).every((cat) => cat.root.visible && cat.mode === 'work'));
+assert.equal(office.cats.find((cat) => cat.data.id === 'rani').mode, 'reception');
 const tasksBeforeRoutine = JSON.stringify(office.simulation.projects);
 office.syncOfficeSchedule(officeTimeAt(12));
 assert.ok(office.cats.every((cat) => cat.activity === 'lounge'));
@@ -593,11 +617,11 @@ if (!process.argv.includes('--projects-only')) {
   assert.ok(office.cats.every((cat) => cat.mode === 'lounge'));
   office.syncOfficeSchedule(officeTimeAt(13));
   finishRoutineWalking('return after ishoma');
-  assert.ok(office.cats.every((cat) => cat.mode === 'work'));
+  assert.ok(office.cats.filter((cat) => !cat.data.operational).every((cat) => cat.mode === 'work'));
 }
 office.cats.forEach((cat) => { cat.energy = 90; });
 office.syncOfficeSchedule(officeTimeAt(16, 30), true);
-assert.ok(office.cats.every((cat) => cat.mode === 'report'));
+assert.ok(office.cats.filter((cat) => cat.data.id !== 'tomo').every((cat) => cat.mode === 'report'));
 assert.ok(office.simulation.office.day.members.every((record) => record.report));
 const requests = office.simulation.office.day.members.filter((record) => record.overtime.status === 'pending');
 assert.equal(requests.length, 3);
@@ -605,7 +629,7 @@ const overtimeId = requests[0].id;
 Schedule.decide(office.simulation.office, officeTimeAt(16, 40), overtimeId, 'approve', 1260);
 office.syncOfficeSchedule(officeTimeAt(17));
 assert.equal(office.cats.find((cat) => cat.data.id === overtimeId).activity, 'lounge');
-assert.ok(office.cats.filter((cat) => cat.data.id !== overtimeId).every((cat) => cat.activity === 'exit'));
+assert.ok(office.cats.filter((cat) => cat.data.id !== overtimeId).every((cat) => cat.activity === 'exit' || !cat.root.visible));
 if (!process.argv.includes('--projects-only')) {
   finishRoutineWalking('regular departure and overtime break');
   assert.ok(office.cats.filter((cat) => cat.data.id !== overtimeId).every((cat) => !cat.root.visible));
@@ -627,3 +651,41 @@ invalidOffice.office.day.members[0].overtime.untilMinute = 1500;
 assert.throws(() => office.restoreProgress(invalidOffice));
 assert.equal(JSON.stringify(office.progressSnapshot()), beforeInvalidOffice);
 console.log('PASS: WIB attendance, report, overtime permission/expiry, hidden avatars, unchanged project tasks, and validated schedule backup.');
+
+if (process.argv.includes('--campus')) {
+  office.simulation.office = null;
+  office.syncOfficeSchedule(officeTimeAt(5), true);
+  const cleaner = office.cats.find((cat) => cat.data.id === 'tomo');
+  assert.ok(cleaner.root.visible && office.cats.filter((cat) => cat !== cleaner).every((cat) => !cat.root.visible));
+  for (let index = 0; index < Campus.CLEANING.length; index += 1) {
+    office.syncOfficeSchedule(officeTimeAt(5 + Math.floor(index / 6), index % 6 * 10));
+    finishRoutineWalking(`cleaning ${Campus.CLEANING[index].room}`);
+    assert.equal(cleaner.mode, 'clean');
+    assert.ok(Math.hypot(cleaner.root.position.x - Campus.CLEANING[index].x,
+      cleaner.root.position.z - Campus.CLEANING[index].z) < 1e-8);
+  }
+  assert.equal(office.simulation.office.day.members.find((record) => record.id === 'tomo').actions.length, 12);
+  office.syncOfficeSchedule(officeTimeAt(9), true);
+  const miko = office.cats[0];
+  for (const activity of ['bathroom', 'wudu', 'prayer']) {
+    assert.ok(office.navigate(miko, activity, true));
+    finishRoutineWalking(`facility ${activity}`);
+    assert.equal(miko.mode, activity);
+  }
+  Schedule.setPrayerParticipant(office.simulation.office, 'miko', true);
+  const noon = Math.max(720, Schedule.prayerTimes('2026-11-06').dhuhr);
+  office.syncOfficeSchedule(officeTimeAt(Math.floor(noon / 60), noon % 60));
+  assert.equal(miko.activity, 'wudu');
+  finishRoutineWalking('scheduled wudu and staff breaks');
+  office.syncOfficeSchedule(officeTimeAt(Math.floor((noon + 2) / 60), (noon + 2) % 60));
+  finishRoutineWalking('scheduled prayer');
+  assert.equal(miko.mode, 'prayer');
+  office.syncOfficeSchedule(officeTimeAt(13), true);
+  assert.ok(office.facilityState.vehicles.filter((vehicle) => vehicle.root.visible).length > 0);
+  for (const cat of office.cats) assert.ok(office.navigate(cat, 'exit', true));
+  finishRoutineWalking('parking departures');
+  assert.ok(office.cats.every((cat) => !cat.root.visible));
+  office.applyOfficeRoutine(officeTimeAt(21), true);
+  assert.ok(office.facilityState.vehicles.every((vehicle) => !vehicle.root.visible));
+  console.log('PASS: OB reaches all cleaning rooms, bathroom/wudu/musala paths work, prayer routing and all parking departures succeed.');
+}

@@ -18,6 +18,8 @@ test('alamat halaman utama tetap; stylesheet dan skrip lokal terhubung berurutan
     'src/js/projects/methods/hybrid.js',
     'src/js/projects/project-engine.js',
     'src/js/projects/project-ui.js',
+    'src/js/office/prayer-times.js',
+    'src/js/office/office-campus.js',
     'src/js/office/office-schedule.js',
     'src/js/office/office-ui.js',
     'src/js/main.js',
@@ -55,4 +57,14 @@ test('kode lama tidak diduplikasi di root dan penyimpanan tetap memakai kunci v3
   }
   assert.match(read('src/js/main.js'), /const PROGRESS_KEY = "pawffice\.progress\.v3"/);
   assert.match(read('README.md'), /Susunan folder proyek/);
+});
+
+test('README ringkas di depan dan panduan teknis tersembunyi secara default', () => {
+  const readme = read('README.md');
+  const boundary = readme.indexOf('<details>');
+  assert.ok(boundary > 0 && readme.slice(0, boundary).split('\n').length < 80);
+  assert.match(readme, /Buka panduan lengkap, jobdesk, struktur folder, dan detail teknis/);
+  assert.equal((readme.match(/<details>/g) || []).length, (readme.match(/<\/details>/g) || []).length);
+  assert.equal(/<details\s+open/.test(readme), false);
+  assert.match(readme, /office-campus\.js/);
 });
