@@ -297,6 +297,56 @@ test('impor harus lolos validasi, preview dan konfirmasi sebelum mengganti state
   assert.match(ui.elements['project-message'].textContent, /berhasil/);
 });
 
+test('UI Hybrid menampilkan perencanaan awal dan modal persetujuan tambahan scope', async () => {
+  const ui = setup();
+  const project = P.createProject(ui.workspace, {
+    method: 'hybrid', title: 'Website Studio Daun', client: 'Studio Daun',
+    kind: 'Company profile', goal: 'Mengenalkan layanan studio.', requirements: 'Profil studio', deadline: '',
+  });
+  ui.hub.open();
+  await ui.tab('backlog');
+  assert.match(ui.content.textContent, /scope PM dan analisis Nori/);
+  await ui.button('Setujui kebutuhan').click();
+  await ui.tab('board');
+  for (const taskId of ['scope', 'analysis']) {
+    P.changeTask(ui.workspace, taskId, 'start');
+    P.changeTask(ui.workspace, taskId, 'draft');
+    for (let index = 0; index < 3; index += 1) P.changeTask(ui.workspace, taskId, 'check', index);
+    P.changeTask(ui.workspace, taskId, 'approve');
+  }
+  await ui.tab('backlog');
+  assert.equal(ui.button('Edit fitur').disabled, true);
+  await ui.button('Tambah fitur').click();
+  const form = ui.content.querySelectorAll('form')[0];
+  const fields = {
+    title: 'Artikel', need: 'Membaca kabar studio.', priority: 'low',
+    criteria: 'Daftar artikel dan kondisi kosong dirinci.', scopeReason: 'Permintaan tambahan klien.',
+  };
+  for (const input of ['input', 'textarea', 'select'].flatMap((tag) => form.querySelectorAll(tag))) input.value = fields[input.name];
+  await form.emit('submit');
+  const extra = project.backlog[1];
+  assert.equal(ui.button('Setujui perubahan scope').disabled, true);
+  await ui.button('Setujui kebutuhan').click();
+  await ui.button('Setujui perubahan scope').click();
+  assert.equal(ui.elements['project-confirm'].open, true);
+  await ui.elements['project-confirm-cancel'].click();
+  assert.equal(extra.scopeStatus, 'pending');
+  await ui.button('Setujui perubahan scope').click();
+  await ui.elements['project-confirm-accept'].click();
+  assert.equal(extra.scopeStatus, 'approved');
+  const iteration = ui.content.querySelectorAll('form')[0];
+  iteration.querySelectorAll('input').find((input) => input.value === extra.id).checked = true;
+  await iteration.emit('submit');
+  await ui.tab('board');
+  assert.match(ui.content.textContent, /Susun scope dan rencana kerja · Artikel/);
+  const selector = ui.content.querySelectorAll('select')[0];
+  selector.value = 'planning';
+  await selector.emit('change');
+  assert.doesNotMatch(ui.content.textContent, /Susun scope dan rencana kerja · Artikel/);
+  assert.match(ui.content.textContent, /Scope proyek/);
+  assert.deepEqual(P.validateWorkspace(ui.workspace), ui.workspace);
+});
+
 test('file terlalu besar ditolak dan pembacaan impor yang terlambat tidak menghapus form baru', async () => {
   const ui = setup();
   ui.hub.open();

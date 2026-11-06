@@ -2843,12 +2843,10 @@
     $("main-quest-percent").textContent = `${summary.percent}%`;
     $("main-quest-fill").style.width = `${summary.percent}%`;
     $("main-quest-progressbar").setAttribute("aria-valuenow", String(summary.percent));
-    $("main-quest-stage-count").textContent = `${summary.done} dari ${summary.total} ${project?.method === "agile" ? "fitur diterima" : "tugas disetujui"}`;
-    $("main-quest-rule").textContent = project?.method === "agile"
-      ? "Progres = fitur diterima / seluruh backlog. Perubahan cakupan dapat mengubah persentase."
-      : "Progres berdasarkan tugas yang disetujui, bukan timer.";
+    $("main-quest-stage-count").textContent = `${summary.done} dari ${summary.total} ${Projects.progressUnit(project)}`;
+    $("main-quest-rule").textContent = Projects.progressRule(project);
     $("main-quest-stage").textContent = definition?.title
-      || (project?.method === "agile" && !summary.complete
+      || (Projects.isIterative(project) && !summary.complete
         ? "Susun backlog / rencanakan iterasi berikutnya"
         : project ? "Dokumen simulasi siap diarsipkan" : "Siapkan brief proyek");
     const owner = definition
@@ -2861,7 +2859,7 @@
     const list = $("main-quest-steps");
     list.replaceChildren();
 
-    (project?.tasks || []).filter((item) => !project?.method || project.method !== "agile"
+    (project?.tasks || []).filter((item) => !Projects.isIterative(project)
       || item.status !== "done").slice(0, 8).forEach((itemTask) => {
       const stage = Projects.definition(project, itemTask.id);
       const member = TEAM.find((person) => person.id === stage.ownerId);
@@ -2886,7 +2884,7 @@
       const task = ownedTasks.find((item) => ["doing", "review"].includes(item.status))
         || ownedTasks.find((item) => item.status === "todo" && !Projects.blockers(project, item.id).length)
         || ownedTasks.find((item) => item.status !== "done") || ownedTasks[0];
-      if (!task) return project?.method === "agile" ? "Menunggu rencana iterasi" : "Menunggu brief proyek";
+      if (!task) return Projects.isIterative(project) ? "Menunggu rencana iterasi" : "Menunggu brief proyek";
       const definition = Projects.definition(project, task.id);
       if (task.status === "doing") return definition.title;
       if (task.status === "review") return `Menunggu review ${definition.output.toLowerCase()}`;

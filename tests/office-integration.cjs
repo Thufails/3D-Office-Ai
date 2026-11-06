@@ -317,81 +317,83 @@ for (let tick = 0; tick < 60; tick += 1) {
 for (const cat of office.cats) checkSeated(cat);
 console.log('PASS: all 8 avatars share chair coordinates, face their desks, and have straight monitors.');
 
-for (const cat of office.cats) {
-  const targets = [cat.data.desk, office.COFFEE_TARGET,
-    office.LOUNGE_SPOTS[office.cats.indexOf(cat)]];
-  const meeting = office.MEETING_SEATS.find((x) => x.ownerId === cat.data.id);
-  targets.push(new THREE.Vector3(meeting.x, 0, meeting.z));
-  for (const target of targets) {
-    assert.equal(office.blocked(target.x, target.z, cat, false), false,
-      `${cat.data.id}: destination intersects furniture ${target.toArray()}`);
-    assert.ok(office.findPath(cat.data.desk, target, cat, false).length,
-      `${cat.data.id}: destination unreachable ${target.toArray()}`);
-  }
-}
-console.log('PASS: all 32 work/coffee/lounge/meeting destinations are clear and reachable.');
-
-function finishWalking(cats, label) {
-  const limit = 2400;
-  let tick = 0;
-  for (; tick < limit && cats.some((cat) => cat.mode === 'walk'); tick += 1) {
-    for (const cat of cats) {
-      if (cat.mode === 'walk') office.moveCat(cat, 0.05);
-      office.animateCat(cat, 0.05);
-    }
-  }
-  const stuck = cats.filter((cat) => cat.mode === 'walk').map((cat) => ({
-    id: cat.data.id,
-    position: cat.root.position.toArray(),
-    target: cat.navTarget?.toArray(),
-  }));
-  assert.equal(stuck.length, 0, `${label}: stuck agents ${JSON.stringify(stuck)}`);
-}
-
-for (const activity of ['coffee', 'lounge']) {
+if (!process.argv.includes('--projects-only')) {
   for (const cat of office.cats) {
-    assert.ok(office.navigate(cat, activity), `${cat.data.id}: start ${activity}`);
-    finishWalking([cat], `${cat.data.id} ${activity}`);
-    assert.equal(cat.mode, activity);
-    if (activity === 'lounge') {
-      const chair = getObject('lounge-chair', cat.data.id);
-      assert.ok(Math.hypot(cat.root.position.x - chair.position.x,
-        cat.root.position.z - chair.position.z) < 1e-8);
-      assert.ok(Math.abs(cat.root.rotation.y - chair.rotation.y) < 1e-8);
+    const targets = [cat.data.desk, office.COFFEE_TARGET,
+      office.LOUNGE_SPOTS[office.cats.indexOf(cat)]];
+    const meeting = office.MEETING_SEATS.find((x) => x.ownerId === cat.data.id);
+    targets.push(new THREE.Vector3(meeting.x, 0, meeting.z));
+    for (const target of targets) {
+      assert.equal(office.blocked(target.x, target.z, cat, false), false,
+        `${cat.data.id}: destination intersects furniture ${target.toArray()}`);
+      assert.ok(office.findPath(cat.data.desk, target, cat, false).length,
+        `${cat.data.id}: destination unreachable ${target.toArray()}`);
     }
-    assert.ok(office.navigate(cat, 'work'));
-    finishWalking([cat], `${cat.data.id} return from ${activity}`);
-    checkSeated(cat);
   }
-}
-console.log('PASS: every avatar walks to coffee/lounge and returns exactly onto its chair.');
+  console.log('PASS: all 32 work/coffee/lounge/meeting destinations are clear and reachable.');
 
-for (const cat of office.cats) assert.ok(office.navigate(cat, 'meeting'));
-finishWalking(office.cats, 'all-team meeting');
-assert.ok(office.cats.every((cat) => cat.mode === 'meeting'));
-office.updateSimulation(0.01);
-assert.equal(office.simulation.projects.active.meetings.length, 1);
-office.updateSimulation(0.01);
-assert.equal(office.simulation.projects.active.meetings.length, 1,
-  'one gathering must not create duplicate minutes every frame');
-for (const cat of office.cats) {
-  const chair = getObject('meeting-chair', cat.data.id);
-  assert.ok(Math.hypot(cat.root.position.x - chair.position.x,
-    cat.root.position.z - chair.position.z) < 1e-8);
-  assert.ok(Math.abs(cat.root.rotation.y - chair.rotation.y) < 1e-8);
-}
-for (const cat of office.cats) assert.ok(office.navigate(cat, 'work'));
-finishWalking(office.cats, 'return from meeting');
-for (const cat of office.cats) checkSeated(cat);
-console.log('PASS: all 8 avatars attend the meeting together and return to their chairs.');
+  function finishWalking(cats, label) {
+    const limit = 2400;
+    let tick = 0;
+    for (; tick < limit && cats.some((cat) => cat.mode === 'walk'); tick += 1) {
+      for (const cat of cats) {
+        if (cat.mode === 'walk') office.moveCat(cat, 0.05);
+        office.animateCat(cat, 0.05);
+      }
+    }
+    const stuck = cats.filter((cat) => cat.mode === 'walk').map((cat) => ({
+      id: cat.data.id,
+      position: cat.root.position.toArray(),
+      target: cat.navTarget?.toArray(),
+    }));
+    assert.equal(stuck.length, 0, `${label}: stuck agents ${JSON.stringify(stuck)}`);
+  }
 
-for (const cat of office.cats) assert.ok(office.navigate(cat, 'lounge'));
-finishWalking(office.cats, 'all-team pantry visit');
-assert.ok(office.cats.every((cat) => cat.mode === 'lounge'));
-for (const cat of office.cats) assert.ok(office.navigate(cat, 'work'));
-finishWalking(office.cats, 'return from pantry');
-for (const cat of office.cats) checkSeated(cat);
-console.log('PASS: all 8 avatars rest in the pantry together and return to work.');
+  for (const activity of ['coffee', 'lounge']) {
+    for (const cat of office.cats) {
+      assert.ok(office.navigate(cat, activity), `${cat.data.id}: start ${activity}`);
+      finishWalking([cat], `${cat.data.id} ${activity}`);
+      assert.equal(cat.mode, activity);
+      if (activity === 'lounge') {
+        const chair = getObject('lounge-chair', cat.data.id);
+        assert.ok(Math.hypot(cat.root.position.x - chair.position.x,
+          cat.root.position.z - chair.position.z) < 1e-8);
+        assert.ok(Math.abs(cat.root.rotation.y - chair.rotation.y) < 1e-8);
+      }
+      assert.ok(office.navigate(cat, 'work'));
+      finishWalking([cat], `${cat.data.id} return from ${activity}`);
+      checkSeated(cat);
+    }
+  }
+  console.log('PASS: every avatar walks to coffee/lounge and returns exactly onto its chair.');
+
+  for (const cat of office.cats) assert.ok(office.navigate(cat, 'meeting'));
+  finishWalking(office.cats, 'all-team meeting');
+  assert.ok(office.cats.every((cat) => cat.mode === 'meeting'));
+  office.updateSimulation(0.01);
+  assert.equal(office.simulation.projects.active.meetings.length, 1);
+  office.updateSimulation(0.01);
+  assert.equal(office.simulation.projects.active.meetings.length, 1,
+    'one gathering must not create duplicate minutes every frame');
+  for (const cat of office.cats) {
+    const chair = getObject('meeting-chair', cat.data.id);
+    assert.ok(Math.hypot(cat.root.position.x - chair.position.x,
+      cat.root.position.z - chair.position.z) < 1e-8);
+    assert.ok(Math.abs(cat.root.rotation.y - chair.rotation.y) < 1e-8);
+  }
+  for (const cat of office.cats) assert.ok(office.navigate(cat, 'work'));
+  finishWalking(office.cats, 'return from meeting');
+  for (const cat of office.cats) checkSeated(cat);
+  console.log('PASS: all 8 avatars attend the meeting together and return to their chairs.');
+
+  for (const cat of office.cats) assert.ok(office.navigate(cat, 'lounge'));
+  finishWalking(office.cats, 'all-team pantry visit');
+  assert.ok(office.cats.every((cat) => cat.mode === 'lounge'));
+  for (const cat of office.cats) assert.ok(office.navigate(cat, 'work'));
+  finishWalking(office.cats, 'return from pantry');
+  for (const cat of office.cats) checkSeated(cat);
+  console.log('PASS: all 8 avatars rest in the pantry together and return to work.');
+}
 
 
 const legacy = {
@@ -508,3 +510,41 @@ assert.equal(office.simulation.projects.active.method, 'agile');
 assert.equal(office.simulation.happiness, happinessBeforeAgile + 25);
 assert.equal(projectHubOptions.importProgress(agileBackup), true);
 console.log('PASS: Agile integrates with office focus, avatar role labels, per-feature rewards, v3 reload and backup import without progress reset.');
+
+office.simulation.projects = Projects.emptyWorkspace();
+const hybridProject = Projects.createProject(office.simulation.projects, {
+  method: 'hybrid', title: 'Company profile Studio Daun', client: 'Studio Daun',
+  kind: 'Company profile', goal: 'Mengenalkan layanan studio.', requirements: 'Profil studio', deadline: '',
+});
+projectHubOptions.onChange('create', hybridProject);
+office.updateUI();
+assert.match(elements.get('main-quest-stage-count').textContent, /0 dari 3 milestone/);
+assert.match(elements.get('main-quest-description').textContent, /Hybrid/);
+Projects.backlogAction(office.simulation.projects, hybridProject.backlog[0].id, 'approve');
+for (const taskId of ['scope', 'analysis']) {
+  Projects.changeTask(office.simulation.projects, taskId, 'start');
+  Projects.changeTask(office.simulation.projects, taskId, 'draft');
+  for (let index = 0; index < 3; index += 1) Projects.changeTask(office.simulation.projects, taskId, 'check', index);
+  const done = Projects.changeTask(office.simulation.projects, taskId, 'approve');
+  projectHubOptions.onChange('approve', done);
+}
+const scopeExtra = Projects.saveFeature(office.simulation.projects, null, {
+  title: 'Kontak WhatsApp', need: 'Pengunjung menghubungi studio.', priority: 'high',
+  criteria: 'Alur tombol dan tujuan kontak dirinci.', scopeReason: 'Permintaan tambahan setelah scope awal.',
+});
+Projects.backlogAction(office.simulation.projects, scopeExtra.id, 'approve');
+const beforeScopeApproval = office.simulation.happiness;
+projectHubOptions.onChange('scope-change', Projects.approveScopeChange(office.simulation.projects, scopeExtra.id));
+assert.equal(office.simulation.happiness, beforeScopeApproval, 'scope approval is not a task completion reward');
+const hybridIteration = Projects.startIteration(office.simulation.projects, 'Fitur tambahan', [scopeExtra.id]);
+projectHubOptions.onChange('iteration', hybridIteration);
+office.updateUI();
+assert.match(elements.get('main-quest-stage-count').textContent, /2 dari 4 milestone/);
+assert.match(elements.get('main-quest-rule').textContent, /scope, analisis awal, dan fitur/);
+const hybridBackup = projectHubOptions.checkBackup(projectHubOptions.makeBackup());
+assert.equal(hybridBackup.projects.active.backlog[1].scopeStatus, 'approved');
+office.loadProgress();
+assert.equal(office.simulation.projects.active.method, 'hybrid');
+assert.equal(office.simulation.projects.active.backlog[0].scopeStatus, 'baseline');
+assert.equal(projectHubOptions.importProgress(hybridBackup), true);
+console.log('PASS: Hybrid milestones, scope-change decisions, actor labels and v3 reload/backup integrate with the office.');

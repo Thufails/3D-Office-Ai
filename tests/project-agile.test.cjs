@@ -23,7 +23,7 @@ function begin(workspace, feature) {
 
 test('Agile menyarankan backlog dari brief, tetapi tidak memulai fitur sebelum review dan pilihan pengguna', () => {
   const workspace = P.emptyWorkspace();
-  assert.throws(() => P.createProject(workspace, brief('hybrid')));
+  assert.throws(() => P.createProject(workspace, brief('unknown')));
   assert.throws(() => P.createProject(workspace, brief('__proto__')));
   const project = P.createProject(workspace, brief());
   assert.equal(project.tasks.length, 0);
@@ -142,7 +142,7 @@ test('save lama tanpa metode menjadi Alur lama dan tidak diubah menjadi Agile', 
 
 test('modul metode dapat di-link sebagai skrip browser lokal tanpa require atau bundler', () => {
   const context = vm.createContext({});
-  for (const file of ['methods/waterfall.js', 'methods/agile.js', 'project-engine.js']) {
+  for (const file of ['methods/waterfall.js', 'methods/iterative.js', 'methods/agile.js', 'methods/hybrid.js', 'project-engine.js']) {
     const path = require.resolve(`../src/js/projects/${file}`);
     vm.runInContext(fs.readFileSync(path, 'utf8'), context);
   }

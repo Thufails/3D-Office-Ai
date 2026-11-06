@@ -60,7 +60,7 @@ proyek, atau tekan **P**. Area dokumen dibuka terpisah dari kantor 3D.
 | Tab | Yang bisa dilakukan |
 | --- | --- |
 | 🌱 **Brief** | Isi nama proyek, klien, jenis website, metode, tujuan, fitur, dan target tanggal opsional. |
-| 🌿 **Backlog & iterasi** | Khusus Agile: review usulan fitur, atur prioritas, dan pilih pekerjaan iterasi. |
+| 🌿 **Backlog & iterasi** | Agile/Hybrid: review usulan fitur, atur prioritas, dan pilih pekerjaan iterasi. |
 | 📋 **Papan tugas** | Mulai tugas, buat draf template, edit dokumen, lalu review hasil. |
 | 🤝 **Notulen** | Baca catatan Sasa dan tindak lanjut yang mengacu ke tugas tim. |
 | 🗂️ **Arsip** | Simpan proyek selesai/berjalan, baca dokumen, dan lanjutkan proyek lama. |
@@ -77,7 +77,7 @@ progres dari versi lama. Brief memuat 1–20 kebutuhan, satu kebutuhan per baris
 | --- | --- |
 | 🪜 **Waterfall** | Delapan tugas untuk seluruh proyek. Tiap tahap menunggu hasil prasyarat yang sudah disetujui; BE dapat berjalan paralel setelah analisis. |
 | 🌿 **Agile** | Setiap baris kebutuhan menjadi usulan backlog. Kamu mereview kebutuhan, mengatur prioritas, dan memilih fitur untuk iterasi. |
-| 🧩 **Hybrid** | Masih direncanakan, belum dapat dipilih. |
+| 🧩 **Hybrid** | Sahkan scope dan analisis awal dahulu, kemudian kerjakan fitur dalam iterasi. Tambahan scope membutuhkan alasan dan persetujuan. |
 
 Metode dipilih saat membuat brief. Belum ada konversi metode pada proyek
 yang sudah dibuat; arsipkan dan buat brief baru bila ingin mencoba metode lain.
@@ -115,6 +115,35 @@ atau dihapus; penghapusan memakai modal konfirmasi Pawffice.
 
 Ini implementasi awal alur Agile untuk dokumen simulasi. Belum ada estimasi
 kapasitas otomatis, story point, durasi sprint, atau implementasi website oleh AI.
+
+### 🧩 Hybrid dengan rencana awal dan iterasi
+
+1. Pilih **Hybrid** pada brief baru. Review backlog usulan Nori dan setujui
+   kebutuhan awal seperti pada Agile.
+2. Buka **Papan tugas** dan selesaikan dokumen **scope PM**. Persetujuan scope
+   memerlukan seluruh kebutuhan awal sudah direview dan disetujui.
+3. Saat scope disahkan, kebutuhan awal menjadi **baseline yang dikunci**.
+   Selesaikan **analisis awal Nori** sebelum iterasi pertama dapat dimulai.
+4. Pilih 1–5 fitur dari baseline untuk iterasi. Kerjakan delapan dokumen tiap
+   fitur, lakukan review, lalu tutup iterasi setelah hasilnya diterima.
+5. Jika muncul kebutuhan tambahan, klik **Tambah fitur** dan isi **alasan
+   perubahan / tambahan scope**. Review kebutuhan, lalu gunakan **Setujui
+   perubahan scope**. Modal menampilkan rincian dan alasan sebelum pengesahan.
+6. Fitur tambahan yang telah disetujui bisa dipilih untuk iterasi berikutnya.
+   Mengeditnya sebelum masuk iterasi mengulang review kebutuhan dan persetujuan
+   scope. Fitur baseline dan fitur dalam iterasi tetap dikunci.
+
+Kamu bertindak sebagai pengelola/Owner simulasi saat menyetujui perubahan scope;
+memilih avatar bukan autentikasi atau persetujuan AI. Pada tahap ini semua
+tambahan kebutuhan setelah baseline memerlukan persetujuan, tanpa klasifikasi
+otomatis perubahan kecil/besar. Alasan dan waktu pengesahan tersimpan pada
+fitur serta disertakan di cadangan dan dokumen Markdown.
+
+Progres Hybrid menghitung **dua milestone rencana awal + fitur diterima**
+dibagi **dua milestone + seluruh fitur backlog**. Contoh: proyek dua fitur
+memiliki empat milestone. Scope dan analisis selesai berarti 50%; dua fitur
+diterima berarti 100%. Menambah fitur baru dapat menurunkan persentase.
+Pilihan **Rencana awal** di papan tugas membuka kembali dokumen perencanaan.
 
 ### 📋 Alur tugas yang menghasilkan dokumen
 
@@ -268,6 +297,9 @@ Menambah cakupan bisa menurunkan persentase; menghapus fitur yang belum
 dikerjakan juga mengubah total cakupan. Tugas yang selesai tetap tersimpan.
 Backlog kosong belum dianggap proyek selesai.
 
+Pada Hybrid, persentase menghitung dua milestone rencana awal dan fitur yang
+diterima; rumusnya ditampilkan pada panel proyek dan tab backlog.
+
 Waktu duduk, kecepatan simulasi, dan timer 30 detik tidak lagi
 menyelesaikan tugas proyek secara otomatis. Setiap persetujuan tugas memberi
 25 happiness sekali; migrasi, reload, dan melanjutkan arsip tidak memberi ulang hadiah.
@@ -370,7 +402,9 @@ bisa digunakan untuk mencoba suasana lain.
 │           ├── project-ui.js              # Antarmuka Project Hub
 │           └── methods/
 │               ├── waterfall.js          # Prasyarat alur bertahap
-│               └── agile.js              # Backlog, iterasi, dan progres fitur
+│               ├── iterative.js          # Bantuan operasi backlog/iterasi bersama
+│               ├── agile.js              # Aturan iterasi dan progres fitur
+│               └── hybrid.js             # Rencana awal dan persetujuan scope
 ├── vendor/
 │   └── three/
 │       ├── Three.js                       # Library Three.js lokal
@@ -386,6 +420,7 @@ bisa digunakan untuk mencoba suasana lain.
 ├── tests/
 │   ├── project-engine.test.cjs             # Tes aturan proyek
 │   ├── project-agile.test.cjs              # Tes fitur, iterasi, dan kompatibilitas
+│   ├── project-hybrid.test.cjs             # Tes rencana awal dan perubahan scope
 │   ├── project-ui.test.cjs                 # Tes handler dan modal UI
 │   ├── project-structure.test.cjs          # Tes path dan struktur proyek
 │   └── office-integration.cjs              # Tes integrasi dan gerak kantor
@@ -414,7 +449,8 @@ Halaman utama **tidak dipindahkan**: tetap buka `3D-index.html` pada browser,
 profil, host, dan port yang sama. Penataan folder tidak mengubah kunci localStorage
 atau mereset proyek. Tidak ada backend, bundler, atau instalasi baru.
 
-HTML memuat file dengan urutan: library Three.js, modul Waterfall dan Agile, engine proyek, UI proyek,
+HTML memuat file dengan urutan: library Three.js, modul Waterfall, bantuan
+iterasi bersama, Agile, Hybrid, engine proyek, UI proyek,
 kemudian `main.js`. Path stylesheet, gambar README, lisensi, dan tes sudah
 disesuaikan ke lokasi baru. Jangan membuka file JavaScript sebagai halaman utama.
 
@@ -425,14 +461,16 @@ Role belum menjalankan model AI atau mengirim permintaan API.
 
 ### 🧩 Pembagian logika metode
 
-`src/js/projects/methods/waterfall.js` mengatur dependensi tahap, sedangkan
-`agile.js` mengatur usulan backlog, perubahan fitur, perencanaan dan penutupan
-iterasi, dependensi per fitur, serta penghitungan progres Agile.
+`src/js/projects/methods/waterfall.js` mengatur dependensi tahap.
+`agile.js` mengatur usulan backlog, dependensi per fitur, serta progres Agile.
+`hybrid.js` mengatur dua milestone rencana awal, penguncian baseline,
+persetujuan tambahan scope, dependensi, dan progres Hybrid.
+`iterative.js` menyediakan operasi backlog dan iterasi yang digunakan kedua
+metode; modul ini memanggil aturan khusus metode sebelum mengubah state.
 `project-engine.js` menghubungkan metode dengan data proyek, dokumen, review,
 validasi cadangan, dan arsip. `project-ui.js` menangani tampilan dan input.
 
-**Hybrid belum diimplementasikan** dan belum memiliki file `hybrid.js`.
-Alur persetujuan perubahan scope secara formal pada Waterfall juga masih
+Alur persetujuan perubahan scope secara formal pada Waterfall masih
 pengembangan berikutnya. Saat ini revisi dokumen dilakukan sebelum persetujuan;
 hasil yang sudah disetujui dikunci.
 
@@ -442,9 +480,12 @@ Node.js **hanya untuk menjalankan tes**, tidak diperlukan untuk membuka kantor.
 Tidak ada paket tambahan atau proses build yang harus diinstal.
 
 ```powershell
-node --test tests/project-engine.test.cjs tests/project-agile.test.cjs tests/project-ui.test.cjs tests/project-structure.test.cjs
+node --test tests/project-engine.test.cjs tests/project-agile.test.cjs tests/project-hybrid.test.cjs tests/project-ui.test.cjs tests/project-structure.test.cjs
 node tests/office-integration.cjs
 ```
+
+Untuk memeriksa integrasi proyek dan penyimpanan tanpa mengulang simulasi
+perjalanan avatar, jalankan `node tests/office-integration.cjs --projects-only`.
 
 Tes UI memakai DOM tiruan untuk memeriksa handler/state dan tes kantor memakai
 model Three.js tanpa rendering. Keduanya bukan pengganti pemeriksaan visual

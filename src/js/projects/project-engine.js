@@ -47,11 +47,23 @@
   const STATUSES = ["todo", "doing", "review", "done"];
   const KINDS = ["Company profile", "Booking / reservasi", "Toko online", "Dashboard / sistem internal", "Website lainnya"];
   const methods = typeof module !== "undefined" && module.exports
-    ? { waterfall: require("./methods/waterfall.js"), agile: require("./methods/agile.js") }
+    ? {
+      waterfall: require("./methods/waterfall.js"), agile: require("./methods/agile.js"),
+      hybrid: require("./methods/hybrid.js"),
+    }
     : globalThis.PawfficeMethods;
-  if (!methods?.waterfall || !methods?.agile) throw new Error("Modul metode proyek belum lengkap.");
+  if (!methods?.waterfall || !methods?.agile || !methods?.hybrid) throw new Error("Modul metode proyek belum lengkap.");
   const METHODS = Object.values(methods);
   const PRIORITIES = { high: "Tinggi", normal: "Sedang", low: "Rendah" };
+  const isIterative = (project) => methods[project?.method]?.iterative === true;
+  const planningDefinitions = (method) => TASKS.filter((task) => methods[method]?.planningIds?.includes(task.id));
+  const progressUnit = (project) => project?.method === "hybrid" ? "milestone disetujui"
+    : project?.method === "agile" ? "fitur diterima" : "tugas disetujui";
+  const progressRule = (project) => project?.method === "hybrid"
+    ? "Progres = (scope, analisis awal, dan fitur diterima) / seluruh milestone. Tambahan scope dapat mengubah persentase."
+    : project?.method === "agile"
+      ? "Progres = fitur diterima / seluruh backlog. Perubahan cakupan dapat mengubah persentase."
+      : "Progres berdasarkan tugas yang disetujui, bukan timer.";
   let sequence = 0;
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const now = () => new Date().toISOString();
@@ -117,9 +129,9 @@
       migrated: false,
       legacySeconds: 0,
       method,
-      backlog: method === "agile" ? methods.agile.suggest(metadata.requirements, id) : [],
+      backlog: methods[method].iterative ? methods[method].suggest(metadata.requirements, id) : [],
       iterations: [],
-      tasks: method === "agile" ? [] : TASKS.map((definition) => ({
+      tasks: (methods[method].iterative ? planningDefinitions(method) : TASKS).map((definition) => ({
         id: definition.id,
         status: "todo",
         artifact: "",
@@ -133,7 +145,7 @@
   }
 
   function summary(project) {
-    if (project?.method === "agile") return methods.agile.summarize(project);
+    if (isIterative(project)) return methods[project.method].summarize(project);
     const done = project ? project.tasks.filter((task) => task.status === "done").length : 0;
     return {
       done,
@@ -159,12 +171,17 @@
     const feature = project.backlog?.find((item) => item.id === task?.featureId);
     const features = feature
       ? `Fitur: ${feature.title}\nKebutuhan: ${feature.need}\nKriteria penerimaan: ${feature.criteria}`
-      : project.requirements.map((item, index) => `${index + 1}. ${item}`).join("\n");
+      : (project.method === "hybrid" ? project.backlog
+        .filter((item) => ["draft", "baseline"].includes(item.scopeStatus))
+        .map((item) => `${item.title}: ${item.need}\nKriteria: ${item.criteria}`)
+        : project.requirements).map((item, index) => `${index + 1}. ${item}`).join("\n");
     const sections = {
       scope: ["Dalam lingkup", features, "Di luar lingkup", "Belum termasuk implementasi/deployment nyata atau integrasi AI.",
-        "Rencana", project.method === "agile"
+        "Rencana", isIterative(project) && feature
           ? "Dalam iterasi terpilih, rinci kebutuhan fitur → desain → rencana FE/BE → QA → catatan serah-terima → penerimaan fitur. Review prioritas backlog sebelum iterasi berikutnya."
-          : "Analisis → desain → rencana FE dan BE → QA → serah-terima → review Owner."],
+          : project.method === "hybrid"
+            ? "Sahkan scope dan analisis awal → pilih fitur iterasi → review per fitur. Tambahan kebutuhan setelah scope disahkan memerlukan alasan dan persetujuan perubahan scope."
+            : "Analisis → desain → rencana FE dan BE → QA → serah-terima → review Owner."],
       analysis: ["Kebutuhan fungsional", features, "Alur utama", "Pengunjung membuka halaman → menggunakan fitur utama → menerima konfirmasi/status.",
         "Kriteria penerimaan", "Periksa setiap kebutuhan bersama klien; catat input, output, dan kondisi gagal."],
       design: ["Halaman yang perlu dirancang", "Beranda, halaman fitur utama, formulir, konfirmasi, dan keadaan kosong/error.",
@@ -233,12 +250,14 @@
       if (!task.artifact.trim() || !task.checks.every(Boolean)) {
         throw new Error("Selesaikan seluruh checklist review sebelum menyetujui hasil.");
       }
+      methods[project.method]?.beforeApprove?.(project, task);
       task.status = "done";
     } else {
       throw new Error("Perubahan status ini tidak tersedia.");
     }
     task.updatedAt = now();
     project.updatedAt = task.updatedAt;
+    if (action === "approve") methods[project.method]?.afterApprove?.(project, task);
     return task;
   }
 
@@ -255,8 +274,19 @@
     return { ...base, title: feature ? `${base.title} · ${feature.title}` : base.title };
   }
 
-  const { featureInput, saveFeature, backlogAction, startIteration, closeIteration } =
-    methods.agile.createActions({ text, id, now, TASKS, PRIORITIES });
+  const iterativeActions = Object.fromEntries(METHODS.filter((method) => method.iterative).map((method) => [
+    method.id, method.createActions({ text, id, now, TASKS, PRIORITIES, method }),
+  ]));
+  const featureInput = iterativeActions.agile.featureInput;
+  const { saveFeature, backlogAction, startIteration, closeIteration, approveScopeChange } = Object.fromEntries(
+    ["saveFeature", "backlogAction", "startIteration", "closeIteration", "approveScopeChange"].map((action) => [
+      action, (workspace, ...args) => {
+        const handler = iterativeActions[workspace.active?.method]?.[action];
+        if (!handler) throw new Error("Aksi ini tidak tersedia untuk metode proyek aktif.");
+        return handler(workspace, ...args);
+      },
+    ]),
+  );
 
   function recordMeeting(workspace) {
     const project = workspace.active;
@@ -268,7 +298,7 @@
     const meeting = {
       id: id(),
       createdAt: now(),
-      note: project.method === "agile" && !pending.length && !summary(project).complete
+      note: isIterative(project) && !pending.length && !summary(project).complete
         ? `Tim meninjau backlog ${project.title}. Review kebutuhan, tentukan prioritas, dan rencanakan iterasi berikutnya. Belum semua fitur diterima.`
         : pending.length
         ? `Tim meninjau ${project.title}. Progres ${summary(project).percent}%. Tindak lanjut mengikuti tugas yang belum selesai; urutan prasyarat tetap berlaku.`
@@ -335,10 +365,10 @@
       if (!value || typeof value !== "object") throw new Error("Data proyek tidak lengkap.");
       const metadata = brief(value);
       const method = value.method === undefined ? "legacy" : value.method;
-      if (!["legacy", "waterfall", "agile"].includes(method)) throw new Error("Metode proyek tidak valid.");
+      if (method !== "legacy" && !Object.hasOwn(methods, method)) throw new Error("Metode proyek tidak valid.");
       const backlog = [];
       const iterations = [];
-      if (method === "agile") {
+      if (isIterative({ method })) {
         if (!Array.isArray(value.backlog) || value.backlog.length > 40
           || !Array.isArray(value.iterations) || value.iterations.length > 40) {
           throw new Error("Data backlog atau iterasi tidak valid.");
@@ -384,15 +414,15 @@
           throw new Error("Iterasi aktif/penugasan fitur tidak valid.");
         }
       } else if ((value.backlog?.length || 0) || (value.iterations?.length || 0)) {
-        throw new Error("Backlog iteratif hanya tersedia di Agile.");
+        throw new Error("Backlog iteratif tersedia di Agile dan Hybrid.");
       }
       const projectId = text(value.id, 100, "ID proyek");
       if (ids.has(projectId)) throw new Error("ID proyek ganda ditemukan.");
       ids.add(projectId);
-      const specs = method === "agile"
-        ? iterations.flatMap((iteration) => iteration.featureIds.flatMap((featureId) => TASKS.map((spec) => ({
+      const specs = isIterative({ method })
+        ? [...planningDefinitions(method), ...iterations.flatMap((iteration) => iteration.featureIds.flatMap((featureId) => TASKS.map((spec) => ({
           ...spec, id: `${featureId}:${spec.id}`, baseId: spec.id, featureId,
-        })))) : TASKS;
+        }))))] : TASKS;
       if (!Array.isArray(value.tasks) || value.tasks.length !== specs.length) {
         throw new Error("Daftar tugas tidak lengkap.");
       }
@@ -412,7 +442,7 @@
         }
         return {
           id: task.id, status: task.status, artifact,
-          ...(method === "agile" ? { baseId: definition.baseId, featureId: definition.featureId } : {}),
+          ...(definition.featureId ? { baseId: definition.baseId, featureId: definition.featureId } : {}),
           checks: [...task.checks],
           updatedAt: task.updatedAt === null ? null : date(task.updatedAt, "Waktu tugas"),
         };
@@ -429,8 +459,18 @@
         tasks,
         meetings: [],
       };
+      if (methods[method]?.validateFeature) {
+        backlog.forEach((feature, index) => Object.assign(feature, methods[method].validateFeature(value.backlog[index], result, date)));
+        if (tasks.find((task) => task.id === "scope")?.status === "done"
+          && !backlog.some((feature) => feature.scopeStatus === "baseline")) {
+          throw new Error("Baseline scope awal tidak ditemukan.");
+        }
+        for (const iteration of iterations) {
+          methods[method].beforeIteration(result, backlog.filter((feature) => iteration.featureIds.includes(feature.id)));
+        }
+      }
       for (const task of tasks) {
-        if (method === "agile") {
+        if (task.featureId) {
           const original = value.tasks.find((item) => item.id === task.id);
           if (original.baseId !== task.baseId || original.featureId !== task.featureId) {
             throw new Error("Referensi fitur tugas tidak valid.");
@@ -478,9 +518,9 @@
       `Metode: ${methodName(project)}`,
       `Progres simulasi: ${summary(project).percent}%`,
       "Dokumen template lokal — bukan bukti implementasi website atau hasil AI.",
-      ...(project.method === "agile" ? [
+      ...(isIterative(project) ? [
         "## Backlog fitur",
-        ...project.backlog.map((feature, index) => `${index + 1}. ${feature.title} · ${PRIORITIES[feature.priority]}\nKebutuhan: ${feature.need}\nKriteria: ${feature.criteria}\nDisetujui: ${feature.approved ? "ya" : "belum"}`),
+        ...project.backlog.map((feature, index) => `${index + 1}. ${feature.title} · ${PRIORITIES[feature.priority]}\nKebutuhan: ${feature.need}\nKriteria: ${feature.criteria}\nDisetujui: ${feature.approved ? "ya" : "belum"}${feature.scopeStatus ? `\nScope: ${feature.scopeStatus}\nAlasan tambahan scope: ${feature.scopeReason || "Bagian rencana awal"}\nWaktu persetujuan scope: ${feature.scopeApprovedAt || "Belum disetujui"}` : ""}`),
         "## Iterasi",
         ...project.iterations.map((iteration) => `${iteration.title} · ${iteration.closedAt ? "ditutup" : "aktif"}`),
       ] : []),
@@ -496,7 +536,8 @@
 
   const api = {
     TASKS, KINDS, STATUSES, METHODS, PRIORITIES, definition, methodName,
-    saveFeature, backlogAction, startIteration, closeIteration,
+    saveFeature, backlogAction, startIteration, closeIteration, approveScopeChange,
+    isIterative, progressUnit, progressRule,
     clone, emptyWorkspace, createProject, summary,
     blockers, changeTask, recordMeeting, archiveActive, resume,
     migrateLegacy, validateWorkspace, projectMarkdown,

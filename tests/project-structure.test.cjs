@@ -13,7 +13,9 @@ test('alamat halaman utama tetap; stylesheet dan skrip lokal terhubung berurutan
   assert.deepEqual(scripts, [
     'vendor/three/Three.js',
     'src/js/projects/methods/waterfall.js',
+    'src/js/projects/methods/iterative.js',
     'src/js/projects/methods/agile.js',
+    'src/js/projects/methods/hybrid.js',
     'src/js/projects/project-engine.js',
     'src/js/projects/project-ui.js',
     'src/js/main.js',
