@@ -59,7 +59,8 @@ proyek, atau tekan **P**. Area dokumen dibuka terpisah dari kantor 3D.
 
 | Tab | Yang bisa dilakukan |
 | --- | --- |
-| 🌱 **Brief** | Isi nama proyek, klien, jenis website, tujuan, fitur, dan target tanggal opsional. |
+| 🌱 **Brief** | Isi nama proyek, klien, jenis website, metode, tujuan, fitur, dan target tanggal opsional. |
+| 🌿 **Backlog & iterasi** | Khusus Agile: review usulan fitur, atur prioritas, dan pilih pekerjaan iterasi. |
 | 📋 **Papan tugas** | Mulai tugas, buat draf template, edit dokumen, lalu review hasil. |
 | 🤝 **Notulen** | Baca catatan Sasa dan tindak lanjut yang mengacu ke tugas tim. |
 | 🗂️ **Arsip** | Simpan proyek selesai/berjalan, baca dokumen, dan lanjutkan proyek lama. |
@@ -69,6 +70,51 @@ Satu proyek aktif dalam satu waktu. Untuk klien baru, arsipkan proyek aktif
 dahulu. Arsip parsial tidak menghapus hasil kerja dan dapat dilanjutkan.
 Instalasi baru dimulai tanpa proyek; contoh barbershop hanya dibawa jika ada
 progres dari versi lama. Brief memuat 1–20 kebutuhan, satu kebutuhan per baris.
+
+### 🧭 Pilih cara kerja tim
+
+| Metode | Perilaku saat membuat proyek |
+| --- | --- |
+| 🪜 **Waterfall** | Delapan tugas untuk seluruh proyek. Tiap tahap menunggu hasil prasyarat yang sudah disetujui; BE dapat berjalan paralel setelah analisis. |
+| 🌿 **Agile** | Setiap baris kebutuhan menjadi usulan backlog. Kamu mereview kebutuhan, mengatur prioritas, dan memilih fitur untuk iterasi. |
+| 🧩 **Hybrid** | Masih direncanakan, belum dapat dipilih. |
+
+Metode dipilih saat membuat brief. Belum ada konversi metode pada proyek
+yang sudah dibuat; arsipkan dan buat brief baru bila ingin mencoba metode lain.
+Simpanan lama diberi label **Alur lama**. Dokumen, status tugas, arsip, dan
+persentasenya tetap mengikuti alur semula.
+
+### 🌿 Dari brief ke backlog Agile
+
+1. Buat brief baru dan pilih **Agile**. Isi fitur yang dibutuhkan, satu per baris.
+2. Buka **Backlog & iterasi**. Nori menyusun usulan dari setiap kebutuhan;
+   Miko memberi saran awal berupa prioritas tinggi untuk fitur pertama.
+   Saran memakai template lokal, belum analisis AI.
+3. Klik **Edit fitur** untuk mengubah nama, kebutuhan pengguna, prioritas,
+   dan kriteria penerimaan. Kamu juga bisa **Tambah fitur** sendiri.
+4. Atur nomor urut memakai **↑ Naik / ↓ Turun**, lalu klik **Setujui kebutuhan**.
+   Label Tinggi/Sedang/Rendah membantu penilaian; nomor urut adalah urutan
+   pengerjaan yang kamu tentukan. Mengedit fitur mengulang persetujuan kebutuhan.
+5. Beri nama iterasi dan pilih **1–5 fitur** yang sudah disetujui.
+   Klik **Mulai iterasi pilihan** untuk membagikan pekerjaan.
+6. Di **Papan tugas**, selesaikan dokumen dan review tiap fitur. Pada versi awal
+   ini, setiap fitur memiliki delapan tugas template untuk delapan role.
+   Prasyarat berlaku dalam fitur yang sama; fitur lain tidak harus selesai dulu.
+7. Setelah seluruh hasil fitur diterima, klik **Tutup iterasi** di tab backlog.
+   Review urutan kebutuhan lagi, kemudian pilih fitur untuk iterasi berikutnya.
+
+Satu iterasi aktif dalam satu waktu, maksimal **40 fitur per proyek**.
+Papan tugas memiliki pilihan iterasi agar dokumen iterasi sebelumnya tetap
+bisa dibaca. Fitur diterima setelah tugas review akhir Owner disetujui.
+
+Kamu berperan sebagai pengelola yang memutuskan kebutuhan, prioritas, dan
+penerimaan hasil. Fitur dalam iterasi dikunci agar dokumen turunannya konsisten.
+Perubahan baru dapat masuk sebagai fitur lanjutan di backlog, tanpa otomatis
+menginterupsi pekerjaan aktif. Fitur yang belum masuk iterasi dapat diedit
+atau dihapus; penghapusan memakai modal konfirmasi Pawffice.
+
+Ini implementasi awal alur Agile untuk dokumen simulasi. Belum ada estimasi
+kapasitas otomatis, story point, durasi sprint, atau implementasi website oleh AI.
 
 ### 📋 Alur tugas yang menghasilkan dokumen
 
@@ -215,10 +261,19 @@ tablet/ponsel, cerita juga ditampilkan dan dapat dibaca lewat gulir halaman.
 ## 🎯 Dari brief sampai siap diuji
 
 Proyek utama mengikuti **brief klien yang kamu buat**, bukan satu judul
-yang dikunci di kode. Progres adalah jumlah tugas berstatus **Selesai** dibagi
-delapan tugas. Waktu duduk, kecepatan simulasi, dan timer 30 detik tidak lagi
+yang dikunci di kode. Pada Waterfall/Alur lama, progres adalah tugas berstatus
+**Selesai** dibagi delapan tugas. Pada Agile, progres adalah **fitur diterima
+dibagi seluruh fitur backlog**, termasuk fitur yang belum masuk iterasi.
+Menambah cakupan bisa menurunkan persentase; menghapus fitur yang belum
+dikerjakan juga mengubah total cakupan. Tugas yang selesai tetap tersimpan.
+Backlog kosong belum dianggap proyek selesai.
+
+Waktu duduk, kecepatan simulasi, dan timer 30 detik tidak lagi
 menyelesaikan tugas proyek secara otomatis. Setiap persetujuan tugas memberi
 25 happiness sekali; migrasi, reload, dan melanjutkan arsip tidak memberi ulang hadiah.
+
+Tahapan berikut berlaku untuk seluruh proyek Waterfall/Alur lama, atau
+diulang dalam masing-masing fitur pada Agile:
 
 | Tahap | Penanggung jawab | Fokus |
 | :---: | --- | --- |
@@ -243,7 +298,7 @@ stabil; quest yang sudah selesai tidak ditarik atau diberi hadiah ulang.
 
 ### 💾 Progres tidak perlu mulai dari nol
 
-Brief, tugas, dokumen, notulen, arsip, anggota tim yang dikenal,
+Brief, pilihan metode, backlog, iterasi, tugas, dokumen, notulen, arsip, anggota tim yang dikenal,
 quest harian, serta happiness disimpan otomatis di localStorage browser.
 Membuka ulang halaman pada browser, profil, dan alamat yang sama memulihkan
 progres. Data versi lama dimigrasikan saat tersedia. Aktivitas tidak berjalan
@@ -312,7 +367,10 @@ bisa digunakan untuk mencoba suasana lain.
 │       ├── main.js                        # Kantor 3D dan penghubung aplikasi
 │       └── projects/
 │           ├── project-engine.js          # Aturan dan data proyek
-│           └── project-ui.js              # Antarmuka Project Hub
+│           ├── project-ui.js              # Antarmuka Project Hub
+│           └── methods/
+│               ├── waterfall.js          # Prasyarat alur bertahap
+│               └── agile.js              # Backlog, iterasi, dan progres fitur
 ├── vendor/
 │   └── three/
 │       ├── Three.js                       # Library Three.js lokal
@@ -327,6 +385,7 @@ bisa digunakan untuk mencoba suasana lain.
 │       └── Catatan Pengembangan AI.txt     # Catatan rencana pengembangan
 ├── tests/
 │   ├── project-engine.test.cjs             # Tes aturan proyek
+│   ├── project-agile.test.cjs              # Tes fitur, iterasi, dan kompatibilitas
 │   ├── project-ui.test.cjs                 # Tes handler dan modal UI
 │   ├── project-structure.test.cjs          # Tes path dan struktur proyek
 │   └── office-integration.cjs              # Tes integrasi dan gerak kantor
@@ -355,7 +414,7 @@ Halaman utama **tidak dipindahkan**: tetap buka `3D-index.html` pada browser,
 profil, host, dan port yang sama. Penataan folder tidak mengubah kunci localStorage
 atau mereset proyek. Tidak ada backend, bundler, atau instalasi baru.
 
-HTML memuat file dengan urutan: library Three.js, engine proyek, UI proyek,
+HTML memuat file dengan urutan: library Three.js, modul Waterfall dan Agile, engine proyek, UI proyek,
 kemudian `main.js`. Path stylesheet, gambar README, lisensi, dan tes sudah
 disesuaikan ke lokasi baru. Jangan membuka file JavaScript sebagai halaman utama.
 
@@ -364,13 +423,18 @@ meja, serta furnitur dibuat dari kode; tidak membutuhkan file model
 eksternal. Progres quest saat ini mengikuti aturan simulasi JavaScript.
 Role belum menjalankan model AI atau mengirim permintaan API.
 
-### 🧭 Rencana pemisahan metode
+### 🧩 Pembagian logika metode
 
-Logika Waterfall, Agile, dan Hybrid **belum ditambahkan**. Untuk pengembangan
-berikutnya, modul metode dapat ditempatkan di `src/js/projects/methods/`
-dengan file `waterfall.js`, `agile.js`, dan `hybrid.js`. Folder dan modul ini
-belum menjadi bagian aplikasi saat ini; `project-engine.js` nantinya bertindak
-sebagai penghubung ke metode yang dipilih dalam brief.
+`src/js/projects/methods/waterfall.js` mengatur dependensi tahap, sedangkan
+`agile.js` mengatur usulan backlog, perubahan fitur, perencanaan dan penutupan
+iterasi, dependensi per fitur, serta penghitungan progres Agile.
+`project-engine.js` menghubungkan metode dengan data proyek, dokumen, review,
+validasi cadangan, dan arsip. `project-ui.js` menangani tampilan dan input.
+
+**Hybrid belum diimplementasikan** dan belum memiliki file `hybrid.js`.
+Alur persetujuan perubahan scope secara formal pada Waterfall juga masih
+pengembangan berikutnya. Saat ini revisi dokumen dilakukan sebelum persetujuan;
+hasil yang sudah disetujui dikunci.
 
 ### 🧪 Pemeriksaan pengembangan (opsional)
 
@@ -378,7 +442,7 @@ Node.js **hanya untuk menjalankan tes**, tidak diperlukan untuk membuka kantor.
 Tidak ada paket tambahan atau proses build yang harus diinstal.
 
 ```powershell
-node --test tests/project-engine.test.cjs tests/project-ui.test.cjs tests/project-structure.test.cjs
+node --test tests/project-engine.test.cjs tests/project-agile.test.cjs tests/project-ui.test.cjs tests/project-structure.test.cjs
 node tests/office-integration.cjs
 ```
 

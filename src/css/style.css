@@ -1428,6 +1428,9 @@ h1 em {
 }
 
 .project-form .project-field:has(textarea),
+.project-form > h4,
+.project-form > p,
+.project-form > fieldset,
 .project-form > button {
   grid-column: 1 / -1;
 }
@@ -1459,6 +1462,31 @@ h1 em {
   flex-wrap: wrap;
   gap: 10px;
   margin: 14px 0;
+}
+
+.backlog-form {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.backlog-form h4,
+.backlog-card h4 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.backlog-card p {
+  white-space: pre-wrap;
+  line-height: 1.65;
+}
+
+.project-task-detail > .project-button {
+  margin: 12px 0 12px 12px;
 }
 
 .project-board {

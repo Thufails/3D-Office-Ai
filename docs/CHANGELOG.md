@@ -1,5 +1,28 @@
 # 🐾 Catatan pengembangan Pawffice
 
+## 6 November 2026 · Pilihan metode dan backlog Agile
+
+- Brief proyek baru memiliki pilihan Waterfall atau Agile. Hybrid belum tersedia.
+- Modul metode dipisah ke `src/js/projects/methods/waterfall.js` dan `agile.js`.
+- Waterfall memakai delapan tugas untuk seluruh proyek dengan prasyarat review.
+- Agile membuat usulan backlog dari kebutuhan brief. Saran Nori/Miko berbasis
+  template lokal dan harus direview pengguna, tanpa panggilan AI.
+- Backlog mendukung tambah, edit, label prioritas, naik/turun urutan, persetujuan
+  kebutuhan, dan hapus dengan modal konfirmasi.
+- Satu iterasi aktif berisi 1–5 fitur yang sudah disetujui. Masing-masing fitur
+  memiliki delapan tugas dokumen untuk tim; dependensi berlaku per fitur.
+- Fitur dalam iterasi dikunci; kebutuhan baru tetap dapat ditambahkan ke backlog.
+- Iterasi ditutup setelah semua hasilnya disetujui. Papan tugas bisa menampilkan
+  iterasi lama maupun aktif.
+- Progres Agile menghitung fitur diterima dibanding seluruh fitur backlog.
+  Perubahan cakupan dapat mengubah persentase tanpa menghapus hasil yang ada.
+- Metode, backlog, iterasi, dan dokumen masuk penyimpanan, arsip, JSON dan Markdown.
+- Simpanan tanpa metode dibaca sebagai Alur lama, tanpa mengulang hadiah atau
+  mengubah status tugas. Kunci localStorage tetap `pawffice.progress.v3`.
+- README memuat panduan mencoba Agile, batas fitur, struktur modul, dan tes.
+- Konversi metode setelah proyek dibuat, Hybrid, dan alur formal perubahan scope
+  Waterfall belum termasuk tahap ini.
+
 ## 4 November 2026 · Project Hub lokal
 
 ### 🗂️ Penataan struktur folder

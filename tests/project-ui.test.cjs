@@ -59,7 +59,7 @@ function setup() {
     elements[id].id = id;
     body.append(elements[id]);
   }
-  for (const tab of ['brief', 'board', 'meetings', 'archive', 'backup']) {
+  for (const tab of ['brief', 'backlog', 'board', 'meetings', 'archive', 'backup']) {
     const button = new Node('button');
     button.dataset.projectTab = tab;
     elements['project-tabs'].append(button);
@@ -193,6 +193,85 @@ test('Project Hub membuat brief, memindah tugas, menjaga draf, review, arsip dan
   await ui.button('Lanjutkan proyek ini').click();
   assert.equal(ui.workspace.active.tasks[0].status, 'done');
   assert.equal(ui.workspace.archive.length, 0);
+});
+
+test('alur UI Agile: pilih metode, edit backlog, setujui, pilih iterasi, dan review hasil fitur', async () => {
+  const ui = setup();
+  ui.hub.open();
+  const form = ui.content.querySelectorAll('form')[0];
+  const values = {
+    title: 'Website Daun', client: 'Studio Daun', method: 'agile', kind: 'Company profile',
+    goal: 'Mengenalkan layanan studio.', requirements: 'Profil studio\nKontak WhatsApp', deadline: '',
+  };
+  for (const field of ['input', 'textarea', 'select'].flatMap((tag) => form.querySelectorAll(tag))) {
+    field.value = values[field.name];
+  }
+  await form.emit('submit');
+  assert.equal(ui.workspace.active.method, 'agile');
+  assert.equal(ui.workspace.active.tasks.length, 0);
+  await ui.tab('backlog');
+  await ui.button('Edit fitur').click();
+  const editForm = ui.content.querySelectorAll('form')[0];
+  const criteria = editForm.querySelectorAll('textarea').find((field) => field.name === 'criteria');
+  criteria.value = 'Profil mencatat identitas, layanan, dan jalur kontak.';
+  await criteria.emit('input');
+  await editForm.emit('input'); // DOM tiruan tidak melakukan bubbling otomatis.
+  ui.hub.refresh();
+  assert.ok(ui.content.querySelectorAll('form')[0] === editForm, 'refresh menjaga draf backlog');
+  await ui.tab('board');
+  assert.equal(ui.elements['project-confirm'].open, true);
+  await ui.elements['project-confirm-cancel'].click();
+  await editForm.emit('submit');
+  assert.equal(ui.workspace.active.backlog[0].criteria, criteria.value);
+  await ui.button('Setujui kebutuhan').click();
+  const iterationForm = ui.content.querySelectorAll('form')[0];
+  const choice = iterationForm.querySelectorAll('input').find((input) => input.type === 'checkbox');
+  choice.checked = true;
+  await choice.emit('change');
+  await iterationForm.emit('submit');
+  assert.equal(ui.workspace.active.tasks.length, 8);
+  assert.equal(ui.workspace.active.iterations.length, 1);
+  assert.equal(ui.button('Tutup iterasi').disabled, true);
+  await ui.tab('board');
+  await ui.button('Mulai tugas').click();
+  await ui.button('Buat draf template').click();
+  const featureId = ui.workspace.active.backlog[0].id;
+  assert.equal(ui.workspace.active.tasks[0].id, `${featureId}:scope`);
+  assert.match(ui.content.textContent, /Profil studio/);
+  for (let index = 0; index < 3; index += 1) await ui.content.querySelectorAll('input')[index].emit('change');
+  await ui.button('Setujui hasil').click();
+  assert.equal(ui.calls.filter((action) => action === 'approve').length, 1);
+  assert.equal(P.summary(ui.workspace.active).percent, 0, 'satu tugas belum sama dengan penerimaan fitur');
+  await ui.tab('backlog');
+  await ui.button('Tambah fitur').click();
+  const addForm = ui.content.querySelectorAll('form')[0];
+  const extra = { title: 'Artikel', need: 'Membaca kabar studio.', priority: 'low', criteria: 'Daftar artikel dan kondisi kosong dirinci.' };
+  for (const field of ['input', 'textarea', 'select'].flatMap((tag) => addForm.querySelectorAll(tag))) field.value = extra[field.name];
+  await addForm.emit('submit');
+  assert.equal(ui.workspace.active.backlog.length, 3);
+  assert.equal(ui.workspace.active.iterations.length, 1, 'fitur baru tidak menyusup ke iterasi aktif');
+  for (const spec of P.TASKS.slice(1)) {
+    const id = `${featureId}:${spec.id}`;
+    P.changeTask(ui.workspace, id, 'start');
+    P.changeTask(ui.workspace, id, 'draft');
+    for (let index = 0; index < 3; index += 1) P.changeTask(ui.workspace, id, 'check', index);
+    P.changeTask(ui.workspace, id, 'approve');
+  }
+  ui.hub.refresh();
+  assert.equal(ui.button('Tutup iterasi').disabled, false);
+  await ui.button('Tutup iterasi').click();
+  await ui.button('Setujui kebutuhan').click();
+  const secondIterationForm = ui.content.querySelectorAll('form')[0];
+  secondIterationForm.querySelectorAll('input').find((input) => input.type === 'checkbox').checked = true;
+  await secondIterationForm.emit('submit');
+  await ui.tab('board');
+  const iterationSelect = ui.content.querySelectorAll('select')[0];
+  assert.equal(iterationSelect.value, ui.workspace.active.iterations[1].id, 'iterasi baru langsung menjadi pilihan papan');
+  iterationSelect.value = ui.workspace.active.iterations[0].id;
+  await iterationSelect.emit('change');
+  assert.match(ui.content.textContent, /Profil studio/);
+  assert.doesNotMatch(ui.content.textContent, /Rangkum kebutuhan sistem · Kontak WhatsApp/);
+  assert.deepEqual(P.validateWorkspace(ui.workspace), ui.workspace);
 });
 
 test('impor harus lolos validasi, preview dan konfirmasi sebelum mengganti state', async () => {

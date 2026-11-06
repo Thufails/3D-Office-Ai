@@ -20,7 +20,9 @@
     let confirmation = null;
     const workspace = options.getWorkspace;
     const member = (ownerId) => team.find((person) => person.id === ownerId);
-    const definition = (id) => engine.TASKS.find((task) => task.id === id);
+    const definition = (id, project = workspace().active) => engine.definition(project, id);
+    let editingFeatureId = null;
+    let boardIterationId = null;
 
     function element(tag, className, text) {
       const node = document.createElement(tag);
@@ -107,6 +109,10 @@
         try {
           const result = change();
           dirty = false;
+          if (action === "iteration" && result.closedAt === null) {
+            boardIterationId = result.id;
+            taskId = "scope";
+          }
           options.onChange(action, result);
           render();
           message("Perubahan diterapkan. Status penyimpanan tersedia di panel quest.");
@@ -135,7 +141,12 @@
     function projectInfo(project, parent) {
       parent.append(element("h3", "project-section-title", project.title));
       parent.append(element("p", "project-muted", `${project.client} · ${project.kind} · Target: ${project.deadline || "belum ditetapkan"}`));
+      parent.append(element("p", "project-callout", `Metode: ${engine.methodName(project)}`));
       parent.append(element("p", "project-goal", project.goal));
+      if (project.method === "agile") {
+        parent.append(element("h4", "", "Kebutuhan awal dari brief"));
+        parent.append(element("p", "project-muted", "Perincian kebutuhan dan perubahan terbaru tersimpan di Backlog & iterasi. Brief ini menjadi acuan awal."));
+      }
       const features = element("ul", "project-features");
       project.requirements.forEach((requirement) => features.append(element("li", "", requirement)));
       parent.append(features);
@@ -150,8 +161,9 @@
       if (project) {
         projectInfo(project, content);
         const progress = engine.summary(project);
-        content.append(element("p", "project-callout", `${progress.percent}% · ${progress.done}/${progress.total} tugas disetujui. Tidak bertambah otomatis karena waktu berjalan.`));
+        content.append(element("p", "project-callout", `${progress.percent}% · ${progress.done}/${progress.total} ${project.method === "agile" ? "fitur diterima" : "tugas disetujui"}. Tidak bertambah otomatis karena waktu berjalan.`));
         const actions = element("div", "project-actions");
+        if (project.method === "agile") actions.append(button("Susun backlog & iterasi →", () => switchTab("backlog"), true));
         actions.append(button("Buka papan tugas →", () => switchTab("board"), true));
         actions.append(button("Unduh dokumen .md", () => exportProject(project)));
         actions.append(button("Arsipkan proyek", () => {
@@ -186,6 +198,25 @@
       });
       kindLabel.append(select);
       form.append(kindLabel);
+      const methodLabel = element("label", "project-field");
+      methodLabel.append(element("span", "", "Metode pengerjaan"));
+      const methodSelect = element("select");
+      methodSelect.name = "method";
+      methodSelect.value = "waterfall";
+      engine.METHODS.forEach((method) => {
+        const option = element("option", "", method.name);
+        option.value = method.id;
+        methodSelect.append(option);
+      });
+      methodLabel.append(methodSelect);
+      form.append(methodLabel);
+      const methodHelp = element("p", "project-callout", engine.METHODS[0].description);
+      methodSelect.addEventListener("change", () => {
+        methodHelp.textContent = engine.METHODS.find((method) => method.id === methodSelect.value).description;
+        dirty = true;
+      });
+      form.append(methodHelp);
+      form.append(element("p", "project-muted", "Hybrid belum tersedia. Pilih metode sebelum membuat proyek; proyek lama tetap memakai alur sebelumnya."));
       const deadline = field(form, "Target tanggal (opsional)", "deadline");
       deadline.type = "date";
       const goal = field(form, "Tujuan / masalah yang ingin diselesaikan", "goal", true);
@@ -196,7 +227,7 @@
       requirements.maxLength = 4820;
       requirements.placeholder = "Contoh: halaman informasi layanan\nFormulir permintaan penawaran\nHalaman kontak";
       form.addEventListener("input", () => { dirty = true; });
-      const submit = element("button", "project-primary", "Buat proyek & bagi tugas tim");
+      const submit = element("button", "project-primary", "Buat proyek & siapkan alur tim");
       submit.type = "submit";
       form.append(submit);
       form.addEventListener("submit", (event) => {
@@ -208,6 +239,139 @@
       content.append(form);
     }
 
+    function renderBacklog() {
+      const project = workspace().active;
+      content.append(element("h3", "project-section-title", "🌿 Backlog & iterasi"));
+      if (project?.method !== "agile") {
+        content.append(element("p", "project-callout", "Backlog iteratif tersedia saat membuat proyek dengan metode Agile. Proyek dengan alur lama tetap bisa dilanjutkan di Papan tugas."));
+        return;
+      }
+      content.append(element("p", "project-muted", "Nori menyusun usulan dari setiap baris kebutuhan brief; Miko menyarankan fitur pertama sebagai prioritas tinggi. Ini template lokal. Kamu mengedit, menyetujui, dan menentukan urutan pengerjaannya."));
+      content.append(element("p", "project-callout", "Progres = fitur diterima ÷ seluruh fitur backlog. Menambah cakupan dapat menurunkan persentase. Label prioritas membantu penilaian; nomor urut adalah urutan pengerjaan yang kamu tentukan."));
+      const editing = project.backlog.find((feature) => feature.id === editingFeatureId && !feature.iterationId);
+      const form = element("form", "project-form backlog-form");
+      form.append(element("h4", "", editing ? "Edit fitur" : "Tambah fitur sendiri"));
+      field(form, "Nama fitur", "title", false, editing?.title || "").maxLength = 120;
+      field(form, "Kebutuhan pengguna", "need", true, editing?.need || "").maxLength = 1200;
+      const priorityLabel = element("label", "project-field");
+      priorityLabel.append(element("span", "", "Prioritas"));
+      const priority = element("select");
+      priority.name = "priority";
+      Object.entries(engine.PRIORITIES).forEach(([value, name]) => {
+        const option = element("option", "", name);
+        option.value = value;
+        priority.append(option);
+      });
+      priority.value = editing?.priority || "normal";
+      priorityLabel.append(priority);
+      form.append(priorityLabel);
+      field(form, "Kriteria penerimaan — apa yang harus terpenuhi?", "criteria", true, editing?.criteria || "").maxLength = 1600;
+      form.addEventListener("input", () => { dirty = true; });
+      form.addEventListener("change", () => { dirty = true; });
+      const save = element("button", "project-primary", editing ? "Simpan perubahan fitur" : "Tambah fitur");
+      save.type = "submit";
+      form.append(save);
+      form.append(button("Batal edit", () => mayDiscard(() => { editingFeatureId = null; render(); })));
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        const input = Object.fromEntries(new FormData(form));
+        mutate("backlog", () => {
+          const result = engine.saveFeature(workspace(), editing?.id || null, input);
+          editingFeatureId = null;
+          return result;
+        }, true);
+      });
+      if (editing || editingFeatureId === "new") {
+        content.append(form);
+        return;
+      }
+      content.append(button("Tambah fitur", () => {
+        mayDiscard(() => { editingFeatureId = "new"; render(); });
+      }, true));
+
+      const list = element("div", "backlog-list");
+      project.backlog.forEach((feature, index) => {
+        const card = element("article", "project-note backlog-card");
+        card.append(element("h4", "", `${index + 1}. ${feature.title}`));
+        card.append(element("p", "project-muted", `Prioritas ${engine.PRIORITIES[feature.priority]} · ${feature.approved ? "Disetujui" : "Perlu review kamu"}`));
+        card.append(element("p", "", feature.need));
+        card.append(element("p", "", `Kriteria: ${feature.criteria}`));
+        const iteration = project.iterations.find((item) => item.id === feature.iterationId);
+        if (iteration) {
+          const accepted = project.tasks.some((task) => task.featureId === feature.id && task.baseId === "approval" && task.status === "done");
+          card.append(element("p", "project-callout", `${iteration.title} · ${accepted ? "Hasil fitur diterima" : "Dalam pengerjaan / review"}. Kebutuhan dikunci; perubahan baru dapat ditambahkan sebagai fitur lanjutan.`));
+        } else {
+          const actions = element("div", "project-actions");
+          actions.append(button("Edit fitur", () => mayDiscard(() => { editingFeatureId = feature.id; render(); })));
+          if (!feature.approved) actions.append(button("Setujui kebutuhan", () => mutate("backlog", () => engine.backlogAction(workspace(), feature.id, "approve")), true));
+          for (const [action, label] of [["up", "↑ Naik"], ["down", "↓ Turun"]]) {
+            const move = button(label, () => mutate("backlog", () => engine.backlogAction(workspace(), feature.id, action)));
+            move.disabled = action === "up" ? index === 0 : index === project.backlog.length - 1;
+            actions.append(move);
+          }
+          actions.append(button("Hapus fitur", () => mayDiscard(() => askConfirmation({
+            title: "Hapus fitur dari backlog?", description: `“${feature.title}” belum masuk iterasi. Menghapusnya mengubah total cakupan dan persentase proyek.`, acceptLabel: "Hapus fitur", tone: "warning",
+          }, () => mutate("backlog", () => engine.backlogAction(workspace(), feature.id, "delete"), true)))));
+          card.append(actions);
+        }
+        list.append(card);
+      });
+      content.append(list);
+      renderIteration(project);
+    }
+
+    function renderIteration(project) {
+      const section = element("section", "project-task-detail");
+      section.append(element("h3", "project-section-title", "🗓️ Rencana iterasi"));
+      const active = project.iterations.find((iteration) => !iteration.closedAt);
+      if (active) {
+        section.append(element("p", "", `${active.title} · ${active.featureIds.length} fitur`));
+        section.append(element("p", "project-muted", "Selesaikan hasil per fitur di Papan tugas. Perubahan baru tetap bisa ditambahkan ke backlog untuk iterasi berikutnya."));
+        section.append(button("Buka papan tugas →", () => switchTab("board"), true));
+        const close = button("Tutup iterasi", () => mutate("iteration", () => engine.closeIteration(workspace())));
+        close.disabled = project.tasks.some((task) => active.featureIds.includes(task.featureId) && task.status !== "done");
+        section.append(close);
+      } else {
+        const candidates = project.backlog.filter((feature) => feature.approved && !feature.iterationId);
+        if (!candidates.length) section.append(element("p", "project-callout", "Tambah/review kebutuhan dan setujui fitur terlebih dahulu. Setelah itu pilih 1–5 fitur untuk iterasi."));
+        else {
+          const form = element("form", "project-form");
+          field(form, "Nama iterasi", "iterationTitle", false, `Iterasi ${project.iterations.length + 1}`).maxLength = 100;
+          const selections = [];
+          const choices = element("fieldset", "project-review");
+          choices.append(element("legend", "", "Pilih 1–5 fitur sesuai prioritas dan kapasitas"));
+          candidates.forEach((feature) => {
+            const label = element("label");
+            const input = element("input");
+            input.type = "checkbox";
+            input.value = feature.id;
+            selections.push(input);
+            label.append(input, element("span", "", `${feature.title} · ${engine.PRIORITIES[feature.priority]}`));
+            choices.append(label);
+          });
+          form.append(choices);
+          form.addEventListener("input", () => { dirty = true; });
+          form.addEventListener("change", () => { dirty = true; });
+          const start = element("button", "project-primary", "Mulai iterasi pilihan");
+          start.type = "submit";
+          form.append(start);
+          form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (!form.reportValidity()) return;
+            const title = form.querySelectorAll("input")[0].value;
+            const ids = selections.filter((input) => input.checked).map((input) => input.value);
+            mutate("iteration", () => engine.startIteration(workspace(), title, ids), true);
+          });
+          section.append(form);
+        }
+      }
+      project.iterations.filter((iteration) => iteration.closedAt).forEach((iteration) => {
+        section.append(element("p", "project-muted", `✓ ${iteration.title} · ${iteration.featureIds.length} fitur · ditutup`));
+      });
+      content.append(section);
+    }
+
     function renderBoard() {
       const project = workspace().active;
       if (!project) {
@@ -216,11 +380,43 @@
       }
       const progress = engine.summary(project);
       content.append(element("h3", "project-section-title", `${project.title} · ${progress.percent}%`));
+      if (project.method === "agile" && !project.tasks.length) {
+        content.append(element("p", "project-callout", "Review backlog dan mulai iterasi dahulu. Tugas tim dibuat berdasarkan fitur yang kamu pilih."));
+        content.append(button("Susun backlog & iterasi →", () => switchTab("backlog"), true));
+        return;
+      }
+      let visibleTasks = project.tasks;
+      if (project.method === "agile") {
+        const current = project.iterations.find((iteration) => iteration.id === boardIterationId)
+          || project.iterations.find((iteration) => !iteration.closedAt)
+          || project.iterations[project.iterations.length - 1];
+        boardIterationId = current.id;
+        const label = element("label", "project-field");
+        label.append(element("span", "", "Tampilkan pekerjaan iterasi"));
+        const select = element("select");
+        project.iterations.forEach((iteration) => {
+          const option = element("option", "", `${iteration.title} · ${iteration.closedAt ? "ditutup" : "aktif"}`);
+          option.value = iteration.id;
+          select.append(option);
+        });
+        select.value = current.id;
+        select.addEventListener("change", () => {
+          const next = select.value;
+          select.value = boardIterationId;
+          mayDiscard(() => { boardIterationId = next; render(); });
+        });
+        label.append(select);
+        content.append(label);
+        visibleTasks = project.tasks.filter((task) => current.featureIds.includes(task.featureId));
+        if (!visibleTasks.some((task) => task.id === taskId)) {
+          taskId = (visibleTasks.find((task) => task.status !== "done") || visibleTasks[0]).id;
+        }
+      }
       content.append(element("p", "project-muted", "Pilih tugas → mulai → buat/edit dokumen → checklist review → setujui. Review dilakukan manual olehmu sebagai pengelola simulasi."));
       const board = element("div", "project-board");
       for (const status of engine.STATUSES) {
         const column = element("section", `project-column status-${status}`);
-        const tasks = project.tasks.filter((task) => task.status === status);
+        const tasks = visibleTasks.filter((task) => task.status === status);
         column.append(element("h4", "", `${statusNames[status]} · ${tasks.length}`));
         for (const task of tasks) {
           const spec = definition(task.id);
@@ -251,15 +447,17 @@
 
     function renderTask(project) {
       const task = project.tasks.find((item) => item.id === taskId) || project.tasks[0];
+      if (!task) return;
       taskId = task.id;
       const spec = definition(task.id);
       const person = member(spec.ownerId);
       const detail = element("section", "project-task-detail");
-      const heading = element("h3", "project-section-title", `${person.name} · ${spec.output}`);
+      const feature = project.backlog?.find((item) => item.id === task.featureId);
+      const heading = element("h3", "project-section-title", `${person.name} · ${spec.output}${feature ? ` · ${feature.title}` : ""}`);
       heading.id = "task-detail-heading";
       heading.tabIndex = -1;
       detail.append(heading);
-      detail.append(element("p", "project-muted", `Status: ${statusNames[task.status]} · Reviewer simulasi: ${task.id === "approval" ? "Owner" : "PM / Owner"}`));
+      detail.append(element("p", "project-muted", `Status: ${statusNames[task.status]} · Reviewer simulasi: ${(task.baseId || task.id) === "approval" ? "Owner" : "PM / Owner"}`));
       const blockedBy = engine.blockers(project, task.id);
       if (blockedBy.length) {
         detail.append(element("p", "project-callout", `Selesaikan terlebih dahulu: ${blockedBy.map((id) => definition(id).title).join("; ")}.`));
@@ -376,7 +574,7 @@
         card.append(element("p", "project-muted", `${project.meetings.length} notulen tersimpan. Arsipkan proyek aktif dahulu jika ingin melanjutkan proyek ini.`));
         project.tasks.forEach((task) => {
           const doc = element("details", "project-archive-document");
-          doc.append(element("summary", "", `${definition(task.id).output} · ${statusNames[task.status]}`));
+          doc.append(element("summary", "", `${definition(task.id, project).title} · ${statusNames[task.status]}`));
           doc.append(element("pre", "", task.artifact || "Belum ada dokumen."));
           card.append(doc);
         });
@@ -455,7 +653,7 @@
         if (node.dataset.projectTab === tab) node.setAttribute("aria-current", "page");
         else node.removeAttribute("aria-current");
       }
-      ({ brief: renderBrief, board: renderBoard, meetings: renderMeetings,
+      ({ brief: renderBrief, backlog: renderBacklog, board: renderBoard, meetings: renderMeetings,
         archive: renderArchive, backup: renderBackup })[tab]();
     }
 

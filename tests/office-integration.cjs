@@ -85,7 +85,7 @@ const instrumented = source.replace('    boot();', `
       findPath, blocked, navigate, moveCat, animateCat,
       progressSnapshot, loadProgress, saveProgress, renderCrewCards,
       restoreProgress, validateProgress, dailyQuestsForDate, readJakartaTime,
-      updateSimulation, resetDailyProgress, installProjectHub,
+      updateSimulation, updateUI, renderMainQuest, resetDailyProgress, installProjectHub,
       renderJobdesk, createWorkspaceLabels, updateWorkspaceLabels, installButtons,
       initializeCamera() {
         camera = new THREE.OrthographicCamera(-16, 16, 12, -12, 0.1, 100);
@@ -472,3 +472,39 @@ office.loadProgress();
 assert.equal(office.simulation.happiness, happinessBeforeApproval + 25,
   'reloading an approved task must not give another reward');
 console.log('PASS: v2-to-v3 migration, v3 persistence, atomic validation, impossible daily quest replacement, manual-only task progress and corrupt-save protection.');
+
+office.simulation.projects = Projects.emptyWorkspace();
+const agileProject = Projects.createProject(office.simulation.projects, {
+  method: 'agile', title: 'Company profile Studio Daun', client: 'Studio Daun',
+  kind: 'Company profile', goal: 'Mengenalkan layanan dan kontak studio.',
+  requirements: 'Profil studio\nKontak WhatsApp', deadline: '',
+});
+projectHubOptions.onChange('create', agileProject);
+office.updateUI();
+assert.match(elements.get('main-quest-stage').textContent, /backlog/);
+assert.match(elements.get('main-quest-stage-count').textContent, /0 dari 2 fitur/);
+assert.match(elements.get('state-miko').textContent, /Menunggu rencana iterasi/);
+const agileFeature = agileProject.backlog[0];
+Projects.backlogAction(office.simulation.projects, agileFeature.id, 'approve');
+const agileIteration = Projects.startIteration(office.simulation.projects, 'Iterasi 1', [agileFeature.id]);
+projectHubOptions.onChange('iteration', agileIteration);
+const agileTaskId = `${agileFeature.id}:scope`;
+Projects.changeTask(office.simulation.projects, agileTaskId, 'start');
+Projects.changeTask(office.simulation.projects, agileTaskId, 'draft');
+for (let index = 0; index < 3; index += 1) Projects.changeTask(office.simulation.projects, agileTaskId, 'check', index);
+const happinessBeforeAgile = office.simulation.happiness;
+const agileApproved = Projects.changeTask(office.simulation.projects, agileTaskId, 'approve');
+projectHubOptions.onChange('approve', agileApproved);
+office.updateUI();
+assert.equal(office.simulation.happiness, happinessBeforeAgile + 25);
+assert.match(elements.get('main-quest-stage-count').textContent, /0 dari 2 fitur/);
+assert.match(elements.get('main-quest-stage').textContent, /Rangkum kebutuhan sistem.*Profil studio/);
+const agileBackup = projectHubOptions.checkBackup(projectHubOptions.makeBackup());
+assert.equal(agileBackup.projects.active.backlog.length, 2);
+assert.equal(agileBackup.projects.active.iterations.length, 1);
+office.loadProgress();
+assert.equal(office.simulation.projects.active.tasks[0].status, 'done');
+assert.equal(office.simulation.projects.active.method, 'agile');
+assert.equal(office.simulation.happiness, happinessBeforeAgile + 25);
+assert.equal(projectHubOptions.importProgress(agileBackup), true);
+console.log('PASS: Agile integrates with office focus, avatar role labels, per-feature rewards, v3 reload and backup import without progress reset.');

@@ -724,7 +724,7 @@
         if (action === "approve") {
           simulation.daily.stageCompletions += 1;
           simulation.happiness += 25;
-          const definition = Projects.TASKS.find((task) => task.id === result.id);
+          const definition = Projects.definition(simulation.projects.active, result.id);
           const member = TEAM.find((person) => person.id === definition.ownerId);
           addEvent(member.name, `menyelesaikan review “${definition.output}”.`);
         } else if (["create", "archive", "resume"].includes(action)) {
@@ -2828,9 +2828,9 @@
     const task = project?.tasks.find((item) => {
       return item.status !== "done" && !Projects.blockers(project, item.id).length;
     });
-    const definition = task && Projects.TASKS.find((item) => item.id === task.id);
+    const definition = task && Projects.definition(project, task.id);
     const signature = JSON.stringify([project?.id, project?.updatedAt,
-      project?.tasks.map((item) => item.status), summary.percent]);
+      project?.tasks.map((item) => item.status), summary]);
 
     if (signature === lastMainQuestSignature) {
       return;
@@ -2839,13 +2839,18 @@
     lastMainQuestSignature = signature;
     $("main-quest-title").textContent = project?.title || "Belum ada proyek aktif";
     $("main-quest-description").textContent = project
-      ? `${project.client} · ${project.kind}` : "Buat brief klien melalui Project Hub.";
+      ? `${project.client} · ${project.kind} · ${Projects.methodName(project)}` : "Buat brief klien melalui Project Hub.";
     $("main-quest-percent").textContent = `${summary.percent}%`;
     $("main-quest-fill").style.width = `${summary.percent}%`;
     $("main-quest-progressbar").setAttribute("aria-valuenow", String(summary.percent));
-    $("main-quest-stage-count").textContent = `${summary.done} dari ${summary.total} tugas disetujui`;
+    $("main-quest-stage-count").textContent = `${summary.done} dari ${summary.total} ${project?.method === "agile" ? "fitur diterima" : "tugas disetujui"}`;
+    $("main-quest-rule").textContent = project?.method === "agile"
+      ? "Progres = fitur diterima / seluruh backlog. Perubahan cakupan dapat mengubah persentase."
+      : "Progres berdasarkan tugas yang disetujui, bukan timer.";
     $("main-quest-stage").textContent = definition?.title
-      || (project ? "Dokumen simulasi siap diarsipkan" : "Siapkan brief proyek");
+      || (project?.method === "agile" && !summary.complete
+        ? "Susun backlog / rencanakan iterasi berikutnya"
+        : project ? "Dokumen simulasi siap diarsipkan" : "Siapkan brief proyek");
     const owner = definition
       ? TEAM.find((member) => member.id === definition.ownerId)
       : null;
@@ -2856,8 +2861,9 @@
     const list = $("main-quest-steps");
     list.replaceChildren();
 
-    (project?.tasks || []).forEach((itemTask) => {
-      const stage = Projects.TASKS.find((item) => item.id === itemTask.id);
+    (project?.tasks || []).filter((item) => !project?.method || project.method !== "agile"
+      || item.status !== "done").slice(0, 8).forEach((itemTask) => {
+      const stage = Projects.definition(project, itemTask.id);
       const member = TEAM.find((person) => person.id === stage.ownerId);
       const item = document.createElement("li");
       item.className = itemTask.status === "done"
@@ -2873,11 +2879,15 @@
   function updateUI() {
     const taskLabel = (cat) => {
       if (cat.mode !== "work") return cat.task;
-      const task = simulation.projects.active?.tasks.find((item) => {
-        return Projects.TASKS.find((definition) => definition.id === item.id).ownerId === cat.data.id;
-      });
-      if (!task) return "Menunggu brief proyek";
-      const definition = Projects.TASKS.find((item) => item.id === task.id);
+      const project = simulation.projects.active;
+      const ownedTasks = project?.tasks.filter((item) => {
+        return Projects.definition(project, item.id).ownerId === cat.data.id;
+      }) || [];
+      const task = ownedTasks.find((item) => ["doing", "review"].includes(item.status))
+        || ownedTasks.find((item) => item.status === "todo" && !Projects.blockers(project, item.id).length)
+        || ownedTasks.find((item) => item.status !== "done") || ownedTasks[0];
+      if (!task) return project?.method === "agile" ? "Menunggu rencana iterasi" : "Menunggu brief proyek";
+      const definition = Projects.definition(project, task.id);
       if (task.status === "doing") return definition.title;
       if (task.status === "review") return `Menunggu review ${definition.output.toLowerCase()}`;
       if (task.status === "done") return "Hasil tugas telah disetujui";

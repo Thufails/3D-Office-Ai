@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="src/css/style.css">
 
     <script defer src="vendor/three/Three.js"></script>
+    <script defer src="src/js/projects/methods/waterfall.js"></script>
+    <script defer src="src/js/projects/methods/agile.js"></script>
     <script defer src="src/js/projects/project-engine.js"></script>
     <script defer src="src/js/projects/project-ui.js"></script>
     <script defer src="src/js/main.js"></script>
@@ -376,7 +378,7 @@
           <button class="project-primary" id="project-hub-button" aria-haspopup="dialog">
             📋 Buka Project Hub
           </button>
-          <p class="save-status">Progres berdasarkan tugas yang disetujui, bukan timer.</p>
+          <p class="save-status" id="main-quest-rule">Progres mengikuti hasil yang disetujui.</p>
         </section>
 
         <section class="mission-panel panel" aria-labelledby="mission-title">
@@ -505,6 +507,7 @@
       </header>
       <nav class="project-tabs" aria-label="Bagian Project Hub" id="project-tabs">
         <button data-project-tab="brief" aria-current="page">🌱 Brief</button>
+        <button type="button" data-project-tab="backlog">🌿 Backlog & iterasi</button>
         <button data-project-tab="board">📋 Papan tugas</button>
         <button data-project-tab="meetings">🤝 Notulen</button>
         <button data-project-tab="archive">🗂️ Arsip</button>
