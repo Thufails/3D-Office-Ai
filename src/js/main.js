@@ -15,15 +15,16 @@
 
   const $ = (id) => document.getElementById(id);
   const Projects = window.PawfficeProjects;
+  const Schedule = window.PawfficeSchedule;
 
   if (!window.THREE) {
     $("loading").lastElementChild.textContent =
       "Three.js belum terbaca. Pastikan file vendor/three/Three.js tersedia.";
     return;
   }
-  if (!Projects || !window.PawfficeProjectUI) {
+  if (!Projects || !window.PawfficeProjectUI || !Schedule || !window.PawfficeOfficeUI) {
     $("loading").lastElementChild.textContent =
-      "Project Hub belum terbaca. Pastikan project-engine.js dan project-ui.js tersedia di src/js/projects/.";
+      "Modul kantor belum lengkap. Pastikan skrip di src/js/projects/ dan src/js/office/ tersedia.";
     return;
   }
 
@@ -368,6 +369,7 @@
     seen: new Set(),
     happiness: 0,
     projects: Projects.emptyWorkspace(),
+    office: null,
     daily: {
       dateKey: "",
       focusSeconds: 0,
@@ -479,6 +481,10 @@
   let storageErrorShown = false;
   let appliedTheme = null;
   let projectUI;
+  let officeUI;
+  let officeTime;
+  let lastOfficePhase = "";
+  const officeDesks = [];
   let progressWriteBlocked = false;
   let viewportWidth = 1;
   let viewportHeight = 1;
@@ -520,6 +526,7 @@
       seen: [...simulation.seen].sort(),
       happiness: simulation.happiness,
       projects: Projects.clone(simulation.projects),
+      office: simulation.office ? Projects.clone(simulation.office) : null,
       daily: {
         dateKey: simulation.daily.dateKey,
         focusSeconds: simulation.daily.focusSeconds,
@@ -602,6 +609,8 @@
     simulation.projects = saved.version === 3
       ? Projects.validateWorkspace(saved.projects)
       : Projects.migrateLegacy(saved.mainQuest);
+    simulation.office = saved.office || null;
+    cats.forEach((cat) => { cat.officePhase = null; });
 
     if (saved.version >= 2) {
       if (Number.isFinite(saved.happiness)) {
@@ -683,6 +692,7 @@
       seen: ids(input.seen, validIds),
       coffee: input.coffee === true,
       happiness: number(input.happiness),
+      office: input.office == null ? null : Schedule.validate(input.office, TEAM),
     };
     if (input.version === 3) result.projects = Projects.validateWorkspace(input.projects);
     else {
@@ -721,6 +731,10 @@
       team: TEAM,
       getWorkspace: () => simulation.projects,
       onChange(action, result) {
+        if (simulation.office && ["start", "draft", "save", "revise", "approve"].includes(action)) {
+          const spec = Projects.definition(simulation.projects.active, result.id);
+          Schedule.recordAction(simulation.office, readJakartaTime(), spec.ownerId, action, spec.title);
+        }
         if (action === "approve") {
           simulation.daily.stageCompletions += 1;
           simulation.happiness += 25;
@@ -753,6 +767,7 @@
         // Validasi penuh terjadi sebelum state aktif disentuh.
         const validated = validateProgress(input);
         restoreProgress(validated);
+        if (officeUI) syncOfficeSchedule();
         simulation.daily.meetingWasTogether = cats.every((cat) => cat.mode === "meeting");
         selectCat(cats.find((cat) => cat.data.id === simulation.selectedId) || cats[0]);
         updateUI();
@@ -867,6 +882,122 @@
     if (simulation.themeOverride === null) {
       applyTheme(time.hour >= 18 || time.hour < 6);
     }
+    if (officeUI) syncOfficeSchedule(time);
+  }
+
+  // ---------- Rutinitas kantor WIB dan izin lembur ----------
+
+  function officeContext() {
+    const project = simulation.projects.active;
+    return {
+      team: TEAM,
+      projectTitle: project?.title || "",
+      members: cats.map((cat) => ({
+        id: cat.data.id,
+        energy: cat.energy,
+        tasks: (project?.tasks || []).filter((task) => Projects.definition(project, task.id).ownerId === cat.data.id)
+          .map((task) => ({ title: Projects.definition(project, task.id).title, status: task.status })),
+      })),
+    };
+  }
+
+  function syncOfficeSchedule(time = readJakartaTime(), initial = false) {
+    officeTime = time;
+    if (!simulation.office) simulation.office = Schedule.create(time, TEAM);
+    const previous = new Set(simulation.office.notifications.map((item) => item.id));
+    const changed = Schedule.tick(simulation.office, time, officeContext());
+    const phase = Schedule.phase(time);
+    if (lastOfficePhase && lastOfficePhase !== phase.id) addEvent("Kantor", `${phase.label} · WIB.`);
+    lastOfficePhase = phase.id;
+    applyOfficeRoutine(time, initial);
+    officeUI?.refresh();
+    const added = simulation.office.notifications.filter((item) => !previous.has(item.id));
+    const requests = added.filter((item) => item.kind === "overtime-request");
+    if (requests.length) toast(`${requests.length} avatar mengajukan lembur. Buka lonceng untuk memberi izin sebelum 17.00 WIB.`);
+    else if (added.some((item) => ["overtime-ended", "low-energy"].includes(item.kind))) {
+      const latest = added[added.length - 1];
+      toast(`${TEAM.find((person) => person.id === latest.memberId).name}: ${latest.text}`);
+    }
+    if (changed || initial) saveProgress(true);
+  }
+
+  function applyOfficeRoutine(time, initial = false) {
+    for (const cat of cats) {
+      const status = Schedule.attendance(simulation.office, time, cat.data.id);
+      const record = simulation.office.day.members.find((item) => item.id === cat.data.id);
+      if (!cat.overtimeSpeech && record.overtime.status === "pending") {
+        cat.overtimeSpeech = createSpeech("Boleh lembur sebentar?");
+        cat.overtimeSpeech.position.set(0, 3.15, 0);
+        cat.root.add(cat.overtimeSpeech);
+      }
+      if (cat.overtimeSpeech) cat.overtimeSpeech.visible = record.overtime.status === "pending";
+      if (cat.officePhase === status.id && !initial) continue;
+      const oldPhase = cat.officePhase;
+      cat.officePhase = status.id;
+      if (status.goal === "away") {
+        if (initial || !oldPhase || !cat.root.visible) {
+          cat.root.visible = false;
+          cat.mode = "away";
+          cat.activity = "away";
+          cat.route = [];
+          cat.navTarget = null;
+        } else if (!navigate(cat, "exit", true)) cat.officePhase = null;
+      } else {
+        const wasHidden = !cat.root.visible;
+        cat.root.visible = true;
+        if (initial && ["work", "prepare", "report"].includes(status.goal)) {
+          cat.activity = status.goal;
+          arrive(cat);
+        } else {
+          if (wasHidden) cat.root.position.set(-18.1, 0.10, 0);
+          if (!navigate(cat, status.goal, true)) cat.officePhase = null;
+        }
+      }
+      cat.task = status.label;
+    }
+    for (const label of workspaceLabels) {
+      label.statusElement.textContent = Schedule.attendance(simulation.office, time, label.cat.data.id).label;
+    }
+    for (const { ownerId, screen, lamp } of officeDesks) {
+      const cat = cats.find((item) => item.data.id === ownerId);
+      const atDesk = cat.root.visible && ["work", "prepare", "report"].includes(cat.mode);
+      screen.color.setHex(atDesk ? 0xffffff : 0x1d2625);
+      lamp.emissiveIntensity = atDesk ? (simulation.night ? 1.7 : 0.15) : 0;
+    }
+    if (sunlight && ambient && simulation.night) {
+      const occupied = cats.some((cat) => cat.root.visible && cat.mode !== "away");
+      sunlight.intensity = occupied ? 0.7 : 0.3;
+      ambient.intensity = occupied ? 1.0 : 0.65;
+    }
+  }
+
+  function installOfficeSchedule() {
+    if (!simulation.office) simulation.office = Schedule.create(readJakartaTime(), TEAM);
+    officeUI = window.PawfficeOfficeUI.mount({
+      schedule: Schedule,
+      team: TEAM,
+      getState: () => simulation.office,
+      now: () => readJakartaTime(),
+      sync: () => syncOfficeSchedule(),
+      energy: (id) => cats.find((cat) => cat.data.id === id).energy,
+      decide(id, decision, until) {
+        syncOfficeSchedule();
+        Schedule.decide(simulation.office, readJakartaTime(), id, decision, until);
+      },
+      onChange() { syncOfficeSchedule(); saveProgress(true); },
+      focusMember(id) {
+        const cat = cats.find((item) => item.data.id === id);
+        selectCat(cat);
+        if (!cat.root.visible) {
+          resetCamera();
+          toast(`${cat.data.name} sedang tidak berada di kantor.`);
+          return;
+        }
+        orbit.follow = true;
+        orbit.goalZoom = 3.0;
+      },
+    });
+    syncOfficeSchedule(readJakartaTime(), true);
   }
 
   // ---------- Bentuk dasar yang dipakai berulang kali ----------
@@ -1286,6 +1417,7 @@
 
     // Logo kecil di belakang monitor, terlihat dari kamera utama.
     sphere(0.06, 0xaab5a4, 0, 0.57, 0.049, group, [1, 1, 0.12]);
+    return screenSurface;
   }
 
   function workHeading(data) {
@@ -1316,7 +1448,14 @@
     box(0.065, 0.50, 1.12, data.partition, 0.80, 1.34, 0, desk);
 
     obstacle(x, deskZ, 1.78, 1.4);
-    createMonitor(data.id === "luna", 0, -0.05, desk);
+    const deskScreen = createMonitor(data.id === "luna", 0, -0.05, desk);
+    cylinder(0.10, 0.12, 0.04, 0x52675b, -0.58, 1.08, -0.44, desk);
+    cylinder(0.025, 0.025, 0.35, 0x52675b, -0.58, 1.26, -0.44, desk);
+    const deskLamp = sphere(0.12, 0xf2dfa9, -0.58, 1.47, -0.44, desk, [1, 0.55, 1]);
+    deskLamp.material = deskLamp.material.clone();
+    deskLamp.material.emissive.setHex(0xffca75);
+    deskLamp.material.emissiveIntensity = 0;
+    officeDesks.push({ ownerId: data.id, screen: deskScreen, lamp: deskLamp.material });
     box(0.72, 0.035, 0.25, 0xdddcd0, -0.02, 1.08, -0.43, desk);
 
     for (let row = 0; row < 3; row += 1) {
@@ -1870,7 +2009,9 @@
       name.textContent = member.name;
       const role = document.createElement("strong");
       role.textContent = ROLE_DETAILS[member.id].label;
-      tag.append(name, role);
+      const statusElement = document.createElement("small");
+      statusElement.className = "office-avatar-status";
+      tag.append(name, role, statusElement);
       container.append(tag);
 
       // Satu anchor milik avatar, bukan posisi layar atau susunan label lain.
@@ -1880,6 +2021,8 @@
       workspaceLabels.push({
         element: tag,
         anchor,
+        cat,
+        statusElement,
         point: new THREE.Vector3(),
       });
     }
@@ -1893,7 +2036,7 @@
 
     for (const item of workspaceLabels) {
       const point = item.anchor.getWorldPosition(item.point).project(camera);
-      const visible = Math.abs(point.x) <= 1
+      const visible = item.cat.root.visible && Math.abs(point.x) <= 1
         && Math.abs(point.y) <= 1 && Math.abs(point.z) <= 1;
       item.element.hidden = !visible;
 
@@ -2012,7 +2155,7 @@
     }
 
     return avoidCats && mover !== null && cats.some((other) => {
-      if (other === mover) {
+      if (other === mover || !other.root.visible) {
         return false;
       }
 
@@ -2091,7 +2234,7 @@
 
     if (avoidCats && mover) {
       for (const other of cats) {
-        if (other !== mover && segmentHitsCircle(
+        if (other !== mover && other.root.visible && segmentHitsCircle(
           start,
           end,
           other.root.position.x,
@@ -2314,11 +2457,21 @@
     return [];
   }
 
-  function navigate(cat, activity) {
+  function navigate(cat, activity, fromSchedule = false) {
+    if (simulation.office && !fromSchedule) {
+      const status = Schedule.attendance(simulation.office, officeTime || readJakartaTime(), cat.data.id);
+      if (!["work", "overtime"].includes(status.id) || !cat.root.visible) {
+        toast(`${cat.data.name}: ${status.label}. Aktivitas manual tersedia saat jam produktif atau lembur berizin.`);
+        return false;
+      }
+    }
     const index = cats.indexOf(cat);
     const seat = MEETING_SEATS.find((item) => item.ownerId === cat.data.id);
     const targets = {
       work: cat.data.desk,
+      prepare: cat.data.desk,
+      report: cat.data.desk,
+      exit: new THREE.Vector3(-18.1, 0, -1.4 + index * 0.4),
       coffee: COFFEE_TARGET,
       lounge: LOUNGE_SPOTS[index % LOUNGE_SPOTS.length],
       meeting: seat ? new THREE.Vector3(seat.x, 0, seat.z) : null,
@@ -2336,7 +2489,7 @@
       const staticRoute = findPath(cat.root.position, target, cat, false);
 
       if (!staticRoute.length) {
-        toast(`${cat.data.name} belum menemukan jalan. Coba aktivitas lain.`);
+        if (!fromSchedule) toast(`${cat.data.name} belum menemukan jalan. Coba aktivitas lain.`);
         return false;
       }
 
@@ -2352,6 +2505,9 @@
     cat.activity = activity;
     cat.task = {
       work: "Kembali ke meja",
+      prepare: "Datang & absen masuk",
+      report: "Menyiapkan daily report",
+      exit: "Beres-beres dan menuju pintu pulang",
       coffee: "Menuju coffee corner",
       lounge: "Menuju pantry untuk istirahat",
       meeting: "Menuju meja diskusi",
@@ -2365,15 +2521,24 @@
     cat.navTarget = null;
     cat.navStall = 0;
     cat.mode = cat.activity;
+    if (cat.mode === "exit") {
+      cat.root.visible = false;
+      cat.mode = "away";
+      cat.activity = "away";
+      cat.task = "Sudah pulang";
+      return;
+    }
     cat.timer = cat.mode === "work" ? 28 + Math.random() * 22 : 8 + Math.random() * 5;
     cat.task = {
       work: cat.data.tasks[Math.floor(Math.random() * cat.data.tasks.length)],
+      prepare: "Persiapan kerja setelah absen masuk",
+      report: "Daily report & persiapan pulang",
       coffee: "Menikmati kopi hangat",
       lounge: "Beristirahat di pantry",
       meeting: "Tukar ide bareng tim",
     }[cat.mode];
 
-    if (cat.mode === "work") {
+    if (["work", "prepare", "report"].includes(cat.mode)) {
       cat.facing = workHeading(cat.data);
       cat.root.position.copy(cat.data.desk);
       cat.root.position.y = WORKSTATION.seatedHeight;
@@ -2496,9 +2661,14 @@
     }
 
     for (const cat of cats) {
+      if (cat.mode === "away" || !cat.root.visible) continue;
+      const routine = simulation.office
+        ? Schedule.attendance(simulation.office, officeTime || readJakartaTime(), cat.data.id) : null;
+      const scheduleRest = routine && !["work", "overtime"].includes(routine.id);
+      const energyDelta = simulation.office ? dt / simulation.speed : dt;
       if (cat.mode === "walk") {
         moveCat(cat, dt);
-        cat.energy = Math.max(20, cat.energy - dt * 0.12);
+        cat.energy = Math.max(20, cat.energy - energyDelta * (simulation.office ? 0.003 : 0.12));
       } else {
         // Peserta yang datang lebih dulu duduk menunggu peserta lainnya.
         const waitingForTeam = cat.mode === "meeting" && cats.some((other) => {
@@ -2517,8 +2687,8 @@
           }
         }
 
-        if (cat.mode === "work") {
-          cat.energy = Math.max(20, cat.energy - dt * 0.17);
+        if (cat.mode === "work" && !scheduleRest) {
+          cat.energy = Math.max(20, cat.energy - energyDelta * (simulation.office ? 0.004 : 0.17));
           cat.mood = Math.max(45, cat.mood - dt * 0.025);
           cat.workProgress += dt;
           simulation.daily.contributors.add(cat.data.id);
@@ -2528,11 +2698,11 @@
             cat.task = cat.data.tasks[Math.floor(Math.random() * cat.data.tasks.length)];
           }
         } else {
-          cat.energy = Math.min(100, cat.energy + dt * 1.15);
+          cat.energy = Math.min(100, cat.energy + energyDelta * (simulation.office ? 0.02 : 1.15));
           cat.mood = Math.min(100, cat.mood + dt * 0.48);
         }
 
-        if (cat.timer <= 0) {
+        if (cat.timer <= 0 && !scheduleRest) {
           if (cat.mode === "work") {
             navigate(cat, cat.data.id === "miko" ? "coffee" : "lounge");
           } else {
@@ -2568,15 +2738,15 @@
   function animateCat(cat, dt) {
     const t = simulation.elapsed + cat.phase;
     const walking = cat.mode === "walk" && cat.motion > 0.02;
-    const working = cat.mode === "work";
-    const seated = working || cat.mode === "meeting" || cat.mode === "lounge";
+    const working = cat.mode === "work" || cat.mode === "report";
+    const seated = working || ["prepare", "meeting", "lounge"].includes(cat.mode);
     const targetY = seated
       ? WORKSTATION.seatedHeight
       : walking ? 0.105 + Math.sin(t * 12) * 0.035 : 0.10;
     const blend = 1 - Math.exp(-12 * dt);
     cat.root.position.y = THREE.MathUtils.lerp(cat.root.position.y, targetY, blend);
 
-    if (working) {
+    if (working || cat.mode === "prepare") {
       cat.root.position.x = cat.data.desk.x;
       cat.root.position.z = cat.data.desk.z;
       cat.facing = workHeading(cat.data);
@@ -2876,6 +3046,8 @@
 
   function updateUI() {
     const taskLabel = (cat) => {
+      const routine = simulation.office ? Schedule.attendance(simulation.office, officeTime || readJakartaTime(), cat.data.id) : null;
+      if (routine && !["work", "overtime"].includes(routine.id)) return routine.label;
       if (cat.mode !== "work") return cat.task;
       const project = simulation.projects.active;
       const ownedTasks = project?.tasks.filter((item) => {
@@ -2886,7 +3058,7 @@
         || ownedTasks.find((item) => item.status !== "done") || ownedTasks[0];
       if (!task) return Projects.isIterative(project) ? "Menunggu rencana iterasi" : "Menunggu brief proyek";
       const definition = Projects.definition(project, task.id);
-      if (task.status === "doing") return definition.title;
+      if (task.status === "doing") return `${routine?.id === "overtime" ? "Lembur · " : ""}${definition.title}`;
       if (task.status === "review") return `Menunggu review ${definition.output.toLowerCase()}`;
       if (task.status === "done") return "Hasil tugas telah disetujui";
       return Projects.blockers(simulation.projects.active, task.id).length
@@ -2897,6 +3069,8 @@
     }
 
     if (selected) {
+      $("selected-presence").textContent = selected.root.visible ? "Di kantor" : "Di luar kantor";
+      $("selected-availability").classList.toggle("is-away", !selected.root.visible);
       $("selected-task").textContent = taskLabel(selected);
       $("energy-bar").style.width = `${selected.energy}%`;
       $("mood-bar").style.width = `${selected.mood}%`;
@@ -2930,7 +3104,7 @@
   function updateCamera(dt) {
     const blend = 1 - Math.exp(-8 * dt);
 
-    if (orbit.follow && selected) {
+    if (orbit.follow && selected && selected.root.visible) {
       orbit.goalTarget.set(selected.root.position.x, 1.12, selected.root.position.z);
     }
 
@@ -3058,7 +3232,7 @@
           -(event.clientY - bounds.top) / bounds.height * 2 + 1
         );
         raycaster.setFromCamera(pointer, camera);
-        const hits = raycaster.intersectObjects(cats.map((cat) => cat.root), true);
+        const hits = raycaster.intersectObjects(cats.filter((cat) => cat.root.visible).map((cat) => cat.root), true);
         const hit = hits.find((item) => item.object.userData.catId);
 
         if (hit) {
@@ -3171,6 +3345,7 @@
     });
 
     $("focus-button").addEventListener("click", () => {
+      if (!selected.root.visible) { toast(`${selected.data.name} sedang tidak berada di kantor.`); return; }
       orbit.follow = true;
       orbit.goalZoom = 3.5;
       orbit.goalTheta = 0.28;
@@ -3220,6 +3395,7 @@
         return;
       }
       if ($("project-dialog").open) return;
+      if ($("office-dialog").open) return;
 
       if (["INPUT", "TEXTAREA", "SELECT"].includes(tag) || event.target.isContentEditable) {
         return;
@@ -3249,6 +3425,11 @@
   function frame() {
     const realDelta = Math.min(clock.getDelta(), 0.06);
     const dt = simulation.paused ? 0 : realDelta * simulation.speed;
+    if (simulation.office && !document.hidden && !simulation.paused) {
+      for (const cat of cats) {
+        if (cat.root.visible && cat.mode === "work") Schedule.accrue(simulation.office, officeTime || readJakartaTime(), cat.data.id, realDelta);
+      }
+    }
     updateSimulation(dt);
     updateCamera(realDelta);
 
@@ -3261,6 +3442,7 @@
 
     selectionRing.position.set(selected.root.position.x, 0.135, selected.root.position.z);
     selectionRing.material.opacity = 0.55 + Math.sin(simulation.elapsed * 2) * 0.10;
+    selectionRing.visible = selected.root.visible;
 
     for (const puff of steamPuffs) {
       const phase = (simulation.elapsed * 0.35 + puff.offset) % 1;
@@ -3354,6 +3536,7 @@
     addEvent("Nori", "membaca brief klien dan mencatat kebutuhan.");
     addEvent("Luna", "menyiapkan ruang untuk ide baru.");
     installProjectHub();
+    installOfficeSchedule();
     installCameraControls();
     installButtons();
     resize();

@@ -368,6 +368,70 @@ ditolak, panel misi menampilkan status bahwa progres masih sementara.
 
 ## 🕰️ Satu kantor, satu jam Jakarta
 
+### ◷ Rutinitas kantor WIB
+
+Klik **Jadwal & absen WIB** di panel kiri untuk melihat jadwal dan kehadiran
+simulasi. Lonceng **🔔** di header membuka notifikasi, pengajuan lembur, dan
+daily report. Saat Project Hub terbuka, tombol kabar kantor ikut muncul jika
+ada notifikasi yang perlu dilihat.
+
+| Waktu WIB | Kegiatan avatar |
+| --- | --- |
+| 07.00–09.00 | Datang bertahap, absen masuk, dan persiapan di meja. |
+| 09.00–12.00 | Kerja produktif pagi. |
+| 12.00–13.00 | Ishoma di pantry. |
+| 13.00–16.30 | Kerja produktif siang. |
+| 16.30–17.00 | Daily report dan persiapan absen pulang. |
+| 17.00–18.00 | Pulang; avatar berizin lembur beristirahat di pantry. |
+| 18.00–21.00 | Lembur hanya untuk avatar yang telah mendapat izin. |
+| 21.00–07.00 | Kantor tutup dan avatar tidak berada di kantor. |
+
+Jadwal berlaku **setiap hari**. Jam WIB tetap mengikuti waktu nyata ketika
+animasi dijeda atau dipercepat. Avatar yang sedang dijeda menyelesaikan gerak
+pulangnya setelah animasi dilanjutkan. Tombol kopi/meeting mengikuti jam
+produktif atau lembur berizin; ishoma dan jadwal pulang tidak ditimpa tombol itu.
+Project Hub tetap bisa kamu kelola kapan saja; jadwal mengatur rutinitas avatar.
+
+Avatar masuk melalui area pintu, meninggalkan kantor saat pulang, dan tidak
+menghalangi jalur setelah tidak terlihat. Monitor meredup saat meja kosong,
+lampu meja menyala saat ditempati, dan pencahayaan malam menyesuaikan keberadaan
+avatar. Label di atas avatar menampilkan status rutinitasnya.
+
+### 🔔 Pengajuan lembur
+
+- Pengajuan muncul pada **16.30–16.50 WIB** jika avatar mempunyai tugas proyek
+  yang belum selesai dan energi minimal 60. Maksimal tiga avatar berbeda
+  mengajukan dalam satu hari; penolakan tidak memicu pengajuan ulang.
+- Toast, badge lonceng, dan balon ucapan avatar membantu menandai pengajuan.
+  **Lihat avatar** menyorot pemohon jika masih berada di kantor.
+- Pilih **Izinkan lembur** sampai **19.00, 20.00, atau 21.00 WIB**, atau
+  **Pulang dulu**. Pengajuan tidak dijawab hingga 17.00 menjadi kedaluwarsa.
+  Membaca notifikasi tidak berarti memberi izin.
+- Lembur dimulai pukul 18.00 setelah jeda. Energi 45 atau kurang memunculkan
+  peringatan; pada energi 30 atau kurang lembur dihentikan. Batas izin yang
+  dipilih dan pukul 21.00 juga mengakhiri lembur.
+- Izin, penolakan, kedaluwarsa, dan notifikasi tersimpan setelah refresh.
+  Izin hari sebelumnya tidak dibawa ke hari baru. Belum ada tugas proyek berarti
+  belum ada alasan pengajuan; buat brief/iterasi dahulu untuk membagikan tugas.
+
+### 📝 Absen dan daily report
+
+Absen merupakan **catatan simulasi yang teramati saat halaman terbuka**.
+Membuka kantor pukul 14.00 mencatat kehadiran saat itu, bukan mengarang jam
+masuk pagi. Membuka halaman pertama kali malam hari tidak membuat absen atau
+laporan pekerjaan fiktif. Tidak ada aktivitas proyek yang dijalankan saat
+halaman ditutup.
+
+Mulai 16.30, laporan mengambil nama proyek, waktu aktivitas kerja yang teramati,
+20 tindakan tugas terakhir yang tercatat, serta snapshot status tugas tiap role.
+Jika tidak ada tindakan tugas, laporan menyatakannya. Snapshot status dibedakan
+dari aktivitas yang benar-benar dilakukan pada sesi itu. Timer laporan tidak
+menyelesaikan tugas, membuat hasil AI, atau menyetujui pekerjaan.
+
+Pusat kantor menyimpan laporan hari ini dan maksimal tujuh hari kunjungan
+sebelumnya. Cadangan JSON Project Hub juga membawa jadwal, absensi, laporan,
+izin lembur, serta notifikasi. Simpanan lama tanpa data jadwal tetap bisa dibaca.
+
 Jam digital, tanggal, cap waktu aktivitas, dan jarum jam dinding mengikuti
 zona waktu Asia/Jakarta (WIB, UTC+7). Jam menggunakan waktu komputer dan
 tidak memerlukan koneksi internet. Pastikan jam komputer sudah benar.
@@ -397,6 +461,9 @@ bisa digunakan untuk mencoba suasana lain.
 │   │   └── style.css                      # Tema dan layout responsif
 │   └── js/
 │       ├── main.js                        # Kantor 3D dan penghubung aplikasi
+│       ├── office/
+│       │   ├── office-schedule.js          # Aturan WIB, absen, laporan, dan lembur
+│       │   └── office-ui.js                # Lonceng dan pusat kantor
 │       └── projects/
 │           ├── project-engine.js          # Aturan dan data proyek
 │           ├── project-ui.js              # Antarmuka Project Hub
@@ -421,6 +488,8 @@ bisa digunakan untuk mencoba suasana lain.
 │   ├── project-engine.test.cjs             # Tes aturan proyek
 │   ├── project-agile.test.cjs              # Tes fitur, iterasi, dan kompatibilitas
 │   ├── project-hybrid.test.cjs             # Tes rencana awal dan perubahan scope
+│   ├── office-schedule.test.cjs            # Tes batas waktu, absen, laporan, izin
+│   ├── office-ui.test.cjs                  # Tes lonceng dan keputusan lembur
 │   ├── project-ui.test.cjs                 # Tes handler dan modal UI
 │   ├── project-structure.test.cjs          # Tes path dan struktur proyek
 │   └── office-integration.cjs              # Tes integrasi dan gerak kantor
@@ -439,6 +508,7 @@ diabaikan oleh Git. Folder `.git/` adalah metadata repositori, bukan kode aplika
 | `src/css/` | Warna, font, panel, dialog, dan tampilan responsif. |
 | `src/js/main.js` | Avatar, ruangan, animasi, navigasi, kamera, quest harian, serta penyimpanan dan integrasi Project Hub. |
 | `src/js/projects/` | Aturan brief, dependensi, hasil kerja, migrasi, validasi, serta antarmuka pengelolaan proyek. |
+| `src/js/office/` | Jadwal WIB, catatan absen dan aktivitas sesi, daily report, pengajuan lembur, dan pusat notifikasi. |
 | `vendor/three/` | Library pihak ketiga beserta lisensinya; terpisah dari kode yang kita kembangkan. |
 | `assets/images/` | Gambar dan ilustrasi lokal. |
 | `docs/` | Dokumentasi, ringkasan Word, dan catatan pengembangan. |
@@ -450,7 +520,7 @@ profil, host, dan port yang sama. Penataan folder tidak mengubah kunci localStor
 atau mereset proyek. Tidak ada backend, bundler, atau instalasi baru.
 
 HTML memuat file dengan urutan: library Three.js, modul Waterfall, bantuan
-iterasi bersama, Agile, Hybrid, engine proyek, UI proyek,
+iterasi bersama, Agile, Hybrid, engine proyek, UI proyek, modul jadwal dan UI kantor,
 kemudian `main.js`. Path stylesheet, gambar README, lisensi, dan tes sudah
 disesuaikan ke lokasi baru. Jangan membuka file JavaScript sebagai halaman utama.
 
@@ -481,11 +551,14 @@ Tidak ada paket tambahan atau proses build yang harus diinstal.
 
 ```powershell
 node --test tests/project-engine.test.cjs tests/project-agile.test.cjs tests/project-hybrid.test.cjs tests/project-ui.test.cjs tests/project-structure.test.cjs
+node --test tests/office-schedule.test.cjs tests/office-ui.test.cjs
 node tests/office-integration.cjs
 ```
 
 Untuk memeriksa integrasi proyek dan penyimpanan tanpa mengulang simulasi
 perjalanan avatar, jalankan `node tests/office-integration.cjs --projects-only`.
+Untuk menguji gerak datang, ishoma, pulang, dan lembur tanpa mengulang seluruh
+skenario perjalanan lama, gunakan `node tests/office-integration.cjs --schedule-only`.
 
 Tes UI memakai DOM tiruan untuk memeriksa handler/state dan tes kantor memakai
 model Three.js tanpa rendering. Keduanya bukan pengganti pemeriksaan visual

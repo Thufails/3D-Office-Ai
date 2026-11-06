@@ -18,6 +18,8 @@ test('alamat halaman utama tetap; stylesheet dan skrip lokal terhubung berurutan
     'src/js/projects/methods/hybrid.js',
     'src/js/projects/project-engine.js',
     'src/js/projects/project-ui.js',
+    'src/js/office/office-schedule.js',
+    'src/js/office/office-ui.js',
     'src/js/main.js',
   ]);
   const stylesheet = html.match(/<link\s+rel="stylesheet"\s+href="([^"]+)"/)[1];

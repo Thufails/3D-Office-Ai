@@ -625,7 +625,7 @@
 
     function renderBackup() {
       content.append(element("h3", "project-section-title", "💾 Cadangkan satu kantor"));
-      content.append(element("p", "project-muted", "JSON berisi proyek aktif, arsip, dokumen, notulen, quest harian, rekan yang dikenal, dan happiness. Simpan secara pribadi bila brief berisi informasi klien."));
+      content.append(element("p", "project-muted", "JSON berisi proyek aktif, arsip, dokumen, notulen, quest harian, absensi simulasi, laporan, izin lembur, notifikasi, rekan yang dikenal, dan happiness. Simpan secara pribadi bila brief berisi informasi klien."));
       content.append(button("Unduh cadangan JSON", () => {
         download(`pawffice-backup-${new Date().toISOString().slice(0, 10)}.json`,
           JSON.stringify(options.makeBackup(), null, 2), "application/json");

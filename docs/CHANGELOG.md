@@ -1,5 +1,29 @@
 # 🐾 Catatan pengembangan Pawffice
 
+## 6 November 2026 · Rutinitas kantor WIB dan izin lembur
+
+- Modul baru `src/js/office/office-schedule.js` mengatur jadwal, absen simulasi,
+  laporan sesi, pengajuan lembur, masa berlaku izin, dan retensi catatan.
+- Modul `office-ui.js` menampilkan pusat kantor: notifikasi, jadwal/absen,
+  dan laporan hari ini beserta tujuh hari kunjungan sebelumnya.
+- Jadwal: datang 07–09, kerja 09–12, ishoma 12–13, kerja 13–16.30,
+  laporan 16.30–17, pulang/jeda 17–18, dan lembur berizin 18–21 WIB.
+- Kedatangan bertahap, perpindahan ishoma/pulang, avatar di luar kantor
+  disembunyikan dan tidak menghalangi jalur. Monitor serta lampu mengikuti
+  pemakaian meja, dengan pencahayaan malam yang lebih redup.
+- Pengajuan lembur 16.30–16.50 untuk tugas tertunda dan energi minimal 60;
+  maksimal tiga pemohon berbeda, tanpa mengulang pengajuan yang sudah ditanggapi.
+- Toast, badge lonceng, balon avatar, dan tombol kabar di Project Hub menandai
+  pengajuan. Persetujuan sampai 19, 20, atau 21; diam sampai 17 berarti kedaluwarsa.
+- Avatar berizin beristirahat 17–18. Notifikasi energi rendah muncul pada 45;
+  energi 30 atau batas izin mengakhiri lembur.
+- Absen dan laporan memakai aktivitas yang teramati saat halaman terbuka.
+  Tidak ada pekerjaan offline fiktif atau persetujuan tugas lewat timer.
+- Progres v3 dan cadangan JSON membawa data kantor baru, dengan validasi penuh;
+  simpanan lama tanpa modul jadwal tetap kompatibel.
+- Tes baru mencakup batas jam, masa izin, duplikasi notifikasi, laporan,
+  pergantian hari, UI keputusan, dan integrasi navigasi/penyimpanan.
+
 ## 6 November 2026 · Waterfall, Agile dan Hybrid
 
 - Brief proyek baru memiliki pilihan Waterfall, Agile atau Hybrid.

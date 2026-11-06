@@ -4,6 +4,7 @@ const vm = require('node:vm');
 const { performance } = require('node:perf_hooks');
 const root = require('node:path').resolve(__dirname, '..');
 const Projects = require(`${root}/src/js/projects/project-engine.js`);
+const Schedule = require(`${root}/src/js/office/office-schedule.js`);
 const THREE = require(`${root}/vendor/three/Three.js`);
 const viewport = { width: 1000, height: 700 };
 const surfaceOffset = { left: 0, top: 0 };
@@ -52,6 +53,8 @@ const context = vm.createContext({
   window: {
     THREE, localStorage, devicePixelRatio: 1,
     PawfficeProjects: Projects,
+    PawfficeSchedule: Schedule,
+    PawfficeOfficeUI: { mount() { return { refresh() {} }; } },
     PawfficeProjectUI: {
       mount(options) {
         projectHubOptions = options;
@@ -86,6 +89,7 @@ const instrumented = source.replace('    boot();', `
       progressSnapshot, loadProgress, saveProgress, renderCrewCards,
       restoreProgress, validateProgress, dailyQuestsForDate, readJakartaTime,
       updateSimulation, updateUI, renderMainQuest, resetDailyProgress, installProjectHub,
+      syncOfficeSchedule, applyOfficeRoutine, officeContext,
       renderJobdesk, createWorkspaceLabels, updateWorkspaceLabels, installButtons,
       initializeCamera() {
         camera = new THREE.OrthographicCamera(-16, 16, 12, -12, 0.1, 100);
@@ -317,7 +321,7 @@ for (let tick = 0; tick < 60; tick += 1) {
 for (const cat of office.cats) checkSeated(cat);
 console.log('PASS: all 8 avatars share chair coordinates, face their desks, and have straight monitors.');
 
-if (!process.argv.includes('--projects-only')) {
+if (!process.argv.includes('--projects-only') && !process.argv.includes('--schedule-only')) {
   for (const cat of office.cats) {
     const targets = [cat.data.desk, office.COFFEE_TARGET,
       office.LOUNGE_SPOTS[office.cats.indexOf(cat)]];
@@ -548,3 +552,78 @@ assert.equal(office.simulation.projects.active.method, 'hybrid');
 assert.equal(office.simulation.projects.active.backlog[0].scopeStatus, 'baseline');
 assert.equal(projectHubOptions.importProgress(hybridBackup), true);
 console.log('PASS: Hybrid milestones, scope-change decisions, actor labels and v3 reload/backup integrate with the office.');
+
+const officeTimeAt = (hour, minute = 0) => ({ dateKey: '2026-11-06', hour, minute, second: 0 });
+office.simulation.office = null;
+office.syncOfficeSchedule(officeTimeAt(6, 59), true);
+assert.ok(office.cats.every((cat) => !cat.root.visible && cat.mode === 'away'));
+const arrivalMinute = office.simulation.office.day.members[0].arrivalMinute;
+office.syncOfficeSchedule(officeTimeAt(7, arrivalMinute - 420));
+assert.equal(office.cats[0].root.visible, true);
+assert.ok(office.cats.slice(1).every((cat) => !cat.root.visible));
+office.cats[1].root.position.set(-16, 0, 0);
+assert.equal(office.blocked(-16, 0, office.cats[0], true), false,
+  'hidden avatars must not obstruct navigation');
+
+function finishRoutineWalking(label) {
+  for (let step = 0; step < 2400 && office.cats.some((cat) => cat.mode === 'walk'); step += 1) {
+    for (const cat of office.cats) {
+      if (cat.mode === 'walk') office.moveCat(cat, 0.05);
+      office.animateCat(cat, 0.05);
+    }
+  }
+  const stuck = office.cats.filter((cat) => cat.mode === 'walk').map((cat) => ({
+    id: cat.data.id, position: cat.root.position.toArray(), target: cat.navTarget?.toArray(),
+  }));
+  assert.equal(stuck.length, 0, `${label}: ${JSON.stringify(stuck)}`);
+}
+
+if (!process.argv.includes('--projects-only')) {
+  finishRoutineWalking('morning arrival from entrance');
+  assert.equal(office.cats[0].mode, 'prepare');
+}
+office.syncOfficeSchedule(officeTimeAt(9), true);
+assert.ok(office.cats.every((cat) => cat.root.visible && cat.mode === 'work'));
+const tasksBeforeRoutine = JSON.stringify(office.simulation.projects);
+office.syncOfficeSchedule(officeTimeAt(12));
+assert.ok(office.cats.every((cat) => cat.activity === 'lounge'));
+assert.equal(office.navigate(office.cats[0], 'meeting'), false, 'ishoma must not be overwritten by manual meeting');
+if (!process.argv.includes('--projects-only')) {
+  finishRoutineWalking('ishoma');
+  assert.ok(office.cats.every((cat) => cat.mode === 'lounge'));
+  office.syncOfficeSchedule(officeTimeAt(13));
+  finishRoutineWalking('return after ishoma');
+  assert.ok(office.cats.every((cat) => cat.mode === 'work'));
+}
+office.cats.forEach((cat) => { cat.energy = 90; });
+office.syncOfficeSchedule(officeTimeAt(16, 30), true);
+assert.ok(office.cats.every((cat) => cat.mode === 'report'));
+assert.ok(office.simulation.office.day.members.every((record) => record.report));
+const requests = office.simulation.office.day.members.filter((record) => record.overtime.status === 'pending');
+assert.equal(requests.length, 3);
+const overtimeId = requests[0].id;
+Schedule.decide(office.simulation.office, officeTimeAt(16, 40), overtimeId, 'approve', 1260);
+office.syncOfficeSchedule(officeTimeAt(17));
+assert.equal(office.cats.find((cat) => cat.data.id === overtimeId).activity, 'lounge');
+assert.ok(office.cats.filter((cat) => cat.data.id !== overtimeId).every((cat) => cat.activity === 'exit'));
+if (!process.argv.includes('--projects-only')) {
+  finishRoutineWalking('regular departure and overtime break');
+  assert.ok(office.cats.filter((cat) => cat.data.id !== overtimeId).every((cat) => !cat.root.visible));
+  office.syncOfficeSchedule(officeTimeAt(18));
+  finishRoutineWalking('start overtime');
+  assert.equal(office.cats.find((cat) => cat.data.id === overtimeId).mode, 'work');
+}
+assert.equal(JSON.stringify(office.simulation.projects), tasksBeforeRoutine, 'routine must never approve or create project tasks');
+office.syncOfficeSchedule(officeTimeAt(21));
+if (!process.argv.includes('--projects-only')) {
+  finishRoutineWalking('last overtime departure');
+  assert.ok(office.cats.every((cat) => !cat.root.visible));
+}
+const officeSnapshot = office.progressSnapshot();
+assert.deepEqual(office.validateProgress(officeSnapshot).office, officeSnapshot.office);
+const beforeInvalidOffice = JSON.stringify(office.progressSnapshot());
+const invalidOffice = JSON.parse(beforeInvalidOffice);
+invalidOffice.office.day.members[0].overtime.untilMinute = 1500;
+assert.throws(() => office.restoreProgress(invalidOffice));
+assert.equal(JSON.stringify(office.progressSnapshot()), beforeInvalidOffice);
+console.log('PASS: WIB attendance, report, overtime permission/expiry, hidden avatars, unchanged project tasks, and validated schedule backup.');

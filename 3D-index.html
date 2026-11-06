@@ -23,6 +23,8 @@
     <script defer src="src/js/projects/methods/hybrid.js"></script>
     <script defer src="src/js/projects/project-engine.js"></script>
     <script defer src="src/js/projects/project-ui.js"></script>
+    <script defer src="src/js/office/office-schedule.js"></script>
+    <script defer src="src/js/office/office-ui.js"></script>
     <script defer src="src/js/main.js"></script>
   </head>
 
@@ -143,10 +145,14 @@
 
       <div class="live-indicator">
         <span class="live-dot"></span>
-        Tim Pawffice sedang beraktivitas
+        <span id="office-phase">Menyiapkan jadwal kantor</span>
       </div>
 
       <div class="header-right">
+        <button class="icon-button office-bell" id="office-bell" type="button" aria-label="Pusat kantor dan notifikasi" title="Pusat kantor & pengajuan lembur">
+          <span aria-hidden="true">🔔</span>
+          <span class="office-badge" id="office-badge" hidden>0</span>
+        </button>
         <span class="day-label" id="day-label">WAKTU JAKARTA</span>
         <span
           class="clock"
@@ -175,6 +181,7 @@
         aria-label="Panel lokasi, tim, dan cerita hari ini"
       >
         <div class="intro">
+          <button class="office-routine-button" id="office-routine-button" type="button">◷ Jadwal & absen WIB</button>
           <p class="eyebrow">YOUR LITTLE VIRTUAL WORKSPACE</p>
           <h1>
             Ruang ide,<br>
@@ -289,9 +296,9 @@
         >
           <div class="section-heading">
             <span class="eyebrow">MEET YOUR TEAMMATE</span>
-            <span class="availability">
+            <span class="availability" id="selected-availability">
               <span class="live-dot"></span>
-              Di kantor
+              <span id="selected-presence">Di kantor</span>
             </span>
           </div>
 
@@ -505,6 +512,7 @@
           <h2 id="project-dialog-title">Dari brief, jadi pekerjaan tim.</h2>
           <p>Kelola proyek dan dokumen simulasi lokal. Belum menghasilkan website nyata.</p>
         </div>
+        <button class="project-button office-inline-button" id="office-project-bell" type="button" hidden>🔔 Kabar kantor</button>
         <button class="jobdesk-close" id="project-close" aria-label="Tutup Project Hub">×</button>
       </header>
       <nav class="project-tabs" aria-label="Bagian Project Hub" id="project-tabs">
@@ -540,6 +548,23 @@
         <button class="project-button" id="project-confirm-cancel" type="button">Batal</button>
         <button class="project-primary" id="project-confirm-accept" type="button">Lanjutkan</button>
       </div>
+    </dialog>
+    <dialog class="project-dialog office-dialog" id="office-dialog" aria-labelledby="office-title">
+      <header class="project-dialog-header">
+        <div>
+          <p class="eyebrow">PAWFFICE · RUTINITAS WIB</p>
+          <h2 id="office-title">Kabar dari kantor.</h2>
+          <p>Jadwal harian, absen simulasi, daily report, dan izin lembur.</p>
+        </div>
+        <button class="jobdesk-close" id="office-close" type="button" aria-label="Tutup pusat kantor">×</button>
+      </header>
+      <nav class="project-tabs" id="office-tabs" aria-label="Bagian pusat kantor">
+        <button type="button" data-office-tab="notifications">🔔 Notifikasi</button>
+        <button type="button" data-office-tab="routine">◷ Jadwal & absen</button>
+        <button type="button" data-office-tab="reports">📝 Daily report</button>
+      </nav>
+      <p class="project-message" id="office-message" role="status" aria-live="polite"></p>
+      <div class="project-content" id="office-content"></div>
     </dialog>
     <noscript>Aktifkan JavaScript di browser untuk membuka kantor 3D ini.</noscript>
   </body>
