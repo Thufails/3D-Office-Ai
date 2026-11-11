@@ -51,6 +51,8 @@ Buka `3D-index.html` di Chrome/Edge, atau gunakan alamat Live Server yang biasa 
 
 Proyek masih menghasilkan **dokumen template simulasi**. Role belum menjalankan AI, membuat website nyata, atau menyelesaikan tugas otomatis lewat timer. Project Hub bisa dikelola kapan saja.
 
+🧭 Melanjutkan pengembangan / pindah akun? Baca [panduan agen](AGENTS.md) dan [konteks terakhir](docs/HANDOFF.md).
+
 <details>
 <summary>📚 Buka panduan lengkap, jobdesk, struktur folder, dan detail teknis</summary>
 
@@ -466,6 +468,7 @@ bisa digunakan untuk mencoba suasana lain.
 ├── 3D-index.html                          # Halaman utama tetap di alamat lama
 ├── index.html                             # Pintasan ke 3D-index.html
 ├── README.md                              # Panduan proyek dan penggunaan
+├── AGENTS.md                              # Aturan kerja agen dan transisi akun
 ├── .gitattributes                         # Normalisasi file teks Git
 ├── .gitignore                             # Abaikan file sementara dan hasil QA
 ├── src/
@@ -494,6 +497,7 @@ bisa digunakan untuk mencoba suasana lain.
 │   └── images/
 │       └── readme-banner.svg              # Ilustrasi dokumentasi
 ├── docs/
+│   ├── HANDOFF.md                          # Kondisi terakhir dan pekerjaan lanjutan
 │   ├── CHANGELOG.md                        # Riwayat pengembangan
 │   ├── Ringkasan_Fitur_dan_Alur_Pawffice.docx
 │   └── notes/

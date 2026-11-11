@@ -1,5 +1,14 @@
 # 🐾 Catatan pengembangan Pawffice
 
+## 11 November 2026 · Panduan transisi akun
+
+- Menambahkan AGENTS.md untuk aturan kerja, peta kode, kompatibilitas simpanan,
+  serta pemilihan tes bagi agen yang melanjutkan proyek.
+- Menambahkan docs/HANDOFF.md untuk kondisi implementasi, keputusan desain,
+  bukti pengujian sebelumnya, batas fitur, dan langkah melanjutkan tanpa chat lama.
+- README menautkan kedua panduan dan memperbarui pohon folder; bagian depan
+  tetap ringkas. Perubahan hanya dokumentasi, tanpa mengubah perilaku aplikasi.
+
 ## 6 November 2026 · Wing fasilitas dan staf operasional
 
 - Tetap memakai model kantor isometrik satu lantai. Bangunan kompak dengan
