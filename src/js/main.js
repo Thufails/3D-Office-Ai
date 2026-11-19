@@ -3047,6 +3047,9 @@
     updateUI();
   }
 
+  window.PawfficeSelectedCat = () => selected;
+  window.PawfficeGetActiveProject = () => simulation.projects.active;
+
   function getDailyQuestStatus(quest) {
     const daily = simulation.daily;
     const seenToday = daily.seenToday.size;
@@ -3497,6 +3500,7 @@
   }
 
   function installButtons() {
+    window.PawfficeAiPanel?.init();
     for (const cat of cats) {
       $(`crew-${cat.data.id}`).addEventListener("click", () => selectCat(cat));
     }

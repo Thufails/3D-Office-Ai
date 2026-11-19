@@ -27,6 +27,7 @@
     <script defer src="src/js/office/office-campus.js"></script>
     <script defer src="src/js/office/office-schedule.js"></script>
     <script defer src="src/js/office/office-ui.js"></script>
+    <script defer src="src/js/ai/ai-panel.js"></script>
     <script defer src="src/js/main.js"></script>
   </head>
 
@@ -151,6 +152,9 @@
       </div>
 
       <div class="header-right">
+        <button class="ai-open-button" id="ai-open-button" type="button" aria-controls="ai-panel" aria-expanded="false">
+          ✨ Asisten AI
+        </button>
         <button class="icon-button office-bell" id="office-bell" type="button" aria-label="Pusat kantor dan notifikasi" title="Pusat kantor & pengajuan lembur">
           <span aria-hidden="true">🔔</span>
           <span class="office-badge" id="office-badge" hidden>0</span>
@@ -360,6 +364,7 @@
               <use href="#i-focus" />
             </svg>
           </button>
+          <button class="project-primary ai-profile-button" id="ai-profile-button" type="button">✨ Tanya avatar ini</button>
         </section>
 
         <section class="main-quest-panel panel" aria-labelledby="main-quest-title">
@@ -495,6 +500,36 @@
       </footer>
     </main>
 
+
+    <aside class="ai-panel" id="ai-panel" aria-labelledby="ai-panel-title" hidden>
+      <header class="ai-panel-header">
+        <div>
+          <p class="eyebrow">PAWFFICE · GEMINI</p>
+          <h2 id="ai-panel-title">Ngobrol dengan tim</h2>
+          <p id="ai-panel-subtitle">Pilih avatar untuk mulai konsultasi.</p>
+        </div>
+        <button class="jobdesk-close ai-panel-close" id="ai-panel-close" type="button" aria-label="Tutup panel AI">×</button>
+      </header>
+      <label class="ai-avatar-label" for="ai-avatar-select">Rekan yang diajak bicara</label>
+      <select class="ai-avatar-select" id="ai-avatar-select"></select>
+      <p class="ai-context-note" id="ai-context-note">Konteks proyek aktif akan disertakan bila tersedia.</p>
+      <label class="ai-avatar-label" for="ai-model-select">Model Gemini</label>
+      <select class="ai-avatar-select" id="ai-model-select">
+        <option value="gemini-3.8-flash">Gemini 3.8 Flash · cepat</option>
+        <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview · analisis mendalam</option>
+        <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite · ringan</option>
+      </select>
+      <div class="ai-messages" id="ai-messages" role="log" aria-live="polite"></div>
+      <form class="ai-form" id="ai-form">
+        <label class="visually-hidden" for="ai-input">Pesan untuk Gemini</label>
+        <textarea id="ai-input" rows="3" maxlength="6000" placeholder="Tanyakan sesuatu ke rekan tim..." required></textarea>
+        <div class="ai-form-actions">
+          <span id="ai-status" role="status">Gemini siap · key tetap di Worker lokal</span>
+          <button class="project-primary" id="ai-send" type="submit">Kirim</button>
+        </div>
+      </form>
+    </aside>
+
     <dialog class="jobdesk-dialog" id="jobdesk-dialog" aria-labelledby="jobdesk-title">
       <div class="jobdesk-header">
         <div>
@@ -575,6 +610,7 @@
       <p class="project-message" id="office-message" role="status" aria-live="polite"></p>
       <div class="project-content" id="office-content"></div>
     </dialog>
+
     <noscript>Aktifkan JavaScript di browser untuk membuka kantor 3D ini.</noscript>
   </body>
 </html>

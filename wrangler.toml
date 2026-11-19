@@ -1,0 +1,7 @@
+name = "pawffice-gemini-local"
+main = "worker/index.js"
+compatibility_date = "2026-11-19"
+
+[vars]
+GEMINI_MODEL = "gemini-3.8-flash"
+

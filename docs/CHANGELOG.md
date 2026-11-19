@@ -1,5 +1,14 @@
 # 🐾 Catatan pengembangan Pawffice
 
+## 19 November 2026 · Gemini melalui Cloudflare Worker lokal
+
+- Mengganti percobaan modal Gemini yang menutupi kantor dengan panel samping biasa, tombol header, dan pintasan dari profil avatar.
+- Merapikan tinggi panel chat: area riwayat dapat menyusut, textarea dibatasi, dan status/tombol mengikuti grid pada layar sempit.
+- Menambahkan `src/js/ai/ai-panel.js` untuk chat per avatar, konteks proyek aktif, serta pilihan Gemini 3.8 Flash, Gemini 3.1 Pro Preview, dan Gemini 3.5 Flash-Lite. Riwayat hanya hidup sementara di tab.
+- Menambahkan `worker/index.js` sebagai perantara API. Key dibaca server-side dari `.dev.vars`; key tidak disimpan di JavaScript atau localStorage.
+- Menambahkan `.dev.vars.example`, `wrangler.toml`, dan aturan Git ignore untuk `.dev.vars`/`.env`.
+- Panel memerlukan Worker lokal dan key yang dikonfigurasi. Tampilan browser belum diverifikasi.
+
 ## 11 November 2026 · Panduan transisi akun
 
 - Menambahkan AGENTS.md untuk aturan kerja, peta kode, kompatibilitas simpanan,

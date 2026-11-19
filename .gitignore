@@ -5,3 +5,7 @@ __pycache__/
 
 # Hasil render pemeriksaan dokumen lokal
 tools/docs/.qa/
+
+# Rahasia lokal Cloudflare Worker
+.dev.vars
+.env

@@ -8,7 +8,7 @@ Kantor software house 3D lokal dengan **10 avatar kucing**, rutinitas WIB, dan s
 
 ## 🚀 Menjalankan
 
-Buka `3D-index.html` di Chrome/Edge, atau gunakan alamat Live Server yang biasa dipakai. Tidak perlu instalasi, backend, atau akun AI.
+Buka `3D-index.html` di Chrome/Edge atau gunakan Live Server. Simulasi kantor tetap berjalan tanpa server AI; Gemini perlu Cloudflare Worker lokal.
 
 **Gunakan browser, profil, dan alamat yang sama** agar progres tetap terbaca. `file://`, `localhost`, dan `127.0.0.1` memiliki penyimpanan berbeda. Refresh dengan **Ctrl + Shift + R** setelah memperbarui kode.
 
@@ -49,12 +49,34 @@ Buka `3D-index.html` di Chrome/Edge, atau gunakan alamat Live Server yang biasa 
 | Spasi / R | Pause / kembali ke overview |
 | 🔔 / Jadwal & absen WIB | Notifikasi, jadwal, absen, laporan, dan pilihan ibadah |
 
-Proyek masih menghasilkan **dokumen template simulasi**. Role belum menjalankan AI, membuat website nyata, atau menyelesaikan tugas otomatis lewat timer. Project Hub bisa dikelola kapan saja.
+Proyek masih menghasilkan **dokumen template simulasi**. Chat Gemini membantu konsultasi sesuai role, tetapi belum membuat website nyata atau menyelesaikan tugas proyek otomatis. Project Hub bisa dikelola kapan saja.
+
+Untuk mencoba Gemini lokal, lihat bagian **Menjalankan Gemini** pada panduan lengkap di bawah. Tanpa Worker dan API key, chat AI belum tersambung.
 
 🧭 Melanjutkan pengembangan / pindah akun? Baca [panduan agen](AGENTS.md) dan [konteks terakhir](docs/HANDOFF.md).
 
 <details>
 <summary>📚 Buka panduan lengkap, jobdesk, struktur folder, dan detail teknis</summary>
+
+### ✨ Menjalankan Gemini secara lokal
+
+1. Buat API key di [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Di PowerShell pada root proyek, salin `.dev.vars.example` menjadi `.dev.vars`, lalu isi `GEMINI_API_KEY` dengan key milikmu:
+
+   ```powershell
+   Copy-Item .dev.vars.example .dev.vars
+   ```
+3. Jalankan Worker di terminal:
+
+   ```powershell
+   npx wrangler dev --local --port 8787
+   ```
+
+4. Buka `3D-index.html` melalui Live Server pada `localhost:5500` atau `127.0.0.1:5500`, lalu pilih **Asisten AI**.
+
+`.dev.vars` diabaikan Git. Jangan menempelkan key ke HTML, JavaScript, screenshot, atau chat. Untuk diterbitkan, atur secret Worker melalui dashboard/CLI Cloudflare, bukan file `.dev.vars`.
+
+Panel menyediakan **Gemini 3.8 Flash** untuk percakapan cepat, **Gemini 3.1 Pro Preview** untuk analisis lebih berat, dan **Gemini 3.5 Flash-Lite** sebagai opsi ringan. Riwayat chat hanya tersimpan sementara di tab browser; percakapan dikirim ke Gemini saat kamu menekan Kirim.
 
 
 ## 🌱 Mulai dari Project Hub
@@ -470,12 +492,18 @@ bisa digunakan untuk mencoba suasana lain.
 ├── README.md                              # Panduan proyek dan penggunaan
 ├── AGENTS.md                              # Aturan kerja agen dan transisi akun
 ├── .gitattributes                         # Normalisasi file teks Git
-├── .gitignore                             # Abaikan file sementara dan hasil QA
+├── .gitignore                             # Abaikan file sementara, hasil QA, dan secret lokal
+├── .dev.vars.example                      # Contoh konfigurasi key Worker (tanpa key asli)
+├── wrangler.toml                          # Konfigurasi Cloudflare Worker lokal
+├── worker/
+│   └── index.js                           # Proxy aman ke Gemini API
 ├── src/
 │   ├── css/
 │   │   └── style.css                      # Tema dan layout responsif
 │   └── js/
 │       ├── main.js                        # Kantor 3D dan penghubung aplikasi
+│       ├── ai/
+│       │   └── ai-panel.js                # Panel chat Gemini per avatar
 │       ├── office/
 │       │   ├── office-schedule.js          # Aturan WIB, absen, laporan, dan lembur
 │       │   ├── office-ui.js                # Lonceng dan pusat kantor
@@ -526,6 +554,7 @@ diabaikan oleh Git. Folder `.git/` adalah metadata repositori, bukan kode aplika
 | --- | --- |
 | `src/css/` | Warna, font, panel, dialog, dan tampilan responsif. |
 | `src/js/main.js` | Avatar, ruangan, animasi, navigasi, kamera, quest harian, serta penyimpanan dan integrasi Project Hub. |
+| `src/js/ai/` dan `worker/` | Panel chat role dan perantara server-side ke Gemini; key lokal berada di `.dev.vars`. |
 | `src/js/projects/` | Aturan brief, dependensi, hasil kerja, migrasi, validasi, serta antarmuka pengelolaan proyek. |
 | `src/js/office/` | Jadwal WIB, catatan absen dan aktivitas sesi, daily report, pengajuan lembur, dan pusat notifikasi. |
 | `vendor/three/` | Library pihak ketiga beserta lisensinya; terpisah dari kode yang kita kembangkan. |
@@ -546,7 +575,7 @@ disesuaikan ke lokasi baru. Jangan membuka file JavaScript sebagai halaman utama
 Data karakter dan quest berada di bagian atas `src/js/main.js`. Model kucing,
 meja, serta furnitur dibuat dari kode; tidak membutuhkan file model
 eksternal. Progres quest saat ini mengikuti aturan simulasi JavaScript.
-Role belum menjalankan model AI atau mengirim permintaan API.
+Chat role dapat memakai model Gemini melalui Worker lokal jika API key sudah dikonfigurasi. Role belum menjalankan tugas proyek atau membuat website secara otomatis.
 
 ### 🧩 Pembagian logika metode
 

@@ -36,13 +36,14 @@ Jika proyek dipindahkan, gunakan root repository yang benar, bukan path lama.
 
 Pawffice adalah simulasi kantor software house 3D dengan avatar kucing.
 Aplikasi memakai HTML, CSS, JavaScript biasa, dan Three.js lokal.
-Buka `3D-index.html` langsung atau gunakan Live Server. Node diperlukan
-untuk tes pengembangan, bukan untuk menjalankan aplikasi di browser.
+Buka `3D-index.html` melalui Live Server untuk memakai semua fitur; Node/Wrangler
+diperlukan untuk menjalankan Worker Gemini lokal, bukan untuk simulasi kantor.
 
 - Pertahankan model kantor isometrik yang dapat diputar dan di-zoom.
   Pengguna membatalkan ide editor bangunan ala The Sims.
-- Belum ada backend atau integrasi model AI. Dokumen proyek dan notulen
-  adalah template simulasi, bukan hasil agen AI atau website yang sudah dibuat.
+- Gemini tersedia untuk chat konsultasi melalui Cloudflare Worker lokal di
+  `worker/`; API key hanya dibaca Worker dari `.dev.vars`. Ini bukan agen
+  eksekusi proyek. Dokumen proyek dan notulen tetap template simulasi.
 - Contoh barbershop adalah proyek klien di dalam simulasi, bukan identitas
   aplikasi. Jangan menjadikan Pawffice aplikasi khusus barbershop.
 - README harus ringkas di depan; panduan panjang dan jobdesk berada dalam
@@ -62,13 +63,15 @@ untuk tes pengembangan, bukan untuk menjalankan aplikasi di browser.
 | `src/js/office/office-schedule.js` | Aturan WIB, absen, laporan, lembur, ibadah, migrasi |
 | `src/js/office/office-ui.js` | Lonceng, notifikasi, pusat kantor |
 | `src/js/office/prayer-times.js` | Estimasi lokal Zuhur/Asar Jakarta |
+| `src/js/ai/ai-panel.js` | Panel chat Gemini per avatar dan pemilihan model |
+| `worker/index.js`, `wrangler.toml` | Proxy Gemini lokal dan konfigurasi Cloudflare Worker |
 | `vendor/three/` | Library dan lisensi; jangan edit untuk perubahan fitur biasa |
 | `tests/` | Tes Node, DOM tiruan, dan integrasi tanpa render browser |
 
 Skrip menggunakan IIFE/global browser; beberapa modul juga mengekspor CommonJS
 untuk tes. Pertahankan urutan `defer` di HTML: Three.js → waterfall →
 iterative → agile → hybrid → engine → project UI → prayer times → campus →
-schedule → office UI → main. Jangan menambahkan build system tanpa kebutuhan.
+schedule → office UI → AI panel → main. Jangan menambahkan build system tanpa kebutuhan.
 
 ## Invarian yang perlu dijaga
 

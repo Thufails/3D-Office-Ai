@@ -1,8 +1,9 @@
 # Serah-terima pengembangan Pawffice
 
-Diperbarui: **11 November 2026**.
-Snapshot kode saat pemeriksaan: commit `8c2e100` (6 November 2026,
-`feat: add some actor`); working tree bersih sebelum penambahan panduan ini.
+Diperbarui: **19 November 2026**.
+Baseline kode yang diperiksa: commit `8c2e100` (6 November 2026,
+`feat: add some actor`). Integrasi Gemini lokal sedang dikerjakan pada
+19 November 2026; working tree berisi perubahan fitur dan dokumentasi.
 Commit tersebut adalah acuan pemeriksaan, bukan instruksi untuk checkout/reset.
 
 Dokumen ini menyimpan keadaan terakhir dan keputusan proyek agar pengembangan
@@ -16,10 +17,12 @@ Pawffice adalah kantor software house 3D lokal dengan avatar kucing berpakaian
 kantor. Tim mensimulasikan pengerjaan proyek website klien melalui brief,
 tugas, dokumen, review, notulen, dan arsip.
 
-Saat ini belum ada model AI/API, backend, atau eksekusi pembuatan website nyata.
-Draf dokumen/notulen berasal dari template lokal. Contoh “Sistem booking online
-untuk barbershop” merupakan proyek klien lama di dalam simulasi. Instalasi baru
-tidak wajib memulai dengan contoh tersebut.
+Gemini sekarang diakses lewat Cloudflare Worker lokal (`worker/index.js`).
+Panel samping memilih satu dari 10 avatar dan mengirim konteks proyek aktif.
+Worker membaca key dari `.dev.vars`; chat memerlukan Worker aktif dan API key.
+Dokumen proyek dan notulen utama tetap berupa template simulasi di Project Hub.
+Contoh “Sistem booking online untuk barbershop” merupakan proyek klien lama
+di dalam simulasi. Instalasi baru tidak wajib memulai dengan contoh tersebut.
 
 ## Yang sudah diterapkan
 
@@ -117,6 +120,25 @@ Satu iterasi aktif pada satu waktu; tiap fitur iterasi mempunyai delapan tugas.
 - Rutinitas visual tidak menyetujui tugas. Project Hub tetap bisa dibuka
   di luar jam kerja.
 
+### Agen Gemini melalui Worker lokal
+
+- `src/js/ai/ai-panel.js` menampilkan panel samping dengan pemilih sepuluh avatar,
+  konteks proyek, riwayat sementara per avatar, serta Gemini 3.8 Flash,
+  Gemini 3.1 Pro Preview, dan Gemini 3.5 Flash-Lite.
+- Tombol di header membuka chat dengan avatar terpilih; tombol di kartu profil
+  langsung membuka chat untuk avatar tersebut. Escape dan tombol × menutup panel.
+- `worker/index.js` menjadi perantara Gemini API. Browser tidak menerima API key.
+- Salin `.dev.vars.example` menjadi `.dev.vars`, isi `GEMINI_API_KEY`, lalu jalankan
+  `npx wrangler dev --local --port 8787`. Buka aplikasi dari Live Server pada
+  localhost/127.0.0.1; Worker mengizinkan origin loopback HTTP lokal.
+- `.dev.vars` dan `.env` diabaikan Git. Untuk Worker terbitan, masukkan key
+  sebagai secret melalui Cloudflare, bukan di repository.
+- Riwayat percakapan disimpan di memori tab dan hilang saat halaman ditutup.
+- API key belum dibuat/dikonfigurasi dan Worker belum dijalankan, jadi respons
+  Gemini belum dapat dicoba. Tampilan dan tombol tutup panel belum diverifikasi
+  lewat browser pada sesi ini. CSS form chat sudah diperbaiki agar area pesan
+  dapat menyusut dan tombol tetap di dalam panel; render browser masih perlu dicek.
+
 ### Penyimpanan dan kompatibilitas
 
 `src/js/main.js` menyimpan snapshot `pawffice.progress.v3`:
@@ -130,7 +152,8 @@ operasional tanpa mengarang absen/laporan hari sebelumnya.
 ## Keputusan yang perlu dipertahankan
 
 - Tidak membuat editor bangunan ala The Sims; pengguna memilih model sekarang.
-- Tidak menambahkan backend, framework, atau API AI hanya untuk merapikan kode.
+- Worker lokal hanya menjadi perantara aman untuk chat Gemini; tidak menambah
+  eksekusi tugas proyek otomatis. Jangan mengekspos API key ke browser.
 - Label role tidak boleh berpindah ke avatar lain saat kamera diputar/zoom.
 - Lobby luas khusus penerimaan; kamar mandi/wudu dekat musala di blok belakang.
 - README ringkas, materi teknis panjang disimpan dalam details tertutup.
@@ -145,32 +168,23 @@ lulus serta `node tests/office-integration.cjs --campus` lulus.
 Cakupannya mencakup metode, simpanan, label/geometri, rute rapat/istirahat,
 dua belas titik OB, fasilitas/ibadah, dan kepulangan seluruh avatar.
 
-Itu hasil historis, bukan pengujian ulang pada 11 November.
+Itu hasil historis, bukan pengujian ulang pada sesi 19 November.
 Tes memakai DOM tiruan dan model Three.js tanpa render WebGL nyata.
 Pemeriksaan visual di browser atas denah kampus terakhir belum terkonfirmasi.
 
-Sesi 11 November hanya menambahkan panduan transisi dan tautan dokumentasi.
-Pemeriksaan sesi ini:
-
-- `node --test tests/project-structure.test.cjs`: **4/4 lulus**.
-- Tautan lokal AGENTS/HANDOFF dan encoding UTF-8 diperiksa: valid.
-- `git diff --check`: tidak ada kesalahan whitespace pada perubahan terlacak.
-- Suite aplikasi penuh dan render browser tidak dijalankan ulang untuk
-  perubahan dokumentasi ini.
+Pada 19 November 2026, percobaan lama berupa modal Gemini pernah tertutup oleh
+label/render kantor dan tombol silang tidak berfungsi. Integrasi itu diganti
+dengan panel samping DOM biasa, kontrol tutup ×/Escape, dan perantara Worker.
+Pembaruan ini belum diperiksa secara visual di browser.
 
 ## Pekerjaan terbuka / ide berikutnya
 
-1. Periksa render nyata: framing kampus, label saat orbit/zoom, posisi kursi,
-   pencahayaan, keterbacaan UI, dan perpindahan sepuluh avatar.
-2. Jika muncul rute tersangkut, periksa pintu/obstacle/target bersama.
-   Jika furnitur kelak dapat dipindahkan, tambahkan invalidasi cache navigasi.
-3. Konversi metode pada proyek berjalan dan alur formal perubahan scope
-   Waterfall belum tersedia.
-4. Integrasi agen AI, hasil website nyata, serta NPC tamu/animasi kendaraan
-   masih kemungkinan pengembangan, bukan fitur yang sudah selesai.
-
-Belum ada permintaan untuk mengeksekusi semua ide di atas.
-Tugas sesi ini adalah menyiapkan konteks transisi akun.
+1. Buat key di Google AI Studio, isi `.dev.vars`, jalankan Wrangler, lalu coba
+   respons model dan tutup panel di browser. Jangan kirim key lewat chat.
+2. Periksa panel pada viewport kecil dan pastikan kantor 3D tetap terlihat.
+3. Jika dibutuhkan, pertimbangkan streaming jawaban Gemini pada iterasi lain.
+4. Konversi metode pada proyek berjalan dan alur formal perubahan scope
+   Waterfall belum tersedia. Agen eksekusi pembuatan website masih rencana masa depan.
 
 ## Melanjutkan dari akun/chat baru
 

@@ -22,6 +22,7 @@ test('alamat halaman utama tetap; stylesheet dan skrip lokal terhubung berurutan
     'src/js/office/office-campus.js',
     'src/js/office/office-schedule.js',
     'src/js/office/office-ui.js',
+    'src/js/ai/ai-panel.js',
     'src/js/main.js',
   ]);
   const stylesheet = html.match(/<link\s+rel="stylesheet"\s+href="([^"]+)"/)[1];
