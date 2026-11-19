@@ -2102,8 +2102,8 @@ h1 em {
 }
 
 .ai-messages {
-  flex: 1 1 0;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 120px;
   margin: 14px 0;
   padding: 4px;
   overflow-y: auto;
@@ -2113,6 +2113,7 @@ h1 em {
 }
 
 .ai-message {
+  flex: 0 0 auto;
   max-width: 92%;
   padding: 10px 12px;
   border: 1px solid var(--line);
@@ -2139,7 +2140,8 @@ h1 em {
 
 .ai-form textarea {
   display: block;
-  min-height: 76px;
+  height: 78px;
+  min-height: 78px;
   max-height: 112px;
   resize: none;
 }
@@ -2174,9 +2176,9 @@ h1 em {
 
 @media (max-width: 700px) {
   .ai-panel {
-    inset: 96px 10px 88px;
+    inset: 12px 10px;
     width: auto;
-    padding: 15px;
+    padding: 14px;
   }
 
   .ai-open-button {
@@ -2192,5 +2194,12 @@ h1 em {
 
   .ai-form-actions span {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 701px) {
+  .ai-panel {
+    top: 12px;
+    bottom: 12px;
   }
 }

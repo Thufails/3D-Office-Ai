@@ -9,3 +9,6 @@ tools/docs/.qa/
 # Rahasia lokal Cloudflare Worker
 .dev.vars
 .env
+
+# Cache dan state Wrangler lokal
+.wrangler/

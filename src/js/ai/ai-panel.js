@@ -70,6 +70,43 @@
     return `Kamu adalah ${member[1]}, ${member[2]}, rekan virtual Pawffice. Fokus pada ${member[3]}. Jawab dalam Bahasa Indonesia yang jelas, ramah, praktis, dan jujur. Jangan mengaku telah mengubah file atau melakukan tindakan di luar chat. Konteks proyek: ${details}`;
   }
 
+  function explainRequestError(error) {
+    const message = error?.message || "Terjadi kesalahan yang belum diketahui.";
+
+    if (/high demand|spikes in demand|overloaded|temporarily unavailable/i.test(message)) {
+      return {
+        chat: "Gemini sedang ramai. Worker Pawffice berhasil terhubung, tetapi modelnya belum bisa menjawab. Coba Gemini 3.5 Flash-Lite atau ulangi beberapa saat lagi.",
+        status: "Gemini sedang padat · coba Flash-Lite atau ulangi nanti.",
+      };
+    }
+
+    if (/429|rate.?limit|resource_exhausted/i.test(message)) {
+      return {
+        chat: "Batas permintaan model sedang tercapai. Tunggu sebentar atau coba Gemini 3.5 Flash-Lite.",
+        status: "Batas permintaan tercapai · tunggu sebentar lalu coba lagi.",
+      };
+    }
+
+    if (/API key belum diatur|API key not valid|API_KEY_INVALID|invalid api key/i.test(message)) {
+      return {
+        chat: "Worker merespons, tetapi API key Gemini belum valid atau belum diatur. Periksa GEMINI_API_KEY di file .dev.vars.",
+        status: "Worker aktif · periksa API key di .dev.vars.",
+      };
+    }
+
+    if (error instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(message)) {
+      return {
+        chat: "Tidak dapat menjangkau Worker lokal. Pastikan Wrangler masih berjalan dan Pawffice dibuka melalui Live Server.",
+        status: "Worker belum terjangkau · periksa Wrangler dan Live Server.",
+      };
+    }
+
+    return {
+      chat: `Gemini belum bisa menjawab: ${message}`,
+      status: "Permintaan gagal · lihat detail pesan di percakapan.",
+    };
+  }
+
   async function sendMessage(event) {
     event.preventDefault();
     const input = byId("ai-input");
@@ -99,8 +136,9 @@
       history.push({ role: "assistant", text: result.text });
       byId("ai-status").textContent = "Gemini menjawab · riwayat chat sementara di halaman ini.";
     } catch (error) {
-      history.push({ role: "assistant", text: `Belum tersambung: ${error.message}` });
-      byId("ai-status").textContent = "Jalankan Worker dan isi GEMINI_API_KEY di .dev.vars.";
+      const feedback = explainRequestError(error);
+      history.push({ role: "assistant", text: feedback.chat });
+      byId("ai-status").textContent = feedback.status;
     } finally {
       if (history.length > 24) history.splice(0, history.length - 24);
       renderHistory();

@@ -131,13 +131,15 @@ Satu iterasi aktif pada satu waktu; tiap fitur iterasi mempunyai delapan tugas.
 - Salin `.dev.vars.example` menjadi `.dev.vars`, isi `GEMINI_API_KEY`, lalu jalankan
   `npx wrangler dev --local --port 8787`. Buka aplikasi dari Live Server pada
   localhost/127.0.0.1; Worker mengizinkan origin loopback HTTP lokal.
-- `.dev.vars` dan `.env` diabaikan Git. Untuk Worker terbitan, masukkan key
+- `.dev.vars`, `.env`, dan `.wrangler/` diabaikan Git. Untuk Worker terbitan, masukkan key
   sebagai secret melalui Cloudflare, bukan di repository.
 - Riwayat percakapan disimpan di memori tab dan hilang saat halaman ditutup.
 - API key belum dibuat/dikonfigurasi dan Worker belum dijalankan, jadi respons
   Gemini belum dapat dicoba. Tampilan dan tombol tutup panel belum diverifikasi
-  lewat browser pada sesi ini. CSS form chat sudah diperbaiki agar area pesan
-  dapat menyusut dan tombol tetap di dalam panel; render browser masih perlu dicek.
+  lewat browser pada sesi ini. CSS panel chat kini mempertahankan tinggi bubble,
+  menyediakan area gulir, dan memakai panel hampir penuh layar sempit; render
+  browser tetap perlu dicek. Error panel juga membedakan model padat/limit/key
+  dari Worker tak terjangkau agar tidak menyuruh menyalakan Worker saat upstream Gemini gagal.
 
 ### Penyimpanan dan kompatibilitas
 
