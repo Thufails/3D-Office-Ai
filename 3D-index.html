@@ -1,16 +1,11 @@
 <!doctype html>
 <html lang="id">
-  <head>
+
+<head>
     <meta charset="utf-8">
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#edf0e8">
-    <meta
-      name="description"
-      content="Simulasi software house lokal dengan tim kucing, proyek website, dan quest harian."
-    >
+    <meta name="description" content="Simulasi software house lokal dengan tim kucing, proyek website, dan quest harian.">
 
     <title>Pawffice — a little room for big ideas</title>
 
@@ -29,15 +24,11 @@
     <script defer src="src/js/office/office-ui.js"></script>
     <script defer src="src/js/ai/ai-panel.js"></script>
     <script defer src="src/js/main.js"></script>
-  </head>
+</head>
 
-  <body>
+<body>
     <!-- Ikon antarmuka berupa SVG lokal, tanpa font atau aset dari internet. -->
-    <svg
-      class="icon-library"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <symbol id="i-paw" viewBox="0 0 24 24">
         <ellipse
           cx="12"
@@ -132,485 +123,375 @@
     </svg>
 
     <header class="topbar">
-      <a
-        class="brand"
-        href="./3D-index.html"
-        aria-label="Pawffice beranda"
-      >
-        <span class="brand-mark">
+        <a class="brand" href="./3D-index.html" aria-label="Pawffice beranda">
+            <span class="brand-mark">
           <svg>
             <use href="#i-paw" />
           </svg>
         </span>
-        <span>pawffice<span class="brand-period">.</span></span>
-        <span class="preview-tag">SANDBOX</span>
-      </a>
+            <span>pawffice<span class="brand-period">.</span></span>
+            <span class="preview-tag">SANDBOX</span>
+        </a>
 
-      <div class="live-indicator">
-        <span class="live-dot"></span>
-        <span id="office-phase">Menyiapkan jadwal kantor</span>
-      </div>
+        <div class="live-indicator">
+            <span class="live-dot"></span>
+            <span id="office-phase">Menyiapkan jadwal kantor</span>
+        </div>
 
-      <div class="header-right">
-        <button class="ai-open-button" id="ai-open-button" type="button" aria-controls="ai-panel" aria-expanded="false">
+        <div class="header-right">
+            <button class="ai-open-button" id="ai-open-button" type="button" aria-controls="ai-panel" aria-expanded="false">
           ✨ Asisten AI
         </button>
-        <button class="icon-button office-bell" id="office-bell" type="button" aria-label="Pusat kantor dan notifikasi" title="Pusat kantor & pengajuan lembur">
+            <button class="icon-button office-bell" id="office-bell" type="button" aria-label="Pusat kantor dan notifikasi" title="Pusat kantor & pengajuan lembur">
           <span aria-hidden="true">🔔</span>
           <span class="office-badge" id="office-badge" hidden>0</span>
         </button>
-        <span class="day-label" id="day-label">WAKTU JAKARTA</span>
-        <span
-          class="clock"
-          id="clock"
-          title="Waktu Jakarta · WIB (UTC+7) · mengikuti jam komputer"
-        >
+            <span class="day-label" id="day-label">WAKTU JAKARTA</span>
+            <span class="clock" id="clock" title="Waktu Jakarta · WIB (UTC+7) · mengikuti jam komputer">
           --:--:-- WIB
         </span>
-        <button
-          class="icon-button"
-          id="theme-button"
-          title="Ganti suasana siang / malam"
-          aria-label="Ganti suasana malam"
-        >
+            <button class="icon-button" id="theme-button" title="Ganti suasana siang / malam" aria-label="Ganti suasana malam">
           <svg>
             <use href="#i-moon" />
           </svg>
         </button>
-      </div>
+        </div>
     </header>
 
     <main>
-      <aside
-        class="left-panel"
-        tabindex="0"
-        aria-label="Panel lokasi, tim, dan cerita hari ini"
-      >
-        <div class="intro">
-          <button class="office-routine-button" id="office-routine-button" type="button">◷ Jadwal & absen WIB</button>
-          <p class="eyebrow">YOUR LITTLE VIRTUAL WORKSPACE</p>
-          <h1>
-            Ruang ide,<br>
-            versi <em>meng.</em>
-          </h1>
-          <p class="intro-copy">
-            Sepuluh rekan berbulu.<br>
-            Sejuta kemungkinan kecil.
-          </p>
-        </div>
+        <aside class="left-panel" tabindex="0" aria-label="Panel lokasi, tim, dan cerita hari ini">
+            <div class="intro">
+                <button class="office-routine-button" id="office-routine-button" type="button">◷ Jadwal & absen WIB</button>
+                <p class="eyebrow">YOUR LITTLE VIRTUAL WORKSPACE</p>
+                <h1>
+                    Ruang ide,<br> versi <em>meng.</em>
+                </h1>
+                <p class="intro-copy">
+                    Sepuluh rekan berbulu.<br> Sejuta kemungkinan kecil.
+                </p>
+            </div>
 
-        <details class="location-menu" id="location-menu">
-          <summary>
-            <strong>Lokasi kantor</strong>
-            <span id="room-current-name">Semua ruangan</span>
-          </summary>
-          <nav class="room-navigation" aria-label="Fokus ruangan kantor">
-            <button id="room-overview" class="active" aria-pressed="true">Semua ruangan</button>
-            <button id="room-work" aria-pressed="false">Ruang kerja</button>
-            <button id="room-meeting" aria-pressed="false">Meeting</button>
-            <button id="room-owner" aria-pressed="false">Owner + PA</button>
-            <button id="room-pantry" aria-pressed="false">Pantry & istirahat</button>
-            <button id="room-lobby" aria-pressed="false">Lobby</button>
-            <button id="room-parking" aria-pressed="false">Parkir</button>
-            <button id="room-grounds" aria-pressed="false">Halaman kantor</button>
-            <button id="room-bathroom" aria-pressed="false">Kamar mandi</button>
-            <button id="room-wudu" aria-pressed="false">Tempat wudu</button>
-            <button id="room-prayer" aria-pressed="false">Musala</button>
-            <button id="room-staff" aria-pressed="false">Ruang staf</button>
-          </nav>
-        </details>
+            <details class="location-menu" id="location-menu">
+                <summary>
+                    <strong>Lokasi kantor</strong>
+                    <span id="room-current-name">Semua ruangan</span>
+                </summary>
+                <nav class="room-navigation" aria-label="Fokus ruangan kantor">
+                    <button id="room-overview" class="active" aria-pressed="true">Semua ruangan</button>
+                    <button id="room-work" aria-pressed="false">Ruang kerja</button>
+                    <button id="room-meeting" aria-pressed="false">Meeting</button>
+                    <button id="room-owner" aria-pressed="false">Owner + PA</button>
+                    <button id="room-pantry" aria-pressed="false">Pantry & istirahat</button>
+                    <button id="room-lobby" aria-pressed="false">Lobby</button>
+                    <button id="room-parking" aria-pressed="false">Parkir</button>
+                    <button id="room-grounds" aria-pressed="false">Halaman kantor</button>
+                    <button id="room-bathroom" aria-pressed="false">Kamar mandi</button>
+                    <button id="room-wudu" aria-pressed="false">Tempat wudu</button>
+                    <button id="room-prayer" aria-pressed="false">Musala</button>
+                    <button id="room-staff" aria-pressed="false">Ruang staf</button>
+                </nav>
+            </details>
 
-        <button
-          class="project-primary project-entry"
-          id="project-shortcut"
-          aria-haspopup="dialog"
-          title="Buka Project Hub (P)"
-        >
+            <button class="project-primary project-entry" id="project-shortcut" aria-haspopup="dialog" title="Buka Project Hub (P)">
           📋 Project Hub
         </button>
 
-        <section
-          class="team-section"
-          aria-labelledby="team-title"
-        >
-          <div class="section-heading">
-            <h2 id="team-title">Penghuni kantor</h2>
-            <span class="count-tag" id="team-count">10</span>
-          </div>
-          <button
-            class="jobdesk-button"
-            id="jobdesk-button"
-            aria-haspopup="dialog"
-            aria-controls="jobdesk-dialog"
-            title="Lihat jobdesk seluruh tim (J)"
-          >
+            <section class="team-section" aria-labelledby="team-title">
+                <div class="section-heading">
+                    <h2 id="team-title">Penghuni kantor</h2>
+                    <span class="count-tag" id="team-count">10</span>
+                </div>
+                <button class="jobdesk-button" id="jobdesk-button" aria-haspopup="dialog" aria-controls="jobdesk-dialog" title="Lihat jobdesk seluruh tim (J)">
             Lihat jobdesk tim <span>10 role ↗</span>
           </button>
-          <div class="team-list" id="team-list"></div>
+                <div class="team-list" id="team-list"></div>
+            </section>
+
+            <section class="activity-section" aria-labelledby="activity-title">
+                <div class="section-heading">
+                    <h2 id="activity-title">Cerita hari ini</h2>
+                    <span class="tiny-dot"></span>
+                </div>
+                <ol class="activity-list" id="activity-list" aria-live="polite"></ol>
+            </section>
+
+            <p class="left-footnote">A cozy experiment. Made for curiosity.</p>
+        </aside>
+
+        <section class="world" id="world" aria-label="Kantor software house kucing 3D interaktif">
+            <div class="world-label">
+                <span class="live-dot"></span>
+                <span id="world-label">THE STUDIO · MORNING LIGHT</span>
+            </div>
+
+            <div id="scene" tabindex="0" aria-label="Seret untuk memutar kantor, gulir untuk zoom, klik kucing">
+                <div id="workspace-labels" class="workspace-labels" role="list" aria-label="Nama dan role di setiap bilik"></div>
+            </div>
+
+            <div class="loading" id="loading">
+                <span class="loading-paw">🐾</span>
+                <span>Merapikan meja para meng…</span>
+            </div>
+
+            <div class="scene-caption">
+                <span class="caption-line"></span> a little room for big ideas
+                <span class="caption-line"></span>
+            </div>
         </section>
 
-        <section
-          class="activity-section"
-          aria-labelledby="activity-title"
-        >
-          <div class="section-heading">
-            <h2 id="activity-title">Cerita hari ini</h2>
-            <span class="tiny-dot"></span>
-          </div>
-          <ol
-            class="activity-list"
-            id="activity-list"
-            aria-live="polite"
-          ></ol>
-        </section>
-
-        <p class="left-footnote">A cozy experiment. Made for curiosity.</p>
-      </aside>
-
-      <section
-        class="world"
-        id="world"
-        aria-label="Kantor software house kucing 3D interaktif"
-      >
-        <div class="world-label">
-          <span class="live-dot"></span>
-          <span id="world-label">THE STUDIO · MORNING LIGHT</span>
-        </div>
-
-        <div
-          id="scene"
-          tabindex="0"
-          aria-label="Seret untuk memutar kantor, gulir untuk zoom, klik kucing"
-        >
-          <div
-            id="workspace-labels"
-            class="workspace-labels"
-            role="list"
-            aria-label="Nama dan role di setiap bilik"
-          ></div>
-        </div>
-
-        <div class="loading" id="loading">
-          <span class="loading-paw">🐾</span>
-          <span>Merapikan meja para meng…</span>
-        </div>
-
-        <div class="scene-caption">
-          <span class="caption-line"></span>
-          a little room for big ideas
-          <span class="caption-line"></span>
-        </div>
-      </section>
-
-      <aside class="right-panel">
-        <section
-          class="inspector panel"
-          aria-labelledby="selected-name"
-        >
-          <div class="section-heading">
-            <span class="eyebrow">MEET YOUR TEAMMATE</span>
-            <span class="availability" id="selected-availability">
+        <aside class="right-panel">
+            <section class="inspector panel" aria-labelledby="selected-name">
+                <div class="section-heading">
+                    <span class="eyebrow">MEET YOUR TEAMMATE</span>
+                    <span class="availability" id="selected-availability">
               <span class="live-dot"></span>
-              <span id="selected-presence">Di kantor</span>
-            </span>
-          </div>
+                    <span id="selected-presence">Di kantor</span>
+                    </span>
+                </div>
 
-          <div class="profile-heading">
-            <img
-              id="selected-portrait"
-              class="profile-avatar"
-              alt="Avatar kucing terpilih"
-            >
-            <div>
-              <span class="role-label" id="selected-role">THE PLANNER</span>
-              <h2 id="selected-name">Miko<span>♂</span></h2>
-              <p id="selected-job">Project Manager</p>
-            </div>
-          </div>
+                <div class="profile-heading">
+                    <img id="selected-portrait" class="profile-avatar" alt="Avatar kucing terpilih">
+                    <div>
+                        <span class="role-label" id="selected-role">THE PLANNER</span>
+                        <h2 id="selected-name">Miko<span>♂</span></h2>
+                        <p id="selected-job">Project Manager</p>
+                    </div>
+                </div>
 
-          <p class="profile-bio" id="selected-bio">
-            Penggemar to-do list, kopi hangat, dan memastikan semua ide punya tempat.
-          </p>
+                <p class="profile-bio" id="selected-bio">
+                    Penggemar to-do list, kopi hangat, dan memastikan semua ide punya tempat.
+                </p>
 
-          <div class="current-task">
-            <span class="task-icon">✦</span>
-            <div>
-              <span>LAGI SIBUK APA?</span>
-              <strong id="selected-task">Menyusun rencana</strong>
-            </div>
-          </div>
+                <div class="current-task">
+                    <span class="task-icon">✦</span>
+                    <div>
+                        <span>LAGI SIBUK APA?</span>
+                        <strong id="selected-task">Menyusun rencana</strong>
+                    </div>
+                </div>
 
-          <div class="needs">
-            <div class="need-row">
-              <span>Energi</span>
-              <span class="need-track">
+                <div class="needs">
+                    <div class="need-row">
+                        <span>Energi</span>
+                        <span class="need-track">
                 <i id="energy-bar"></i>
               </span>
-              <b id="energy-value">90</b>
-            </div>
+                        <b id="energy-value">90</b>
+                    </div>
 
-            <div class="need-row">
-              <span>Semangat</span>
-              <span class="need-track mood">
+                    <div class="need-row">
+                        <span>Semangat</span>
+                        <span class="need-track mood">
                 <i id="mood-bar"></i>
               </span>
-              <b id="mood-value">95</b>
-            </div>
-          </div>
+                        <b id="mood-value">95</b>
+                    </div>
+                </div>
 
-          <button class="text-button" id="focus-button">
+                <button class="text-button" id="focus-button">
             Lihat lebih dekat
             <svg>
               <use href="#i-focus" />
             </svg>
           </button>
-          <button class="project-primary ai-profile-button" id="ai-profile-button" type="button">✨ Tanya avatar ini</button>
-        </section>
+                <button class="project-primary ai-profile-button" id="ai-profile-button" type="button">✨ Tanya avatar ini</button>
+            </section>
 
-        <section class="main-quest-panel panel" aria-labelledby="main-quest-title">
-          <div class="section-heading quest-heading">
-            <span class="eyebrow">PROYEK UTAMA</span>
-            <strong class="main-quest-progress" id="main-quest-percent">0%</strong>
-          </div>
-          <h2 class="main-quest-title" id="main-quest-title">
-            Belum ada proyek aktif
-          </h2>
-          <p class="main-quest-copy" id="main-quest-description">
-            Buat brief klien dan susun pekerjaan tim lewat Project Hub.
-          </p>
-          <div
-            class="main-quest-track"
-            id="main-quest-progressbar"
-            role="progressbar"
-            aria-label="Progres proyek utama"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow="0"
-          >
-            <span id="main-quest-fill"></span>
-          </div>
-          <p class="main-quest-stage-count" id="main-quest-stage-count">
-            0 dari 8 tugas selesai
-          </p>
-          <div class="main-quest-current" id="main-quest-current">
-            <span>FOKUS BERIKUTNYA</span>
-            <strong id="main-quest-stage">Siapkan brief proyek</strong>
-            <p id="main-quest-owner">Owner + PM · tentukan kebutuhan klien</p>
-          </div>
-          <ol class="main-quest-steps" id="main-quest-steps"></ol>
-          <button class="project-primary" id="project-hub-button" aria-haspopup="dialog">
+            <section class="main-quest-panel panel" aria-labelledby="main-quest-title">
+                <div class="section-heading quest-heading">
+                    <span class="eyebrow">PROYEK UTAMA</span>
+                    <strong class="main-quest-progress" id="main-quest-percent">0%</strong>
+                </div>
+                <h2 class="main-quest-title" id="main-quest-title">
+                    Belum ada proyek aktif
+                </h2>
+                <p class="main-quest-copy" id="main-quest-description">
+                    Buat brief klien dan susun pekerjaan tim lewat Project Hub.
+                </p>
+                <div class="main-quest-track" id="main-quest-progressbar" role="progressbar" aria-label="Progres proyek utama" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <span id="main-quest-fill"></span>
+                </div>
+                <p class="main-quest-stage-count" id="main-quest-stage-count">
+                    0 dari 8 tugas selesai
+                </p>
+                <div class="main-quest-current" id="main-quest-current">
+                    <span>FOKUS BERIKUTNYA</span>
+                    <strong id="main-quest-stage">Siapkan brief proyek</strong>
+                    <p id="main-quest-owner">Owner + PM · tentukan kebutuhan klien</p>
+                </div>
+                <ol class="main-quest-steps" id="main-quest-steps"></ol>
+                <button class="project-primary" id="project-hub-button" aria-haspopup="dialog">
             📋 Buka Project Hub
           </button>
-          <p class="save-status" id="main-quest-rule">Progres mengikuti hasil yang disetujui.</p>
-        </section>
+                <p class="save-status" id="main-quest-rule">Progres mengikuti hasil yang disetujui.</p>
+            </section>
 
-        <section class="mission-panel panel" aria-labelledby="mission-title">
-          <div class="section-heading">
-            <h2 id="mission-title">Quest sampingan hari ini</h2>
-            <span class="mission-total" id="mission-total">0 / 3</span>
-          </div>
-          <p class="mission-copy" id="daily-quest-date">WIB · quest berganti tiap hari</p>
-          <div id="mission-list"></div>
-          <div class="reward-line">
-            <span>✧ Office happiness</span>
-            <strong id="happiness">+0</strong>
-          </div>
-          <p class="save-status" id="save-status" role="status">
-            Menyiapkan penyimpanan progres…
-          </p>
-        </section>
+            <section class="mission-panel panel" aria-labelledby="mission-title">
+                <div class="section-heading">
+                    <h2 id="mission-title">Quest sampingan hari ini</h2>
+                    <span class="mission-total" id="mission-total">0 / 3</span>
+                </div>
+                <p class="mission-copy" id="daily-quest-date">WIB · quest berganti tiap hari</p>
+                <div id="mission-list"></div>
+                <div class="reward-line">
+                    <span>✧ Office happiness</span>
+                    <strong id="happiness">+0</strong>
+                </div>
+                <p class="save-status" id="save-status" role="status">
+                    Menyiapkan penyimpanan progres…
+                </p>
+            </section>
 
-        <div class="local-note">
-          <span class="local-dot"></span>
-          SOFTWARE HOUSE SIMULATION
-          <span>Proyek website fiktif · tanpa backend</span>
-        </div>
-      </aside>
+            <div class="local-note">
+                <span class="local-dot"></span> SOFTWARE HOUSE SIMULATION
+                <span>Proyek website fiktif · tanpa backend</span>
+            </div>
+        </aside>
 
-      <footer class="bottom-bar">
-        <div class="camera-hint">
-          <span>↔</span> Seret untuk putar
-          <i>·</i> Scroll untuk zoom
-          <i>·</i> Klik kucing
-        </div>
+        <footer class="bottom-bar">
+            <div class="camera-hint">
+                <span>↔</span> Seret untuk putar
+                <i>·</i> Scroll untuk zoom
+                <i>·</i> Klik kucing
+            </div>
 
-        <div class="toolbar" aria-label="Kontrol simulasi">
-          <button
-            class="tool-button"
-            id="home-button"
-            title="Kamera awal (R)"
-            aria-label="Overview"
-          >
+            <div class="toolbar" aria-label="Kontrol simulasi">
+                <button class="tool-button" id="home-button" title="Kamera awal (R)" aria-label="Overview">
             <svg>
               <use href="#i-home" />
             </svg>
             <span>Overview</span>
           </button>
 
-          <span class="tool-divider"></span>
+                <span class="tool-divider"></span>
 
-          <button
-            class="tool-button"
-            id="coffee-button"
-            aria-label="Coffee break"
-            title="Ajak rekan terpilih ngopi di pantry"
-          >
+                <button class="tool-button" id="coffee-button" aria-label="Coffee break" title="Ajak rekan terpilih ngopi di pantry">
             <svg>
               <use href="#i-coffee" />
             </svg>
             <span>Coffee break</span>
           </button>
 
-          <button
-            class="tool-button"
-            id="meeting-button"
-            aria-label="Team huddle"
-            title="Ajak tim duduk dan berdiskusi"
-          >
+                <button class="tool-button" id="meeting-button" aria-label="Team huddle" title="Ajak tim duduk dan berdiskusi">
             <svg>
               <use href="#i-meet" />
             </svg>
             <span>Team huddle</span>
           </button>
 
-          <span class="tool-divider"></span>
+                <span class="tool-divider"></span>
 
-          <button
-            class="tool-button pause-button"
-            id="pause-button"
-            title="Jeda / lanjut (Spasi)"
-            aria-label="Jeda simulasi"
-            aria-pressed="false"
-          >
+                <button class="tool-button pause-button" id="pause-button" title="Jeda / lanjut (Spasi)" aria-label="Jeda simulasi" aria-pressed="false">
             <svg>
               <use href="#i-pause" />
             </svg>
           </button>
 
-          <button
-            class="speed-button"
-            id="speed-button"
-            title="Kecepatan simulasi"
-          >
+                <button class="speed-button" id="speed-button" title="Kecepatan simulasi">
             1×
           </button>
-        </div>
+            </div>
 
-        <span class="version">EXPERIMENT 001</span>
-      </footer>
+            <span class="version">EXPERIMENT 001</span>
+        </footer>
     </main>
 
 
     <aside class="ai-panel" id="ai-panel" aria-labelledby="ai-panel-title" hidden>
-      <header class="ai-panel-header">
-        <div>
-          <p class="eyebrow">PAWFFICE · GEMINI</p>
-          <h2 id="ai-panel-title">Ngobrol dengan tim</h2>
-          <p id="ai-panel-subtitle">Pilih avatar untuk mulai konsultasi.</p>
-        </div>
-        <button class="jobdesk-close ai-panel-close" id="ai-panel-close" type="button" aria-label="Tutup panel AI">×</button>
-      </header>
-      <label class="ai-avatar-label" for="ai-avatar-select">Rekan yang diajak bicara</label>
-      <select class="ai-avatar-select" id="ai-avatar-select"></select>
-      <p class="ai-context-note" id="ai-context-note">Konteks proyek aktif akan disertakan bila tersedia.</p>
-      <label class="ai-avatar-label" for="ai-model-select">Model Gemini</label>
-      <select class="ai-avatar-select" id="ai-model-select">
+        <header class="ai-panel-header">
+            <div>
+                <p class="eyebrow">PAWFFICE · GEMINI</p>
+                <h2 id="ai-panel-title">Ngobrol dengan tim</h2>
+                <p id="ai-panel-subtitle">Pilih avatar untuk mulai konsultasi.</p>
+            </div>
+            <button class="jobdesk-close ai-panel-close" id="ai-panel-close" type="button" aria-label="Tutup panel AI">×</button>
+        </header>
+        <label class="ai-avatar-label" for="ai-avatar-select">Rekan yang diajak bicara</label>
+        <select class="ai-avatar-select" id="ai-avatar-select"></select>
+        <p class="ai-context-note" id="ai-context-note">Konteks proyek aktif akan disertakan bila tersedia.</p>
+        <label class="ai-avatar-label" for="ai-model-select">Model Gemini</label>
+        <select class="ai-avatar-select" id="ai-model-select">
         <option value="gemini-3.8-flash">Gemini 3.8 Flash · cepat</option>
         <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview · analisis mendalam</option>
         <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite · ringan</option>
       </select>
-      <div class="ai-messages" id="ai-messages" role="log" aria-live="polite"></div>
-      <form class="ai-form" id="ai-form">
-        <label class="visually-hidden" for="ai-input">Pesan untuk Gemini</label>
-        <textarea id="ai-input" rows="3" maxlength="6000" placeholder="Tanyakan sesuatu ke rekan tim..." required></textarea>
-        <div class="ai-form-actions">
-          <span id="ai-status" role="status">Gemini siap · key tetap di Worker lokal</span>
-          <button class="project-primary" id="ai-send" type="submit">Kirim</button>
-        </div>
-      </form>
+        <div class="ai-messages" id="ai-messages" role="log" aria-live="polite"></div>
+        <form class="ai-form" id="ai-form">
+            <label class="visually-hidden" for="ai-input">Pesan untuk Gemini</label>
+            <textarea id="ai-input" rows="3" maxlength="6000" placeholder="Tanyakan sesuatu ke rekan tim..." required></textarea>
+            <div class="ai-form-actions">
+                <span id="ai-status" role="status">Gemini siap · key tetap di Worker lokal</span>
+                <button class="project-primary" id="ai-send" type="submit">Kirim</button>
+            </div>
+        </form>
     </aside>
 
     <dialog class="jobdesk-dialog" id="jobdesk-dialog" aria-labelledby="jobdesk-title">
-      <div class="jobdesk-header">
-        <div>
-          <p class="eyebrow">THE PAWFFICE TEAM</p>
-          <h2 id="jobdesk-title">Siapa mengerjakan apa?</h2>
-          <p>Delapan role proyek dan dua role operasional. Ini tanggung jawab tiap aktor.</p>
-        </div>
-        <button class="jobdesk-close" id="jobdesk-close" aria-label="Tutup daftar jobdesk">
+        <div class="jobdesk-header">
+            <div>
+                <p class="eyebrow">THE PAWFFICE TEAM</p>
+                <h2 id="jobdesk-title">Siapa mengerjakan apa?</h2>
+                <p>Delapan role proyek dan dua role operasional. Ini tanggung jawab tiap aktor.</p>
+            </div>
+            <button class="jobdesk-close" id="jobdesk-close" aria-label="Tutup daftar jobdesk">
           ×
         </button>
-      </div>
-      <div class="jobdesk-list" id="jobdesk-list"></div>
+        </div>
+        <div class="jobdesk-list" id="jobdesk-list"></div>
     </dialog>
 
     <div class="toast" id="toast" role="status"></div>
-    <dialog
-      class="project-dialog"
-      id="project-dialog"
-      aria-labelledby="project-dialog-title"
-    >
-      <header class="project-dialog-header">
-        <div>
-          <p class="eyebrow">PAWFFICE · PROJECT HUB</p>
-          <h2 id="project-dialog-title">Dari brief, jadi pekerjaan tim.</h2>
-          <p>Kelola proyek dan dokumen simulasi lokal. Belum menghasilkan website nyata.</p>
-        </div>
-        <button class="project-button office-inline-button" id="office-project-bell" type="button" hidden>🔔 Kabar kantor</button>
-        <button class="jobdesk-close" id="project-close" aria-label="Tutup Project Hub">×</button>
-      </header>
-      <nav class="project-tabs" aria-label="Bagian Project Hub" id="project-tabs">
-        <button data-project-tab="brief" aria-current="page">🌱 Brief</button>
-        <button type="button" data-project-tab="backlog">🌿 Backlog & iterasi</button>
-        <button data-project-tab="board">📋 Papan tugas</button>
-        <button data-project-tab="meetings">🤝 Notulen</button>
-        <button data-project-tab="archive">🗂️ Arsip</button>
-        <button data-project-tab="backup">💾 Cadangan</button>
-      </nav>
-      <p class="project-message" id="project-message" role="status" aria-live="polite"></p>
-      <div id="project-content" class="project-content"></div>
+    <dialog class="project-dialog" id="project-dialog" aria-labelledby="project-dialog-title">
+        <header class="project-dialog-header">
+            <div>
+                <p class="eyebrow">PAWFFICE · PROJECT HUB</p>
+                <h2 id="project-dialog-title">Dari brief, jadi pekerjaan tim.</h2>
+                <p>Kelola proyek dan dokumen simulasi lokal. Belum menghasilkan website nyata.</p>
+            </div>
+            <button class="project-button office-inline-button" id="office-project-bell" type="button" hidden>🔔 Kabar kantor</button>
+            <button class="jobdesk-close" id="project-close" aria-label="Tutup Project Hub">×</button>
+        </header>
+        <nav class="project-tabs" aria-label="Bagian Project Hub" id="project-tabs">
+            <button data-project-tab="brief" aria-current="page">🌱 Brief</button>
+            <button type="button" data-project-tab="backlog">🌿 Backlog & iterasi</button>
+            <button data-project-tab="board">📋 Papan tugas</button>
+            <button data-project-tab="meetings">🤝 Notulen</button>
+            <button data-project-tab="archive">🗂️ Arsip</button>
+            <button data-project-tab="backup">💾 Cadangan</button>
+        </nav>
+        <p class="project-message" id="project-message" role="status" aria-live="polite"></p>
+        <div id="project-content" class="project-content"></div>
     </dialog>
-    <dialog
-      class="confirmation-dialog"
-      id="project-confirm"
-      role="alertdialog"
-      aria-modal="true"
-      aria-labelledby="project-confirm-title"
-      aria-describedby="project-confirm-description"
-    >
-      <button
-        class="jobdesk-close confirmation-close"
-        id="project-confirm-close"
-        type="button"
-        aria-label="Batalkan konfirmasi"
-      >×</button>
-      <span class="confirmation-icon" id="project-confirm-icon" aria-hidden="true">🐾</span>
-      <p class="eyebrow">PAWFFICE · KONFIRMASI</p>
-      <h2 id="project-confirm-title">Lanjutkan tindakan ini?</h2>
-      <p class="confirmation-description" id="project-confirm-description"></p>
-      <div class="confirmation-actions">
-        <button class="project-button" id="project-confirm-cancel" type="button">Batal</button>
-        <button class="project-primary" id="project-confirm-accept" type="button">Lanjutkan</button>
-      </div>
+    <dialog class="confirmation-dialog" id="project-confirm" role="alertdialog" aria-modal="true" aria-labelledby="project-confirm-title" aria-describedby="project-confirm-description">
+        <button class="jobdesk-close confirmation-close" id="project-confirm-close" type="button" aria-label="Batalkan konfirmasi">×</button>
+        <span class="confirmation-icon" id="project-confirm-icon" aria-hidden="true">🐾</span>
+        <p class="eyebrow">PAWFFICE · KONFIRMASI</p>
+        <h2 id="project-confirm-title">Lanjutkan tindakan ini?</h2>
+        <p class="confirmation-description" id="project-confirm-description"></p>
+        <div class="confirmation-actions">
+            <button class="project-button" id="project-confirm-cancel" type="button">Batal</button>
+            <button class="project-primary" id="project-confirm-accept" type="button">Lanjutkan</button>
+        </div>
     </dialog>
     <dialog class="project-dialog office-dialog" id="office-dialog" aria-labelledby="office-title">
-      <header class="project-dialog-header">
-        <div>
-          <p class="eyebrow">PAWFFICE · RUTINITAS WIB</p>
-          <h2 id="office-title">Kabar dari kantor.</h2>
-          <p>Jadwal harian, absen simulasi, daily report, dan izin lembur.</p>
-        </div>
-        <button class="jobdesk-close" id="office-close" type="button" aria-label="Tutup pusat kantor">×</button>
-      </header>
-      <nav class="project-tabs" id="office-tabs" aria-label="Bagian pusat kantor">
-        <button type="button" data-office-tab="notifications">🔔 Notifikasi</button>
-        <button type="button" data-office-tab="routine">◷ Jadwal & absen</button>
-        <button type="button" data-office-tab="reports">📝 Daily report</button>
-      </nav>
-      <p class="project-message" id="office-message" role="status" aria-live="polite"></p>
-      <div class="project-content" id="office-content"></div>
+        <header class="project-dialog-header">
+            <div>
+                <p class="eyebrow">PAWFFICE · RUTINITAS WIB</p>
+                <h2 id="office-title">Kabar dari kantor.</h2>
+                <p>Jadwal harian, absen simulasi, daily report, dan izin lembur.</p>
+            </div>
+            <button class="jobdesk-close" id="office-close" type="button" aria-label="Tutup pusat kantor">×</button>
+        </header>
+        <nav class="project-tabs" id="office-tabs" aria-label="Bagian pusat kantor">
+            <button type="button" data-office-tab="notifications">🔔 Notifikasi</button>
+            <button type="button" data-office-tab="routine">◷ Jadwal & absen</button>
+            <button type="button" data-office-tab="reports">📝 Daily report</button>
+        </nav>
+        <p class="project-message" id="office-message" role="status" aria-live="polite"></p>
+        <div class="project-content" id="office-content"></div>
     </dialog>
 
     <noscript>Aktifkan JavaScript di browser untuk membuka kantor 3D ini.</noscript>
-  </body>
+</body>
+
 </html>
